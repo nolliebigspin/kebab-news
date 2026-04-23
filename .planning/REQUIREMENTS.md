@@ -3,7 +3,25 @@
 **Defined:** 2026-04-23
 **Core Value:** Every published Fact Card must be traceable to a verifiable primary source that any user can access in a single click.
 
-## v1 Requirements
+## v1.0 Requirements (Milestone: Foundation & Landing)
+
+### Project Setup
+
+- [ ] **SETUP-01**: Project uses Bun as the runtime, managed via mise.toml (contributors must install mise)
+- [ ] **SETUP-02**: mise.toml documents that `mise install` is required before running the project
+- [ ] **SETUP-03**: Next.js 16 App Router project exists in /src with TypeScript (latest), Biome (latest), Tailwind CSS (latest), next-intl (latest)
+- [ ] **SETUP-04**: Design system CSS custom properties (--bg, --ink-*, --accent, --line-*, --warn, --oerr, --left, --right) and fonts (Inter + IBM Plex Mono) are wired into the Tailwind config
+
+### Landing Page
+
+- [ ] **LAND-01**: Landing page displays the unsere.news logo (wordmark: "unsere" in ink + ".news" in accent teal)
+- [ ] **LAND-02**: Landing page presents the platform vision and motto ("We don't tell you what to think. We show you where the information comes from.")
+- [ ] **LAND-03**: Landing page includes a link to the GitHub repository
+- [ ] **LAND-04**: Landing page uses the project design system (tokens, Inter font, IBM Plex Mono for data/labels)
+
+## Full v1 Requirements (Phases 1–6)
+
+See earlier REQUIREMENTS.md content — the complete 64-requirement set (INFRA, AUTH, TOPIC, VOTE, PIPE, FACT, BIAS, DISC, UI) is the roadmap scope for this milestone. Reproduced below for reference.
 
 ### Authentication
 
@@ -21,12 +39,12 @@
 - [ ] **TOPIC-05**: Topics in "voting" state are sortable: most votes / close to goal / newest
 - [ ] **TOPIC-06**: Featured topic (highest votes in current filter) is displayed at larger size
 - [ ] **TOPIC-07**: Each topic shows status badge: Voting / In Investigation / Published
-- [ ] **TOPIC-08**: Topics in "investigating" state show a 4-step Investigation Timeline (KI-Aggregation → Fact Extraction → Editorial Review → Publication) with progress %
+- [ ] **TOPIC-08**: Topics in "investigating" state show a 4-step Investigation Timeline with progress %
 - [ ] **TOPIC-09**: Published topics show source count, comment count, and link to Fact Card article
 
 ### Voting
 
-- [ ] **VOTE-01**: Authenticated user has a configurable weekly vote budget (default: 10 votes, resets on Monday, admin-configurable)
+- [ ] **VOTE-01**: Authenticated user has a configurable weekly vote budget (default: 10 votes, resets Monday)
 - [ ] **VOTE-02**: User can upvote a topic (costs 1 vote from budget)
 - [ ] **VOTE-03**: User can retract their vote (returns 1 vote to budget)
 - [ ] **VOTE-04**: Vote budget is displayed as a visual pip strip (used vs. remaining)
@@ -41,28 +59,28 @@
 - [ ] **PIPE-03**: Pipeline fetches referenced primary source URLs / PDFs and passes content to Claude
 - [ ] **PIPE-04**: Claude synthesizes Fact Cards from primary source content only (no secondary reporting)
 - [ ] **PIPE-05**: Objectivity Filter prompt layer neutralizes biased/emotional topic submissions before storing
-- [ ] **PIPE-06**: All AI research tasks are offloaded to Upstash Workflows/QStash to stay within Vercel's 30s timeout
+- [ ] **PIPE-06**: All AI research tasks are offloaded to Upstash Workflows/QStash (Vercel 30s timeout)
 - [ ] **PIPE-07**: Pipeline updates topic status: voting → investigating → done
 
 ### Fact Cards
 
 - [ ] **FACT-01**: Each Fact Card has a type: `claim` / `evidence` / `context` / `openq`
 - [ ] **FACT-02**: Each card has a confidence level: `primary` / `conflicting` / `insufficient`
-- [ ] **FACT-03**: Each card displays a ScienceStamp badge (ShieldCheck / AlertTriangle / HelpCircle icon) matching confidence level
-- [ ] **FACT-04**: Each card links every claim to one or more primary sources (org, document name, date, file size)
-- [ ] **FACT-05**: Primary source links include archive.org fallback URL to prevent link rot
+- [ ] **FACT-03**: Each card displays a ScienceStamp badge matching confidence level
+- [ ] **FACT-04**: Each card links every claim to one or more primary sources
+- [ ] **FACT-05**: Primary source links include archive.org fallback URL
 - [ ] **FACT-06**: AI-generated Fact Cards enter a human review queue before publishing
 - [ ] **FACT-07**: Evidence cards with a key statistic display a large figure + sub-label layout
-- [ ] **FACT-08**: Sources are expandable inline (collapsible details element) per card
+- [ ] **FACT-08**: Sources are expandable inline per card
 - [ ] **FACT-09**: All primary sources for an article are available in a Download Block (individual + ZIP)
-- [ ] **FACT-10**: Published article page shows article header, all Fact Cards in sequence, Bias Radar, Download Block, and Discussion
+- [ ] **FACT-10**: Published article page shows article header, all Fact Cards, Bias Radar, Download Block, Discussion
 
 ### Bias Radar
 
-- [ ] **BIAS-01**: For each published topic, aggregate headlines from curated RSS feeds grouped by political orientation: left-leaning / public broadcaster / right-leaning/business
-- [ ] **BIAS-02**: Display headline list per outlet group with a tone meter bar (critical ← neutral → supportive)
+- [ ] **BIAS-01**: Aggregate headlines from curated RSS feeds grouped by political orientation
+- [ ] **BIAS-02**: Display headline list per outlet group with a tone meter bar
 - [ ] **BIAS-03**: Show article count per outlet group
-- [ ] **BIAS-04**: Bias Radar is collapsible (expandable section) within the article page
+- [ ] **BIAS-04**: Bias Radar is collapsible within the article page
 - [ ] **BIAS-05**: Explanatory note: "Goal is not one truth but to make perspectives visible"
 
 ### Discussion & Moderation
@@ -77,37 +95,37 @@
 
 ### Design System & UI
 
-- [ ] **UI-01**: Inter (sans/display, tight tracking) + IBM Plex Mono (data/labels/metadata) type system
-- [ ] **UI-02**: CSS custom properties token set: --bg, --bg-warm, --ink, --ink-soft, --ink-mute, --line, --line-soft, --accent (teal oklch(0.56 0.085 190)), --warn (amber), --oerr (purple), --left (warm red), --right (slate blue)
-- [ ] **UI-03**: Sticky header with logo, navigation tabs (Community Board / Article), vote budget pill, "Propose Topic" button
-- [ ] **UI-04**: Footer with nonprofit tagline and links: Methodology, AI Transparency, Funding, Source Code, Contact
+- [ ] **UI-01**: Inter (sans/display) + IBM Plex Mono (data/labels/metadata) type system
+- [ ] **UI-02**: CSS custom properties token set: --bg, --bg-warm, --ink, --ink-soft, --ink-mute, --line, --line-soft, --accent, --warn, --oerr, --left, --right
+- [ ] **UI-03**: Sticky header with logo, navigation tabs, vote budget pill, "Propose Topic" button
+- [ ] **UI-04**: Footer with nonprofit tagline and links
 - [ ] **UI-05**: Toast notification on topic submission
-- [ ] **UI-06**: English UI with i18n infrastructure ready (next-intl or equivalent) — German translation strings prepared for launch
+- [ ] **UI-06**: English UI with i18n infrastructure ready (next-intl); German translation strings prepared
 
 ### Infrastructure & Schema
 
-- [ ] **INFRA-01**: Drizzle ORM schema: Users (id, email, passwordHash, emailVerified, trustScore, votesBudget, budgetResetAt, createdAt)
-- [ ] **INFRA-02**: Drizzle ORM schema: Topics (id, title, titleNeutral, tag, proposerId, votes, goalThreshold, status, progress, progressLabel, createdAt)
-- [ ] **INFRA-03**: Drizzle ORM schema: Votes (id, userId, topicId, createdAt) — unique constraint userId+topicId
-- [ ] **INFRA-04**: Drizzle ORM schema: FactCards (id, articleId, kind, label, confidence, body, figure, position, status, createdAt)
-- [ ] **INFRA-05**: Drizzle ORM schema: Sources (id, factCardId, org, doc, date, sourceUrl, archiveUrl, fileSize, externalId)
-- [ ] **INFRA-06**: Drizzle ORM schema: Articles (id, topicId, title, summary, tag, publishedAt, updatedAt, readtime, votesAtCommission)
-- [ ] **INFRA-07**: pgvector extension enabled on Neon Postgres from day one (semantic search not yet used)
+- [ ] **INFRA-01**: Drizzle ORM schema: Users table
+- [ ] **INFRA-02**: Drizzle ORM schema: Topics table
+- [ ] **INFRA-03**: Drizzle ORM schema: Votes table
+- [ ] **INFRA-04**: Drizzle ORM schema: FactCards table
+- [ ] **INFRA-05**: Drizzle ORM schema: Sources table
+- [ ] **INFRA-06**: Drizzle ORM schema: Articles table
+- [ ] **INFRA-07**: pgvector extension enabled on Neon Postgres from day one
 - [ ] **INFRA-08**: Vercel + Upstash environment scaffold wired from project initialization
-- [ ] **INFRA-09**: Next.js App Router project with TypeScript, Tailwind CSS, proper env var patterns for self-hosting
+- [ ] **INFRA-09**: Next.js App Router project with TypeScript, Tailwind CSS, proper env var patterns
 
 ## v2 Requirements
 
 ### Anti-Abuse
 
 - **ABUSE-01**: IP-based rate limiting on vote submission
-- **ABUSE-02**: Behavioral scoring for trust_score algorithm (full implementation)
-- **ABUSE-03**: Account age decay / reputation tiers (new/trusted/veteran) that scale vote weight
+- **ABUSE-02**: Behavioral scoring for trust_score algorithm
+- **ABUSE-03**: Account age decay / reputation tiers
 
 ### Source Mirroring
 
-- **MIRROR-01**: Self-hosted PDF/snapshot storage in object storage (S3 or Cloudflare R2)
-- **MIRROR-02**: Automated archiving pipeline that mirrors sources on ingest
+- **MIRROR-01**: Self-hosted PDF/snapshot storage in object storage
+- **MIRROR-02**: Automated archiving pipeline
 
 ### Notifications
 
@@ -116,11 +134,11 @@
 
 ### Internationalization
 
-- **I18N-01**: Full German translation (strings prepared in v1, activated in v2)
+- **I18N-01**: Full German translation
 
 ### Payments / Membership
 
-- **PAY-01**: Membership / donation flow for "Mitglieder-getragen" model
+- **PAY-01**: Membership / donation flow
 
 ## Out of Scope
 
@@ -129,7 +147,7 @@
 | Mobile native app | Web-first; mobile browser supported |
 | Real-time vote counts (WebSocket) | Not needed for MVP; polling sufficient |
 | OAuth login (Google, GitHub) | Email/password sufficient for v1 |
-| Full anti-abuse scoring algorithm | Schema seeds trust_score; algorithm is a research problem deferred to v2 |
+| Full anti-abuse scoring algorithm | Schema seeds trust_score; algorithm deferred to v2 |
 | Self-hosted PDF mirroring | archive.org fallback is zero-infra; S3 mirroring is v2 |
 | Video/audio content | Text and data only |
 | Multi-tenant / white-label | Single community deployment |
@@ -138,6 +156,14 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| SETUP-01 | Phase 0 (Setup) | Pending |
+| SETUP-02 | Phase 0 (Setup) | Pending |
+| SETUP-03 | Phase 0 (Setup) | Pending |
+| SETUP-04 | Phase 0 (Setup) | Pending |
+| LAND-01 | Phase 0 (Setup) | Pending |
+| LAND-02 | Phase 0 (Setup) | Pending |
+| LAND-03 | Phase 0 (Setup) | Pending |
+| LAND-04 | Phase 0 (Setup) | Pending |
 | INFRA-01 | Phase 1 | Pending |
 | INFRA-02 | Phase 1 | Pending |
 | INFRA-03 | Phase 1 | Pending |
@@ -204,12 +230,11 @@
 | DISC-07 | Phase 6 | Pending |
 
 **Coverage:**
-- v1 requirements: 64 total (9 INFRA + 4 AUTH + 9 TOPIC + 7 VOTE + 7 PIPE + 10 FACT + 5 BIAS + 7 DISC + 6 UI)
-- Mapped to phases: 64
+- v1.0 milestone requirements: 8 total (SETUP + LAND)
+- Full v1 roadmap requirements: 72 total (8 new + 64 existing)
+- Mapped to phases: 72
 - Unmapped: 0 ✓
-
-**Note:** The earlier count of 59 undercounted — the correct total when each requirement ID is counted individually is 64. All are mapped.
 
 ---
 *Requirements defined: 2026-04-23*
-*Last updated: 2026-04-23 — traceability expanded to individual requirement rows; VOTE-01–07 reassigned from Phase 2 to Phase 3 (voting is inseparable from the board UI)*
+*Last updated: 2026-04-23 — milestone v1.0 initialized with SETUP + LAND requirements*

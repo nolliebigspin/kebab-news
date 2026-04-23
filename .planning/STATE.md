@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 
 ## Current Position
 
-Phase: 1 of 6 (Infrastructure & Schema)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-04-23 — Roadmap created; 6 phases defined covering all 59 v1 requirements
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-23 — Milestone v1.0 started (Foundation & Landing)
 
 Progress: [░░░░░░░░░░] 0%
 

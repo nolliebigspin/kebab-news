@@ -10,6 +10,16 @@ unsere.news is an open-source, community-driven investigative news platform that
 
 Every published Fact Card must be traceable to a verifiable primary source that any user can access in a single click — without this guarantee, the platform has no reason to exist.
 
+## Current Milestone: v1.0 Foundation & Landing
+
+**Goal:** Scaffold the project and ship a public landing page that teases the unsere.news platform.
+
+**Target features:**
+- Bun via mise.toml as the runtime (documented so contributors know mise is required)
+- Next.js 16 App Router + TypeScript + Biome + Tailwind CSS + next-intl project skeleton
+- Design system tokens from .claude/design wired into Tailwind config (CSS vars, fonts)
+- Landing page: logo, platform vision/motto, GitHub link — teaser only, no app UI
+
 ## Requirements
 
 ### Validated
@@ -85,4 +95,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-23 after initialization*
+*Last updated: 2026-04-23 after milestone v1.0 start*
