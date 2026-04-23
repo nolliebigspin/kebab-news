@@ -1,0 +1,33 @@
+{
+  "landing": {
+    "tagline": "We don't tell you what to think.",
+    "tagline_accent": "We show you where the information comes from.",
+    "description": "unsere.news is an open-source, community-driven investigative news platform. The community votes on topics, and we produce AI-powered, human-verified Deep-Dives built strictly on primary sources — every claim linked directly to its source.",
+    "cta_github": "View on GitHub",
+    "cta_notify": "Get notified at launch",
+    "coming_soon": "Coming soon",
+    "principles": {
+      "transparent": {
+        "title": "Radical Transparency",
+        "body": "Every published Fact Card is traceable to a verifiable primary source — government PDFs, scientific papers, raw data — accessible in a single click."
+      },
+      "community": {
+        "title": "Community-Driven",
+        "body": "The community votes on which topics get investigated. No editorial gatekeeping. When a topic crosses the vote threshold, the research begins automatically."
+      },
+      "open": {
+        "title": "Open Source",
+        "body": "MIT licensed. Public repository from day one. The code, methodology, and funding are all open for inspection."
+      }
+    },
+    "footer": {
+      "nonprofit": "Non-profit · Ad-free · Member-supported",
+      "links": {
+        "methodology": "Methodology",
+        "ai_transparency": "AI Transparency",
+        "source_code": "Source Code",
+        "contact": "Contact"
+      }
+    }
+  }
+}

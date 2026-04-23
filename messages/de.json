@@ -1,0 +1,33 @@
+{
+  "landing": {
+    "tagline": "Wir sagen dir nicht, was du denken sollst.",
+    "tagline_accent": "Wir zeigen dir, woher die Informationen kommen.",
+    "description": "unsere.news ist eine offene, community-getriebene investigative Nachrichtenplattform. Die Community stimmt über Themen ab, wir erstellen KI-gestützte, redaktionell geprüfte Deep-Dives — ausschließlich auf Basis öffentlicher Primärquellen. Jede Aussage zurückführbar.",
+    "cta_github": "Auf GitHub ansehen",
+    "cta_notify": "Bei Launch benachrichtigen",
+    "coming_soon": "Demnächst verfügbar",
+    "principles": {
+      "transparent": {
+        "title": "Radikale Transparenz",
+        "body": "Jede veröffentlichte Fakten-Karte ist auf eine verifizierbare Primärquelle zurückführbar — mit einem Klick zugänglich."
+      },
+      "community": {
+        "title": "Community-Getrieben",
+        "body": "Die Community entscheidet, welche Themen untersucht werden. Kein redaktionelles Gatekeeping. Wenn ein Thema die Abstimmungsschwelle erreicht, startet die Recherche automatisch."
+      },
+      "open": {
+        "title": "Open Source",
+        "body": "MIT-Lizenz. Öffentliches Repository von Tag eins. Code, Methodik und Finanzierung sind offen einsehbar."
+      }
+    },
+    "footer": {
+      "nonprofit": "Gemeinnützig · Werbefrei · Mitglieder-getragen",
+      "links": {
+        "methodology": "Methodik",
+        "ai_transparency": "KI-Transparenz",
+        "source_code": "Quellcode",
+        "contact": "Kontakt"
+      }
+    }
+  }
+}

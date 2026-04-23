@@ -1,0 +1,7 @@
+[tools]
+bun = "latest"
+
+[env]
+# Use bun as the runtime for this project.
+# Install mise first: https://mise.jdx.dev
+# Then run: mise install
