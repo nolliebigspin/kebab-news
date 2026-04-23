@@ -138,21 +138,78 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01–09 | Phase 1 | Pending |
-| AUTH-01–04 | Phase 2 | Pending |
-| VOTE-01–07 | Phase 2 | Pending |
-| TOPIC-01–09 | Phase 3 | Pending |
-| UI-01–06 | Phase 3 | Pending |
-| PIPE-01–07 | Phase 4 | Pending |
-| FACT-01–10 | Phase 5 | Pending |
-| BIAS-01–05 | Phase 5 | Pending |
-| DISC-01–07 | Phase 6 | Pending |
+| INFRA-01 | Phase 1 | Pending |
+| INFRA-02 | Phase 1 | Pending |
+| INFRA-03 | Phase 1 | Pending |
+| INFRA-04 | Phase 1 | Pending |
+| INFRA-05 | Phase 1 | Pending |
+| INFRA-06 | Phase 1 | Pending |
+| INFRA-07 | Phase 1 | Pending |
+| INFRA-08 | Phase 1 | Pending |
+| INFRA-09 | Phase 1 | Pending |
+| AUTH-01 | Phase 2 | Pending |
+| AUTH-02 | Phase 2 | Pending |
+| AUTH-03 | Phase 2 | Pending |
+| AUTH-04 | Phase 2 | Pending |
+| TOPIC-01 | Phase 3 | Pending |
+| TOPIC-02 | Phase 3 | Pending |
+| TOPIC-03 | Phase 3 | Pending |
+| TOPIC-04 | Phase 3 | Pending |
+| TOPIC-05 | Phase 3 | Pending |
+| TOPIC-06 | Phase 3 | Pending |
+| TOPIC-07 | Phase 3 | Pending |
+| TOPIC-08 | Phase 3 | Pending |
+| TOPIC-09 | Phase 3 | Pending |
+| VOTE-01 | Phase 3 | Pending |
+| VOTE-02 | Phase 3 | Pending |
+| VOTE-03 | Phase 3 | Pending |
+| VOTE-04 | Phase 3 | Pending |
+| VOTE-05 | Phase 3 | Pending |
+| VOTE-06 | Phase 3 | Pending |
+| VOTE-07 | Phase 3 | Pending |
+| UI-01 | Phase 3 | Pending |
+| UI-02 | Phase 3 | Pending |
+| UI-03 | Phase 3 | Pending |
+| UI-04 | Phase 3 | Pending |
+| UI-05 | Phase 3 | Pending |
+| UI-06 | Phase 3 | Pending |
+| PIPE-01 | Phase 4 | Pending |
+| PIPE-02 | Phase 4 | Pending |
+| PIPE-03 | Phase 4 | Pending |
+| PIPE-04 | Phase 4 | Pending |
+| PIPE-05 | Phase 4 | Pending |
+| PIPE-06 | Phase 4 | Pending |
+| PIPE-07 | Phase 4 | Pending |
+| FACT-01 | Phase 5 | Pending |
+| FACT-02 | Phase 5 | Pending |
+| FACT-03 | Phase 5 | Pending |
+| FACT-04 | Phase 5 | Pending |
+| FACT-05 | Phase 5 | Pending |
+| FACT-06 | Phase 5 | Pending |
+| FACT-07 | Phase 5 | Pending |
+| FACT-08 | Phase 5 | Pending |
+| FACT-09 | Phase 5 | Pending |
+| FACT-10 | Phase 5 | Pending |
+| BIAS-01 | Phase 5 | Pending |
+| BIAS-02 | Phase 5 | Pending |
+| BIAS-03 | Phase 5 | Pending |
+| BIAS-04 | Phase 5 | Pending |
+| BIAS-05 | Phase 5 | Pending |
+| DISC-01 | Phase 6 | Pending |
+| DISC-02 | Phase 6 | Pending |
+| DISC-03 | Phase 6 | Pending |
+| DISC-04 | Phase 6 | Pending |
+| DISC-05 | Phase 6 | Pending |
+| DISC-06 | Phase 6 | Pending |
+| DISC-07 | Phase 6 | Pending |
 
 **Coverage:**
-- v1 requirements: 59 total
-- Mapped to phases: 59
+- v1 requirements: 64 total (9 INFRA + 4 AUTH + 9 TOPIC + 7 VOTE + 7 PIPE + 10 FACT + 5 BIAS + 7 DISC + 6 UI)
+- Mapped to phases: 64
 - Unmapped: 0 ✓
+
+**Note:** The earlier count of 59 undercounted — the correct total when each requirement ID is counted individually is 64. All are mapped.
 
 ---
 *Requirements defined: 2026-04-23*
-*Last updated: 2026-04-23 after initial definition — design prototype reviewed (Prototyp.html + JSX files)*
+*Last updated: 2026-04-23 — traceability expanded to individual requirement rows; VOTE-01–07 reassigned from Phase 2 to Phase 3 (voting is inseparable from the board UI)*
