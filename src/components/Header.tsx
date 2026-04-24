@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { GithubIcon } from "@/components/GithubIcon";
+import { FaGithub } from "react-icons/fa6";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Wordmark } from "@/components/Wordmark";
 import { GITHUB_URL } from "@/lib/constants";
@@ -20,7 +20,7 @@ export const Header = () => {
             className="hairline inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors hover:bg-(--bg-warm)"
             style={{ color: "var(--ink-soft)" }}
           >
-            <GithubIcon />
+            <FaGithub />
             <span className="font-mono text-xs">{t("github")}</span>
           </a>
         </div>

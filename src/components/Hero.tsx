@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { GithubIcon } from "@/components/GithubIcon";
+import { FaGithub } from "react-icons/fa6";
 import { GITHUB_URL } from "@/lib/constants";
 
 export const Hero = () => {
@@ -52,7 +52,7 @@ export const Hero = () => {
           className="inline-flex items-center gap-2 rounded-md px-5 py-2.5 font-medium text-sm transition-opacity hover:opacity-90"
           style={{ background: "var(--accent)", color: "#fff" }}
         >
-          <GithubIcon color="#fff" />
+          <FaGithub />
           {t("cta_github")}
         </a>
         <span
