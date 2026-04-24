@@ -2,13 +2,15 @@
 
 ## What This Is
 
-unsere.news is an open-source, community-driven investigative news platform that restores trust in information through radical transparency. The community votes on topics (infrastructure spending, international conflicts, environmental data), and the platform produces AI-powered, human-verified "Deep-Dives" built strictly on primary sources — government PDFs, scientific papers, raw data — with every claim linked directly to its source.
+unsere.news is an open-source, community-driven platform for traceable, verifiable research. The community votes on which questions get investigated (infrastructure spending, international conflicts, environmental data), and the platform produces AI-powered, human-verified source analyses built strictly on primary sources — government PDFs, scientific papers, raw data — with every claim linked directly to its source.
+
+unsere.news is not a news platform. It is a verification interface for information. We do not claim neutrality — we make every selection decision visible so users can follow along, question it, and verify independently.
 
 **Motto:** "We don't tell you what to think. We show you where the information comes from."
 
 ## Core Value
 
-Every published Fact Card must be traceable to a verifiable primary source that any user can access in a single click — without this guarantee, the platform has no reason to exist.
+Every published sourced claim must be traceable to a verifiable primary source that any user can access in a single click — without this guarantee, the platform has no reason to exist.
 
 ## Current Milestone: v1.0 Foundation & Landing
 

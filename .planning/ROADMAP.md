@@ -2,7 +2,7 @@
 
 ## Overview
 
-unsere.news ships in six phases that build strictly on one another. Phase 1 lays the entire database schema and deployment scaffold so nothing is bolted on later. Phase 2 wires authentication so every subsequent feature can assume an authenticated user exists. Phase 3 delivers the full community experience — design system, topic board, and voting — as one coherent slice, because the UI and voting budget are inseparable from the board. Phase 4 is the platform's core engine: the Upstash Workflow pipeline that triggers Claude to produce Fact Cards from primary sources. Phase 5 surfaces that output — Fact Cards with traceable sources and the Bias Radar on the published article page. Phase 6 closes the loop with community discussion and AI moderation. Every v1 requirement maps to exactly one phase.
+unsere.news ships in six phases that build strictly on one another. Phase 1 lays the entire database schema and deployment scaffold so nothing is bolted on later. Phase 2 wires authentication so every subsequent feature can assume an authenticated user exists. Phase 3 delivers the full community experience — design system, topic board, and voting — as one coherent slice, because the UI and voting budget are inseparable from the board. Phase 4 is the platform's core engine: the Upstash Workflow pipeline that triggers Claude to produce sourced claims from primary sources. Phase 5 surfaces that output — sourced claims with traceable sources and the Bias Radar on the published article page. Phase 6 closes the loop with community discussion and AI moderation. Every v1 requirement maps to exactly one phase.
 
 ## Phases
 
@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 1: Infrastructure & Schema** - Neon/pgvector/Drizzle schema, Vercel + Upstash scaffold, Next.js project skeleton
 - [ ] **Phase 2: Authentication** - Better Auth email/password signup, login, session persistence, logout
 - [ ] **Phase 3: Topic Board, Voting & Design System** - Full design system, sticky header, topic board with filtering/sorting, propose modal, vote budget, weekly reset
-- [ ] **Phase 4: Deep-Dive Pipeline** - Upstash Workflow integration, vote-threshold trigger, Claude synthesis, objectivity filter, status progression
+- [ ] **Phase 4: Source Analysis Pipeline** - Upstash Workflow integration, vote-threshold trigger, Claude synthesis, objectivity filter, status progression
 - [ ] **Phase 5: Fact Cards & Bias Radar** - Published article page, typed Fact Cards with primary source links, archive.org fallback, human review queue, Bias Radar RSS aggregation
 - [ ] **Phase 6: Discussion & Moderation** - Community comments on published articles, AI moderation, upvotes/downvotes, editorial badges
 
@@ -57,7 +57,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: TBD
 **UI hint**: yes
 
-### Phase 4: Deep-Dive Pipeline
+### Phase 4: Source Analysis Pipeline
 **Goal**: When a topic crosses its vote threshold the platform automatically starts an AI research job — sourcing, synthesis, and status updates happen entirely through Upstash Workflows, never timing out on Vercel.
 **Depends on**: Phase 3
 **Requirements**: PIPE-01, PIPE-02, PIPE-03, PIPE-04, PIPE-05, PIPE-06, PIPE-07
@@ -65,7 +65,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. When a topic's vote count crosses the configurable goal threshold, an Upstash Workflow job is triggered automatically and the topic status changes from `voting` to `investigating`
   2. Admin can manually trigger a Deep-Dive on any topic from an admin interface regardless of vote count
   3. Pipeline fetches content from the topic's referenced primary source URLs/PDFs and passes it to Claude within the Upstash Workflow (no Vercel timeout risk)
-  4. Claude returns structured Fact Card drafts synthesized exclusively from primary source content; no secondary reporting is used
+  4. Claude returns structured sourced claim drafts synthesized exclusively from primary source content; no secondary reporting is used
   5. Topic status progresses through `voting → investigating → done` and is visible on the board in real time on next page load
 **Plans**: TBD
 
@@ -105,6 +105,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. Infrastructure & Schema | 0/TBD | Not started | - |
 | 2. Authentication | 0/TBD | Not started | - |
 | 3. Topic Board, Voting & Design System | 0/TBD | Not started | - |
-| 4. Deep-Dive Pipeline | 0/TBD | Not started | - |
+| 4. Source Analysis Pipeline | 0/TBD | Not started | - |
 | 5. Fact Cards & Bias Radar | 0/TBD | Not started | - |
 | 6. Discussion & Moderation | 0/TBD | Not started | - |

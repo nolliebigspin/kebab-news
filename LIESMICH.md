@@ -1,64 +1,71 @@
-# unsere.news 🕊️
+# unsere.news
 
-> **Journalismus, der uns gehört. Fakten, die uns verbinden.**
+> **Wir zeigen dir nicht, was du denken sollst. Wir zeigen dir, woher die Informationen stammen.**
 
-## 📖 Die Vision
-In einer Welt, in der Nachrichten oft als "wanked", einseitig oder manipulativ wahrgenommen werden, schafft **unsere.news** einen Raum für radikale Sachlichkeit. Wir sind keine klassische Redaktion, sondern ein gemeinschaftliches Werkzeug. Unser Ziel ist es, den Fokus von der Meinung zurück auf den Beleg zu lenken – wissenschaftlich fundiert, politisch unabhängig und durch die Community gesteuert.
+## Die Vision
 
-Wir glauben, dass Demokratie nur funktioniert, wenn wir Zugang zu denselben, verifizierbaren Fakten haben. **unsere.news** gibt der Bevölkerung die Macht zurück, die Agenda der Berichterstattung selbst zu bestimmen.
+In einer Welt, in der Nachrichten oft als einseitig oder manipulativ wahrgenommen werden, schafft **unsere.news** einen Raum für nachvollziehbare, überprüfbare Recherche. Wir sind keine klassische Redaktion, sondern ein gemeinschaftliches Werkzeug. Unser Ziel: den Fokus von der Meinung zurück auf den Beleg lenken.
+
+Wir behaupten keine Neutralität. Auch wir treffen Auswahlentscheidungen — welche Quellen wir einbeziehen, wie wir Fragen formulieren, welche Perspektiven wir zeigen. Deshalb legen wir jeden Schritt offen, damit du nachvollziehen, hinterfragen und widersprechen kannst.
 
 ---
 
-## 🛠️ Wie es funktioniert
-Das Projekt basiert auf drei unumstößlichen Säulen:
+## Kernprinzip
 
-### 1. Community-driven Agenda (Votum)
-Nicht Chefredakteure entscheiden, was wichtig ist, sondern die Menschen. Nutzer schlagen Themen oder Fragen vor (z.B. zur Infrastruktur, Umweltbelastungen oder internationalen Konflikten). Über ein faires Voting-System wird ermittelt, welche Themen eine tiefgreifende Untersuchung erfordern.
+**Transparenz statt Neutralität. Nachvollziehbarkeit statt Autorität. Struktur statt Narrativ.**
+
+unsere.news ist kein Nachrichtenmedium. Es ist eine **Verifikationsschnittstelle für Informationen**.
+
+---
+
+## Wie es funktioniert
+
+Das Projekt basiert auf drei Säulen:
+
+### 1. Community-getriebene Agenda (Votum)
+Die Community entscheidet, welche Fragen untersucht werden — nicht, was die Antwort ist. Nutzer schlagen prüfbare Fragen vor. Über ein Voting-System wird ermittelt, welche Themen eine Untersuchung rechtfertigen.
 
 ### 2. Multi-Perspektivität (Radar)
-Bevor wir tief graben, schauen wir uns das "Rauschen" an. In Anlehnung an *ground.news* aggregieren wir internationale und nationale Berichterstattung, um "Blindspots" und politische Färbungen sichtbar zu machen. Wir hören alle Seiten, um den Kern der Sache zu finden.
+Bevor wir tief graben, schauen wir uns das Spektrum der Berichterstattung an. Wir aggregieren internationale und nationale Quellen, um Blindspots und unterschiedliche Rahmungen sichtbar zu machen — nicht um sie zu "korrigieren".
 
-### 3. Faktische Tiefe (Deep-Dive)
-Sobald ein Thema gewählt wurde, startet der Prozess:
-- **KI-gestützte Recherche:** Analyse von Primärquellen, wissenschaftlichen Datenbanken, Haushaltsplänen und Satellitendaten.
-- **Menschliche Verifikation:** Fachjournalisten und Experten prüfen die KI-Ergebnisse auf Nuancen und Kontext.
-- **Transparente Ergebnisse:** Wir liefern keine langen Meinungsartikel, sondern "Fakten-Karten". Jede Zahl, jede Aussage ist direkt mit dem Original-Dokument (PDF, Quelle) verlinkt.
+### 3. Quellenanalyse (ehemals Deep-Dive)
+Sobald ein Thema gewählt wurde:
+- **KI-gestützte Recherche:** Analyse von Primärquellen, wissenschaftlichen Datenbanken, Haushaltsplänen und öffentlichen Dokumenten.
+- **Menschliche Verifikation:** Redakteure prüfen KI-Ergebnisse auf Nuancen und Kontext.
+- **Nachvollziehbare Ergebnisse:** Belegte Aussagen statt Meinungsartikel. Jede Aussage direkt mit dem Original-Dokument verlinkt. Unsicherheiten explizit ausgewiesen.
+- **Methodik-Sektion:** Jeder Bericht enthält: verwendete Quellen, ausgeschlossene Quellen, Datum der Daten, KI- oder menschliche Verifikation.
 
 ---
 
-## 🏗️ Technischer Stack
-Um maximale Skalierbarkeit und Transparenz zu gewährleisten, setzen wir auf modernste Web-Technologien:
+## Strategie gegen Desinformation
+
+- **Sachlichkeits-Filter:** KI reduziert emotionale Sprache in Fragen, um sie prüfbar zu machen — keine Behauptung von Neutralität.
+- **Zweistufiges Votum:** Prüfung auf Verfügbarkeit von Primärquellen vor Untersuchungsbeginn.
+- **Unsicherheits-Labels:** "Datenlage unklar", "widersprüchliche Quellen" — sichtbar, nicht verborgen.
+- **Open Source:** Gesamter Code und Recherche-Algorithmen sind für jeden einsehbar.
+
+---
+
+## Technischer Stack
 
 - **Framework:** [Next.js](https://nextjs.org/) (App Router)
-- **Sprache:** [TypeScript](https://www.typescriptlang.org/) (Type-safety für alle Datenprozesse)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/) (Modular & Clean)
-- **Authentifizierung:** [Better Auth](https://better-auth.com/) (Sicher & Community-fokussiert)
-- **Datenbank:** [Neon](https://neon.tech/) (Serverless Postgres mit `pgvector` für KI-Suche)
-- **ORM:** [Drizzle ORM](https://orm.drizzle.team/) (Lightweight & Fast)
-- **Background Jobs:** [Upstash](https://upstash.com/) (Workflows & QStash für langlaufende KI-Recherchen)
+- **Sprache:** [TypeScript](https://www.typescriptlang.org/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **Authentifizierung:** [Better Auth](https://better-auth.com/)
+- **Datenbank:** [Neon](https://neon.tech/) (Serverless Postgres mit `pgvector`)
+- **ORM:** [Drizzle ORM](https://orm.drizzle.team/)
+- **Background Jobs:** [Upstash](https://upstash.com/) (QStash)
 - **Hosting:** [Vercel](https://vercel.com/)
 
 ---
 
-## 🛡️ Strategie gegen Desinformation
-Um zu verhindern, dass die Plattform für Nischenthemen oder Propaganda missbraucht wird, implementieren wir:
-- **Sachlichkeits-Filter:** KI-gestützte Umformung von emotionalen User-Fragen in neutrale Forschungsfragen.
-- **Zweistufiges Votum:** Prüfung auf Verfügbarkeit von Primärquellen vor Untersuchungsbeginn.
-- **Reputations-System:** Nutzer, die wertvolle Quellen beisteuern, erhalten höheres Gewicht in der Community.
-- **Open Source:** Der gesamte Code und die Recherche-Algorithmen sind für jeden einsehbar.
+## Open Source & Mitwirkung
 
----
-
-## 🤝 Open Source & Mitwirkung
-**unsere.news** wird als Open-Source-Projekt entwickelt. Wir brauchen Entwickler, Datenanalysten, Journalisten und Faktenchecker, die dabei helfen, das Vertrauen in Information wiederherzustellen.
+**unsere.news** wird als Open-Source-Projekt entwickelt. Wir brauchen Entwickler, Datenanalysten, Journalisten und Faktenchecker.
 
 - **Status:** Vision & Prototyping (MVP Phase)
-- **Ziel:** Eine Plattform von der Community für die Community.
+- **Lizenz:** MIT
 
 ---
 
-## ⚖️ Leitspruch
-**"Wir zeigen dir nicht, was du denken sollst. Wir zeigen dir, woher die Informationen stammen."**
-
----
-*Erstellt im April 2026 – Ein Projekt für die Vernunft.*
+*Erstellt im April 2026.*

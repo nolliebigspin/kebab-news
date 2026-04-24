@@ -1,7 +1,7 @@
 # Requirements: unsere.news
 
 **Defined:** 2026-04-23
-**Core Value:** Every published Fact Card must be traceable to a verifiable primary source that any user can access in a single click.
+**Core Value:** Every published sourced claim must be traceable to a verifiable primary source that any user can access in a single click.
 
 ## v1.0 Requirements (Milestone: Foundation & Landing)
 
@@ -33,7 +33,7 @@ See earlier REQUIREMENTS.md content — the complete 64-requirement set (INFRA, 
 ### Topic Board
 
 - [ ] **TOPIC-01**: Authenticated user can submit a topic question via Propose Modal
-- [ ] **TOPIC-02**: Submitted topic is run through the Objectivity Filter (Claude prompt layer) before being stored — neutral, researchable framing enforced
+- [ ] **TOPIC-02**: Submitted topic is run through the Objectivity Filter (Claude prompt layer) before being stored — emotional language reduced, researchable framing enforced (not a neutrality claim)
 - [ ] **TOPIC-03**: User can optionally provide: category, rationale ("why important"), possible primary sources
 - [ ] **TOPIC-04**: Topics display in a filterable list with tabs: In Voting / In Investigation / Published
 - [ ] **TOPIC-05**: Topics in "voting" state are sortable: most votes / close to goal / newest
@@ -57,8 +57,8 @@ See earlier REQUIREMENTS.md content — the complete 64-requirement set (INFRA, 
 - [ ] **PIPE-01**: When a topic crosses the vote threshold, an Upstash Workflow job is automatically triggered
 - [ ] **PIPE-02**: Admin can manually trigger a Deep-Dive on any topic regardless of vote count
 - [ ] **PIPE-03**: Pipeline fetches referenced primary source URLs / PDFs and passes content to Claude
-- [ ] **PIPE-04**: Claude synthesizes Fact Cards from primary source content only (no secondary reporting)
-- [ ] **PIPE-05**: Objectivity Filter prompt layer neutralizes biased/emotional topic submissions before storing
+- [ ] **PIPE-04**: Claude synthesizes sourced claims from primary source content only (no secondary reporting)
+- [ ] **PIPE-05**: Objectivity Filter prompt layer reduces emotional language in topic submissions to make them verifiable before storing
 - [ ] **PIPE-06**: All AI research tasks are offloaded to Upstash Workflows/QStash (Vercel 30s timeout)
 - [ ] **PIPE-07**: Pipeline updates topic status: voting → investigating → done
 

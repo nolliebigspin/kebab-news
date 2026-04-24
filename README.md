@@ -1,60 +1,70 @@
-# unsere.news 🕊️
+# unsere.news
 
-> **Journalism that belongs to us. Facts that connect us.**
+> **We don't tell you what to think. We show you where the information comes from.**
 
-## 📖 The Vision
-In a world where news is often perceived as "wanked," biased, or manipulative, **unsere.news** creates a space for radical objectivity. We are not a traditional editorial office, but a collaborative tool. Our goal is to shift the focus from opinion back to evidence – scientifically grounded, politically independent, and community-driven.
+## The Vision
 
-We believe that democracy only functions when we have access to the same, verifiable facts. **unsere.news** returns the power to set the reporting agenda back to the people.
+In a world where news is often perceived as biased or manipulative, **unsere.news** creates a space for traceable, verifiable research. We are not a traditional editorial operation — we are a community-driven tool. Our goal is to shift the focus from opinion back to evidence.
+
+We do not claim neutrality. We make selection decisions too — which sources to include, how to frame questions, which perspectives to surface. No platform is free from this. That's why we make every step visible, so you can follow along, question it, and disagree.
 
 ---
 
-## 🛠️ How It Works
-The project is built on three unshakeable pillars:
+## Core Principle
+
+**Transparency over neutrality. Verification over authority. Structure over narrative.**
+
+unsere.news is not a news platform. It is a **verification interface for information**.
+
+---
+
+## How It Works
 
 ### 1. Community-driven Agenda (Votum)
-Editors don't decide what's important; people do. Users suggest topics or questions. A fair voting system determines which topics require a deep-dive investigation.
+The community decides which questions get investigated — not what the answers are. Users submit verifiable questions. A voting system determines which topics warrant an investigation.
 
 ### 2. Multi-Perspectivity (Radar)
-Following the *ground.news* model, we aggregate international and national reporting to make blind spots and political biases visible. We listen to all sides to find the core of the issue.
+Before we dig in, we survey the reporting landscape. We aggregate international and national sources to make blind spots and different framings visible — not to "correct" them.
 
-### 3. Factual Depth (Deep-Dive)
-- **AI-Powered Research:** Analysis of primary sources, scientific databases, and official records.
-- **Human Verification:** Professionals verify AI results for nuance and context.
-- **Transparent Results:** "Fact Cards" directly linked to original documents (PDFs, sources).
-
----
-
-## 🛡️ Strategy Against Disinformation
-To prevent the platform from being hijacked by niche interests or propaganda, we implement:
-- **Objectivity Filter:** AI-powered transformation of emotional user questions into neutral research inquiries.
-- **Two-Stage Voting:** A feasibility check for primary source availability before an investigation begins.
-- **Reputation System:** Users contributing verified sources gain higher weight within the community.
-- **Open Source:** The entire codebase and research algorithms are public for maximum accountability.
+### 3. Source Analysis (formerly Deep-Dive)
+Once a topic is commissioned:
+- **AI-powered research:** Analysis of primary sources — government documents, scientific papers, official records, raw data.
+- **Human verification:** Editors review AI results for nuance and context.
+- **Traceable output:** Sourced claims instead of opinion pieces. Every claim linked directly to its source. Uncertainty made visible, not hidden.
+- **Methodology section:** Every report includes which sources were used, which were excluded, the data date, and whether AI or human verified.
 
 ---
 
-## 🏗️ Technical Stack
+## Strategy Against Disinformation
+
+- **Objectivity filter:** AI reduces emotional language in submitted questions to make them verifiable — not a claim of neutrality.
+- **Two-stage voting:** Feasibility check for primary source availability before an investigation begins.
+- **Uncertainty labels:** "Conflicting sources", "data unclear" — surfaced explicitly, not buried.
+- **Open source:** The entire codebase and research algorithms are public for maximum accountability.
+
+---
+
+## Technical Stack
+
 - **Framework:** [Next.js](https://nextjs.org/) (App Router)
 - **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 - **Auth:** [Better Auth](https://better-auth.com/)
 - **Database:** [Neon](https://neon.tech/) (Postgres + pgvector)
 - **ORM:** [Drizzle ORM](https://orm.drizzle.team/)
-- **Background Jobs:** [Upstash](https://upstash.com/) (Workflows)
+- **Background Jobs:** [Upstash](https://upstash.com/) (QStash / Workflows)
 - **Hosting:** [Vercel](https://vercel.com/)
 
 ---
 
-## 🤝 Open Source & Contribution
-**unsere.news** is being developed as an open-source project. We need developers, data analysts, journalists, and fact-checkers to help restore trust in information.
+## Open Source & Contribution
+
+**unsere.news** is being developed as an open-source project. We need developers, data analysts, journalists, and fact-checkers.
 
 - **Status:** Vision & Prototyping (MVP Phase)
+- **License:** MIT
 - **Goal:** A platform by the community, for the community.
 
 ---
 
-## ⚖️ Our Pledge
-**"We don't tell you what to think. We show you where the information comes from."**
-
----
-*Created April 2026 – A project for reason and transparency.*
+*Created April 2026.*

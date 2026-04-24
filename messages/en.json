@@ -6,24 +6,24 @@
     "badge": "In development",
     "tagline": "We don't tell you what to think.",
     "tagline_accent": "We show you where the information comes from.",
-    "description": "unsere.news is an open-source, community-driven investigative news platform. The community votes on topics, and we produce AI-powered, human-verified Deep-Dives built strictly on primary sources — every claim linked directly to its source.",
+    "description": "unsere.news is an open-source, community-driven platform for traceable research. The community votes on which questions get investigated. When a topic crosses the threshold, our AI — verified by editors — produces a source analysis built strictly on primary sources. Every claim traceable. Every source linked.",
     "cta_github": "View on GitHub",
     "cta_soon": "Launch newsletter coming soon"
   },
   "banner": {
-    "bold": "Every number verifiable.",
-    "text": "Every article AI-researched, editorially reviewed, traceable to primary sources.",
+    "bold": "Every claim verifiable.",
+    "text": "Every report AI-researched, editorially reviewed, traceable to primary sources.",
     "tags": "non-profit · ad-free · open source"
   },
   "principles": {
     "heading": "Principles",
     "transparent": {
       "title": "Radical Transparency",
-      "body": "Every published Fact Card is traceable to a verifiable primary source — government PDFs, scientific papers, raw data — accessible in a single click."
+      "body": "Every published sourced claim is traceable to a verifiable primary source — government PDFs, scientific papers, raw data — accessible in a single click."
     },
     "community": {
       "title": "Community-Driven",
-      "body": "The community votes on which topics get investigated. No editorial gatekeeping. When a topic crosses the vote threshold, the research begins automatically."
+      "body": "The community decides which questions get investigated — not what the answers are. No editorial gatekeeping. When a topic crosses the vote threshold, the research begins automatically."
     },
     "open": {
       "title": "Open Source",
@@ -35,8 +35,34 @@
     "steps": [
       { "n": "01", "h": "Propose", "b": "Any member can submit a verifiable question." },
       { "n": "02", "h": "Vote", "b": "Topics with enough support get commissioned." },
-      { "n": "03", "h": "Research", "b": "AI gathers primary sources; editors verify manually." },
-      { "n": "04", "h": "Publish", "b": "Fact Cards instead of prose — one source per claim." }
+      { "n": "03", "h": "Source Analysis", "b": "AI gathers primary sources; editors verify manually." },
+      {
+        "n": "04",
+        "h": "Publish",
+        "b": "Sourced claims instead of prose — one source per claim, uncertainty made visible."
+      }
+    ]
+  },
+  "trustStatement": {
+    "heading": "Why you shouldn't just trust us",
+    "body": "We make selection decisions too: which sources to include, how to frame questions, which perspectives to surface. No platform is free from this. That's why we make every step visible — so you can follow along, question it, and disagree.",
+    "items": [
+      {
+        "label": "Check the sources",
+        "text": "Every source analysis includes direct links to the original documents. Read them yourself."
+      },
+      {
+        "label": "Uncertainty is visible",
+        "text": "Conflicting data or missing evidence is explicitly flagged — not hidden."
+      },
+      {
+        "label": "How this report was made",
+        "text": "Every report includes a methodology section: sources used, sources excluded, data date, AI or human verification."
+      },
+      {
+        "label": "Objectivity filter",
+        "text": "Emotional language in questions is reduced to make them verifiable — not a claim of neutrality."
+      }
     ]
   },
   "footer": {
