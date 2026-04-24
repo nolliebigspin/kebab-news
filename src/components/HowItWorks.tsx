@@ -1,11 +1,9 @@
-const steps = [
-  ["01", "Vorschlag", "Jedes Mitglied kann eine prüfbare Frage einreichen."],
-  ["02", "Voting", "Themen mit genug Unterstützung werden beauftragt."],
-  ["03", "Recherche", "KI sammelt Primärquellen, die Redaktion prüft manuell."],
-  ["04", "Veröffentlichung", "Fakten-Karten statt Fließtext — eine Quelle pro Aussage."],
-] as const;
+import { useTranslations } from "next-intl";
 
 export const HowItWorks = () => {
+  const t = useTranslations("howItWorks");
+  const steps = t.raw("steps") as { n: string; h: string; b: string }[];
+
   return (
     <section className="hairline border-t" style={{ background: "var(--bg-warm)" }}>
       <div className="mx-auto max-w-5xl px-6 py-20">
@@ -13,10 +11,10 @@ export const HowItWorks = () => {
           className="mb-10 font-mono text-xs uppercase tracking-[0.14em]"
           style={{ color: "var(--ink-mute)" }}
         >
-          So funktioniert es
+          {t("heading")}
         </h2>
         <ol className="grid gap-6 sm:grid-cols-4">
-          {steps.map(([n, h, b]) => (
+          {steps.map(({ n, h, b }) => (
             <li key={n} className="flex flex-col gap-2">
               <span className="font-mono text-[11px]" style={{ color: "var(--ink-mute)" }}>
                 {n}
@@ -33,4 +31,4 @@ export const HowItWorks = () => {
       </div>
     </section>
   );
-}
+};

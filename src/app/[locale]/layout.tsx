@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Inter } from "next/font/google";
+import { notFound } from "next/navigation";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { routing } from "@/i18n/routing";
 import "./globals.css";
 
 const inter = Inter({
@@ -28,14 +32,32 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+type Props = {
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
+};
+
+export default async function LocaleLayout({ children, params }: Props) {
+  const { locale } = await params;
+
+  if (!routing.locales.includes(locale as "de" | "en")) {
+    notFound();
+  }
+
+  const messages = await getMessages();
+
   return (
-    <html lang="de" className={`${inter.variable} ${ibmPlexMono.variable}`}>
-      <body className="flex min-h-screen flex-col antialiased" style={{ background: "var(--bg)", color: "var(--ink)" }}>
+    <html lang={locale} className={`${inter.variable} ${ibmPlexMono.variable}`}>
+      <body
+        className="flex min-h-screen flex-col antialiased"
+        style={{ background: "var(--bg)", color: "var(--ink)" }}
+      >
+        <NextIntlClientProvider messages={messages}>
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
-        </body>
+        </NextIntlClientProvider>
+      </body>
     </html>
   );
 }

@@ -1,33 +1,51 @@
 {
-  "landing": {
+  "header": {
+    "github": "GitHub"
+  },
+  "hero": {
+    "badge": "In development",
     "tagline": "We don't tell you what to think.",
     "tagline_accent": "We show you where the information comes from.",
     "description": "unsere.news is an open-source, community-driven investigative news platform. The community votes on topics, and we produce AI-powered, human-verified Deep-Dives built strictly on primary sources — every claim linked directly to its source.",
     "cta_github": "View on GitHub",
-    "cta_notify": "Get notified at launch",
-    "coming_soon": "Coming soon",
-    "principles": {
-      "transparent": {
-        "title": "Radical Transparency",
-        "body": "Every published Fact Card is traceable to a verifiable primary source — government PDFs, scientific papers, raw data — accessible in a single click."
-      },
-      "community": {
-        "title": "Community-Driven",
-        "body": "The community votes on which topics get investigated. No editorial gatekeeping. When a topic crosses the vote threshold, the research begins automatically."
-      },
-      "open": {
-        "title": "Open Source",
-        "body": "MIT licensed. Public repository from day one. The code, methodology, and funding are all open for inspection."
-      }
+    "cta_soon": "Launch newsletter coming soon"
+  },
+  "banner": {
+    "bold": "Every number verifiable.",
+    "text": "Every article AI-researched, editorially reviewed, traceable to primary sources.",
+    "tags": "non-profit · ad-free · open source"
+  },
+  "principles": {
+    "heading": "Principles",
+    "transparent": {
+      "title": "Radical Transparency",
+      "body": "Every published Fact Card is traceable to a verifiable primary source — government PDFs, scientific papers, raw data — accessible in a single click."
     },
-    "footer": {
-      "nonprofit": "Non-profit · Ad-free · Member-supported",
-      "links": {
-        "methodology": "Methodology",
-        "ai_transparency": "AI Transparency",
-        "source_code": "Source Code",
-        "contact": "Contact"
-      }
+    "community": {
+      "title": "Community-Driven",
+      "body": "The community votes on which topics get investigated. No editorial gatekeeping. When a topic crosses the vote threshold, the research begins automatically."
+    },
+    "open": {
+      "title": "Open Source",
+      "body": "MIT licensed. Public repository from day one. The code, methodology, and funding are all open for inspection."
+    }
+  },
+  "howItWorks": {
+    "heading": "How it works",
+    "steps": [
+      { "n": "01", "h": "Propose", "b": "Any member can submit a verifiable question." },
+      { "n": "02", "h": "Vote", "b": "Topics with enough support get commissioned." },
+      { "n": "03", "h": "Research", "b": "AI gathers primary sources; editors verify manually." },
+      { "n": "04", "h": "Publish", "b": "Fact Cards instead of prose — one source per claim." }
+    ]
+  },
+  "footer": {
+    "nonprofit": "Non-profit · Ad-free · Member-supported",
+    "links": {
+      "methodology": "Methodology",
+      "ai_transparency": "AI Transparency",
+      "source_code": "Source Code",
+      "contact": "Contact"
     }
   }
 }
