@@ -3,11 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "biome check .",
-    "format": "biome format --write ."
+    "check:lint": "biome lint --write ./",
+    "check:format": "biome format --write ./",
+    "check:imports": "biome check --formatter-enabled=false --linter-enabled=false --write ./",
+    "check:ts": "tsc --noEmit",
+    "check:all": "bun check:imports && bun check:format && bun check:lint && bun check:ts"
   },
   "dependencies": {
     "lucide-react": "^1.8.0",

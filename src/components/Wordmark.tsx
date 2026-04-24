@@ -1,6 +1,6 @@
-export function Wordmark() {
+export const Wordmark = () => {
   return (
-    <div className="flex items-baseline gap-0.5 select-none">
+    <div className="flex select-none items-baseline gap-0.5">
       <span className="font-display text-xl" style={{ color: "var(--ink)" }}>
         unsere
       </span>
@@ -9,4 +9,4 @@ export function Wordmark() {
       </span>
     </div>
   );
-}
+};

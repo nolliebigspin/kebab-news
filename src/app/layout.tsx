@@ -21,19 +21,14 @@ export const metadata: Metadata = {
     "Community-driven investigative news built on primary sources. Every claim traceable. Every source linked.",
   openGraph: {
     title: "unsere.news",
-    description:
-      "We don't tell you what to think. We show you where the information comes from.",
+    description: "We don't tell you what to think. We show you where the information comes from.",
     type: "website",
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${ibmPlexMono.variable}`}>
+    <html lang="de" className={`${inter.variable} ${ibmPlexMono.variable}`}>
       <body className="min-h-screen antialiased">{children}</body>
     </html>
   );

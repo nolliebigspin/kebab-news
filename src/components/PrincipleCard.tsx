@@ -1,14 +1,12 @@
-export function PrincipleCard({
-  icon,
-  title,
-  body,
-}: {
+type PrincipleCardProps = {
   icon: React.ReactNode;
   title: string;
   body: string;
-}) {
+};
+
+export const PrincipleCard = ({ icon, title, body }: PrincipleCardProps) => {
   return (
-    <div className="border hairline rounded-lg p-5 flex flex-col gap-3 bg-white">
+    <div className="hairline flex flex-col gap-3 rounded-lg border bg-white p-5">
       <span style={{ color: "var(--accent)" }}>{icon}</span>
       <h3 className="font-medium text-sm" style={{ color: "var(--ink)" }}>
         {title}
@@ -18,4 +16,4 @@ export function PrincipleCard({
       </p>
     </div>
   );
-}
+};

@@ -85,14 +85,30 @@ body {
 }
 
 /* colour utilities */
-.ink { color: var(--ink); }
-.ink-soft { color: var(--ink-soft); }
-.ink-mute { color: var(--ink-mute); }
-.bg-warm { background: var(--bg-warm); }
-.text-accent { color: var(--accent); }
-.bg-accent { background: var(--accent); }
-.text-accent-ink { color: var(--accent-ink); }
-.bg-accent-wash { background: var(--accent-wash); }
+.ink {
+  color: var(--ink);
+}
+.ink-soft {
+  color: var(--ink-soft);
+}
+.ink-mute {
+  color: var(--ink-mute);
+}
+.bg-warm {
+  background: var(--bg-warm);
+}
+.text-accent {
+  color: var(--accent);
+}
+.bg-accent {
+  background: var(--accent);
+}
+.text-accent-ink {
+  color: var(--accent-ink);
+}
+.bg-accent-wash {
+  background: var(--accent-wash);
+}
 
 /* dot */
 .dot {
@@ -104,22 +120,36 @@ body {
 
 /* animations */
 @keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0 oklch(0.56 0.085 190 / 0.45); }
-  100% { box-shadow: 0 0 0 14px oklch(0.56 0.085 190 / 0); }
+  0% {
+    box-shadow: 0 0 0 0 oklch(0.56 0.085 190 / 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 14px oklch(0.56 0.085 190 / 0);
+  }
 }
 .pulse {
   animation: pulse-ring 0.6s ease-out;
 }
 
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .fade-up {
   animation: fade-up 0.3s ease-out;
 }
 
 @keyframes shimmer {
-  from { background-position: -200% center; }
-  to { background-position: 200% center; }
+  from {
+    background-position: -200% center;
+  }
+  to {
+    background-position: 200% center;
+  }
 }
