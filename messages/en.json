@@ -4,26 +4,26 @@
   },
   "hero": {
     "badge": "In development",
-    "tagline": "We don't tell you what to think.",
-    "tagline_accent": "We show you where the information comes from.",
+    "tagline": "News, told from every perspective.",
+    "tagline_accent": "We always show you where the information comes from.",
     "description": "unsere.news is an open-source, community-driven platform for traceable research. The community votes on which questions get investigated. When a topic crosses the threshold, our AI — verified by editors — produces a source analysis built strictly on primary sources. Every claim traceable. Every source linked.",
     "cta_github": "View on GitHub",
     "cta_soon": "Launch newsletter coming soon"
   },
   "banner": {
     "bold": "Every claim verifiable.",
-    "text": "Every report AI-researched, editorially reviewed, traceable to primary sources.",
+    "text": "Every report is AI-researched, editorially reviewed and traceable to primary sources.",
     "tags": "non-profit · ad-free · open source"
   },
   "principles": {
     "heading": "Principles",
     "transparent": {
-      "title": "Radical Transparency",
-      "body": "Every published sourced claim is traceable to a verifiable primary source — government PDFs, scientific papers, raw data — accessible in a single click."
+      "title": "Transparency",
+      "body": "Every published sourced claim is traceable to a verifiable primary source — government PDFs, scientific papers, raw data, etc, everything accessible in a single click."
     },
     "community": {
       "title": "Community-Driven",
-      "body": "The community decides which questions get investigated — not what the answers are. No editorial gatekeeping. When a topic crosses the vote threshold, the research begins automatically."
+      "body": "The community decides which Topics get investigated — not what the answers are. No editorial gatekeeping. When a topic crosses the vote threshold, the research begins automatically."
     },
     "open": {
       "title": "Open Source",
@@ -33,19 +33,23 @@
   "howItWorks": {
     "heading": "How it works",
     "steps": [
-      { "n": "01", "h": "Propose", "b": "Any member can submit a verifiable question." },
+      { "n": "01", "h": "Propose", "b": "Any member can submit a verifiable topic." },
       { "n": "02", "h": "Vote", "b": "Topics with enough support get commissioned." },
-      { "n": "03", "h": "Source Analysis", "b": "AI gathers primary sources; editors verify manually." },
+      {
+        "n": "03",
+        "h": "Source Analysis",
+        "b": "AI gathers primary sources; editors verify manually."
+      },
       {
         "n": "04",
         "h": "Publish",
-        "b": "Sourced claims instead of prose — one source per claim, uncertainty made visible."
+        "b": "Article published with different point of views"
       }
     ]
   },
   "trustStatement": {
-    "heading": "Why you shouldn't just trust us",
-    "body": "We make selection decisions too: which sources to include, how to frame questions, which perspectives to surface. No platform is free from this. That's why we make every step visible — so you can follow along, question it, and disagree.",
+    "heading": "Why you shouldn't just trust everything",
+    "body": "Also this platform makes decisions! Which sources to include, how to frame questions and which perspectives to surface. No platform is free from this. That's why unsere.news make every step visible — so you can follow along, question it, and disagree.",
     "items": [
       {
         "label": "Check the sources",
@@ -66,7 +70,7 @@
     ]
   },
   "footer": {
-    "nonprofit": "Non-profit · Ad-free · Member-supported",
+    "nonprofit": "non-profit · ad-free · open source",
     "links": {
       "methodology": "Methodology",
       "ai_transparency": "AI Transparency",
