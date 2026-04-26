@@ -6,7 +6,7 @@ export const Hero = () => {
   const t = useTranslations("hero");
 
   return (
-    <section className="mx-auto max-w-5xl px-6 pt-24 pb-20">
+    <section className="mx-auto flex min-h-[calc(100vh-var(--header-h,64px)-var(--footer-h,72px))] max-w-5xl flex-col items-start justify-center px-6 py-24">
       <div className="hairline mb-8 inline-flex items-center gap-2 rounded-full border px-3 py-1">
         <span className="relative flex h-1.5 w-1.5">
           <span

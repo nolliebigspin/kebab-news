@@ -3,10 +3,10 @@
     "github": "GitHub"
   },
   "hero": {
-    "badge": "Noch am Aufbau — mach mit",
-    "tagline": "Nachrichten, die du selbst checken kannst.",
-    "tagline_accent": "Wir zeigen dir immer, woher die Informationen kommen.",
-    "description": "Jedes Thema hat mehrere Seiten — kebab.news zeigt sie alle. Die Community bestimmt, was untersucht wird. Wir beleuchten verschiedene Perspektiven, belegen jede Aussage mit Primärquellen und machen Unsicherheiten sichtbar. Für mehr Achtsamkeit im Umgang mit Informationen.",
+    "badge": "Noch am Aufbau, mach mit",
+    "tagline": "Nachrichten ohne Scheuklappen.",
+    "tagline_accent": "Verschiedene Blickwinkel. Belegte Fakten. Deine Meinung.",
+    "description": "Große Nachrichtenportale filtern, vereinfachen, polarisieren, oft ohne es zu merken. kebab.news macht das anders: inspiriert von ground.news, aber mit Fokus auf den deutschen Raum. Die Community stimmt ab, welche Themen untersucht werden. Wir zeigen, wie dasselbe Ereignis aus verschiedenen gesellschaftlichen Perspektiven betrachtet wird und belegen jede Aussage mit Primärquellen, damit du selbst tiefer recherchieren und informiert diskutieren kannst.",
     "cta_github": "Auf GitHub ansehen",
     "cta_soon": "Launch-Newsletter demnächst"
   },
@@ -16,56 +16,56 @@
     "tags": "gemeinnützig · werbefrei · open source"
   },
   "principles": {
-    "heading": "Prinzipien",
+    "heading": "Wofür wir stehen",
     "transparent": {
-      "title": "Transparenz",
-      "body": "Jede veröffentlichte Aussage lässt sich auf eine primäre Quelle zurückführen — per Klick, direkt, ohne Umwege."
+      "title": "Quellen zuerst",
+      "body": "Jede Aussage auf dieser Plattform ist mit einer Primärquelle verknüpft. Kein Vertrauen nötig, einfach selbst nachschauen."
     },
     "community": {
-      "title": "Von der Community",
-      "body": "Die Community entscheidet, welche Themen untersucht werden. Kein Chefredakteur, keine Agenda — nur Abstimmungen."
+      "title": "Die Community entscheidet",
+      "body": "Was untersucht wird, bestimmt nicht eine Redaktion, sondern ihr. Per Abstimmung, transparent, ohne versteckte Agenda."
     },
     "open": {
-      "title": "Open Source",
-      "body": "MIT-lizenziert. Öffentliches Repository von Tag eins. Wer uns nicht traut, kann den Code lesen."
+      "title": "Alles offen",
+      "body": "MIT-lizenziert, öffentliches Repository von Tag eins. Wer uns nicht traut, kann den Code lesen. So soll es sein."
     }
   },
   "howItWorks": {
-    "heading": "So funktioniert es",
+    "heading": "So läuft es ab",
     "steps": [
-      { "n": "01", "h": "Vorschlag", "b": "Du wirfst ein Thema in die Runde." },
-      { "n": "02", "h": "Voting", "b": "Die Community entscheidet, was untersucht wird." },
+      { "n": "01", "h": "Thema einwerfen", "b": "Du schlägst vor, was die Community untersuchen soll." },
+      { "n": "02", "h": "Abstimmen", "b": "Genug Stimmen? Dann geht die Recherche los." },
       {
         "n": "03",
         "h": "Quellenanalyse",
-        "b": "KI recherchiert Primärquellen. Menschen prüfen nach."
+        "b": "KI sammelt Primärquellen, Menschen prüfen nach und ergänzen Kontext."
       },
       {
         "n": "04",
         "h": "Veröffentlichung",
-        "b": "Bericht erscheint — mit Quellen, Methodik, und allem was wir nicht wissen."
+        "b": "Der Bericht erscheint mit allen Quellen, der Methodik und offenen Fragen."
       }
     ]
   },
   "trustStatement": {
     "heading": "Warum du uns auch nicht einfach glauben solltest",
-    "body": "Auch wir treffen Entscheidungen — welche Quellen, welche Fragestellung, welche KI. Deshalb machen wir alles davon sichtbar.",
+    "body": "Auch wir wählen aus: welche Quellen, wie wir Fragen formulieren, welche KI wir einsetzen. Das ist unvermeidbar. Deshalb legen wir jeden Schritt offen, damit du selbst urteilen kannst.",
     "items": [
       {
-        "label": "Quellen prüfen",
-        "text": "Jede Quellenanalyse enthält direkte Links zu den Originaldokumenten. Lies selbst nach."
+        "label": "Lies die Quellen selbst",
+        "text": "Jeder Bericht enthält direkte Links zu den Originaldokumenten. Nicht weil wir es sagen, sondern weil du es prüfen sollst."
       },
       {
-        "label": "Unsicherheit sichtbar",
-        "text": "Widersprüchliche Datenlage oder fehlende Belege werden explizit ausgewiesen — nicht verborgen."
+        "label": "Unsicherheit gehört dazu",
+        "text": "Wenn Daten widersprüchlich sind oder Belege fehlen, steht das im Bericht. Wir verstecken keine Lücken."
       },
       {
-        "label": "Wie dieser Bericht entstand",
-        "text": "Jeder Bericht enthält eine Methodik-Sektion: verwendete Quellen, ausgeschlossene Quellen, Datum der Daten, KI- oder menschliche Verifikation."
+        "label": "Methodik offen einsehbar",
+        "text": "Jeder Bericht zeigt: welche Quellen wurden genutzt, welche ausgeschlossen, wann die Daten erhoben wurden und ob KI oder Menschen geprüft haben."
       },
       {
         "label": "Sachlichkeits-Filter",
-        "text": "Emotionale Sprache in Fragen wird reduziert, um sie prüfbar zu machen — keine Behauptung von Neutralität."
+        "text": "Emotional formulierte Fragen werden vor der Recherche neutralisiert. Kein Anspruch auf perfekte Neutralität, aber auf faire Fragestellungen."
       }
     ]
   },

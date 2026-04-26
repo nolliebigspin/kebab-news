@@ -3,10 +3,10 @@
     "github": "GitHub"
   },
   "hero": {
-    "badge": "Still building — join us",
-    "tagline": "News you can actually verify.",
-    "tagline_accent": "We always show you where the information comes from.",
-    "description": "Every topic has more than one side — kebab.news shows them all. The community decides what gets investigated. We surface different perspectives, back every claim with primary sources, and make uncertainty visible. For a more mindful relationship with information.",
+    "badge": "Still building, join us",
+    "tagline": "News without blinders.",
+    "tagline_accent": "Different perspectives. Sourced facts. Your own conclusion.",
+    "description": "Big news platforms filter, simplify, and polarize, often without realising it. kebab.news does it differently: inspired by ground.news, but focused on the German-speaking world. The community votes on which topics get investigated. We show how the same event looks from different social perspectives and back every claim with primary sources, so you can dig deeper and discuss with confidence.",
     "cta_github": "View on GitHub",
     "cta_soon": "Launch newsletter coming soon"
   },
@@ -16,56 +16,56 @@
     "tags": "non-profit · ad-free · open source"
   },
   "principles": {
-    "heading": "Principles",
+    "heading": "What we stand for",
     "transparent": {
-      "title": "Transparency",
-      "body": "Every published claim traces back to a primary source — one click, directly, no detours."
+      "title": "Sources first",
+      "body": "Every claim on this platform links to a primary source. No need to trust us, just check for yourself."
     },
     "community": {
-      "title": "Community-Driven",
-      "body": "The community decides which topics get investigated. No editor-in-chief, no agenda — just votes."
+      "title": "The community decides",
+      "body": "What gets investigated is not up to an editorial team, it's up to you. By vote, transparently, without hidden agendas."
     },
     "open": {
-      "title": "Open Source",
-      "body": "MIT licensed. Public repository from day one. If you don't trust us, read the code."
+      "title": "Everything open",
+      "body": "MIT licensed, public repository from day one. If you don't trust us, read the code. That's how it should be."
     }
   },
   "howItWorks": {
     "heading": "How it works",
     "steps": [
-      { "n": "01", "h": "Propose", "b": "You throw a topic into the ring." },
-      { "n": "02", "h": "Vote", "b": "The community decides what gets investigated." },
+      { "n": "01", "h": "Throw in a topic", "b": "You suggest what the community should investigate." },
+      { "n": "02", "h": "Vote", "b": "Enough votes? The research begins." },
       {
         "n": "03",
-        "h": "Source Analysis",
-        "b": "AI gathers primary sources. Humans verify."
+        "h": "Source analysis",
+        "b": "AI gathers primary sources, humans verify and add context."
       },
       {
         "n": "04",
-        "h": "Publish",
-        "b": "Report goes live — with sources, methodology, and everything we don't know."
+        "h": "Publication",
+        "b": "The report goes live with all sources, the methodology, and open questions."
       }
     ]
   },
   "trustStatement": {
     "heading": "Why you shouldn't just trust us either",
-    "body": "We make decisions too — which sources, how to frame questions, which AI. That's why we make all of it visible.",
+    "body": "We make choices too: which sources, how we frame questions, which AI we use. That's unavoidable. So we make every step visible, so you can judge for yourself.",
     "items": [
       {
-        "label": "Check the sources",
-        "text": "Every source analysis includes direct links to the original documents. Read them yourself."
+        "label": "Read the sources yourself",
+        "text": "Every report includes direct links to the original documents. Not because we say so, but because you should be able to verify it."
       },
       {
-        "label": "Uncertainty is visible",
-        "text": "Conflicting data or missing evidence is explicitly flagged — not hidden."
+        "label": "Uncertainty is part of it",
+        "text": "When data is conflicting or evidence is missing, it says so in the report. We don't hide gaps."
       },
       {
-        "label": "How this report was made",
-        "text": "Every report includes a methodology section: sources used, sources excluded, data date, AI or human verification."
+        "label": "Methodology open for inspection",
+        "text": "Every report shows: which sources were used, which were excluded, when the data was collected, and whether AI or humans verified it."
       },
       {
         "label": "Objectivity filter",
-        "text": "Emotional language in questions is reduced to make them verifiable — not a claim of neutrality."
+        "text": "Emotionally worded questions are neutralised before research begins. No claim of perfect neutrality, but a commitment to fair framing."
       }
     ]
   },
