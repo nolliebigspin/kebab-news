@@ -8,9 +8,7 @@ export const Footer = () => {
     <footer className="hairline border-t">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
         <Wordmark />
-        <p className="text-xs" style={{ color: "var(--ink-mute)" }}>
-          {t("nonprofit")}
-        </p>
+        <p className="text-ink-mute text-xs">{t("nonprofit")}</p>
       </div>
     </footer>
   );

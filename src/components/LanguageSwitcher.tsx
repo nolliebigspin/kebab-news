@@ -16,18 +16,14 @@ export const LanguageSwitcher = () => {
   };
 
   return (
-    <div className="flex items-center gap-1 font-mono text-xs" style={{ color: "var(--ink-mute)" }}>
+    <div className="flex items-center gap-1 font-mono text-ink-mute text-xs">
       {routing.locales.map((l, i) => (
         <span key={l} className="flex items-center gap-1">
-          {i > 0 && <span style={{ color: "var(--line)" }}>·</span>}
+          {i > 0 && <span className="text-line">·</span>}
           <button
             type="button"
             onClick={() => switchLocale(l)}
-            className="cursor-pointer uppercase transition-colors hover:text-(--ink)"
-            style={{
-              color: l === locale ? "var(--ink)" : undefined,
-              fontWeight: l === locale ? 500 : undefined,
-            }}
+            className={`cursor-pointer uppercase transition-colors hover:text-ink ${l === locale ? "font-medium text-ink" : ""}`}
           >
             {l}
           </button>

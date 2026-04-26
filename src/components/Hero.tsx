@@ -9,19 +9,10 @@ export const Hero = () => {
     <section className="mx-auto flex min-h-[calc(100vh-var(--header-h,64px)-var(--footer-h,72px))] max-w-5xl flex-col items-start justify-center px-6 py-24">
       <div className="hairline mb-8 inline-flex items-center gap-2 rounded-full border px-3 py-1">
         <span className="relative flex h-1.5 w-1.5">
-          <span
-            className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
-            style={{ background: "var(--accent)" }}
-          />
-          <span
-            className="relative inline-flex h-1.5 w-1.5 rounded-full"
-            style={{ background: "var(--accent)" }}
-          />
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
         </span>
-        <span
-          className="font-mono text-[11px] uppercase tracking-[0.12em]"
-          style={{ color: "var(--accent-ink)" }}
-        >
+        <span className="font-mono text-[11px] text-accent-ink uppercase tracking-[0.12em]">
           {t("badge")}
         </span>
       </div>
@@ -34,14 +25,23 @@ export const Hero = () => {
       </h1>
 
       <p
-        className="mb-8 font-display text-2xl sm:text-3xl"
-        style={{ color: "var(--accent)", textWrap: "balance" } as React.CSSProperties}
+        className="mb-8 font-display text-2xl text-accent sm:text-3xl"
+        style={{ textWrap: "balance" } as React.CSSProperties}
       >
         {t("tagline_accent")}
       </p>
 
-      <p className="mb-12 max-w-2xl text-base leading-relaxed" style={{ color: "var(--ink-soft)" }}>
-        {t("description")}
+      <p className="mb-12 max-w-2xl text-base text-ink-soft leading-relaxed">
+        {t("description_before")}
+        <a
+          href="https://ground.news"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-accent hover:underline"
+        >
+          ground.news
+        </a>
+        {t("description_after")}
       </p>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -49,16 +49,12 @@ export const Hero = () => {
           href={GITHUB_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-md px-5 py-2.5 font-medium text-sm transition-opacity hover:opacity-90"
-          style={{ background: "var(--accent)", color: "#fff" }}
+          className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 font-medium text-sm text-white transition-opacity hover:opacity-90"
         >
           <FaGithub />
           {t("cta_github")}
         </a>
-        <span
-          className="hairline rounded-md border px-5 py-2.5 text-sm"
-          style={{ color: "var(--ink-mute)" }}
-        >
+        <span className="hairline rounded-md border px-5 py-2.5 text-ink-mute text-sm">
           {t("cta_soon")}
         </span>
       </div>

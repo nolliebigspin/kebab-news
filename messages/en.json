@@ -6,7 +6,8 @@
     "badge": "Still building, join us",
     "tagline": "News without blinders.",
     "tagline_accent": "Different perspectives. Sourced facts. Your own conclusion.",
-    "description": "Big news platforms filter, simplify, and polarize, often without realising it. kebab.news does it differently: inspired by ground.news, but focused on the German-speaking world. The community votes on which topics get investigated. We show how the same event looks from different social perspectives and back every claim with primary sources, so you can dig deeper and discuss with confidence.",
+    "description_before": "Big news platforms filter, simplify, and polarize, often without realising it. kebab.news does things differently: inspired by ",
+    "description_after": ", but focused on the German-speaking world. The community votes on what gets investigated. We look at different social perspectives and back every claim with primary sources, so you can dig deeper and actually enjoy the debate.",
     "cta_github": "View on GitHub",
     "cta_soon": "Launch newsletter coming soon"
   },
@@ -33,7 +34,11 @@
   "howItWorks": {
     "heading": "How it works",
     "steps": [
-      { "n": "01", "h": "Throw in a topic", "b": "You suggest what the community should investigate." },
+      {
+        "n": "01",
+        "h": "Throw in a topic",
+        "b": "You suggest what the community should investigate."
+      },
       { "n": "02", "h": "Vote", "b": "Enough votes? The research begins." },
       {
         "n": "03",

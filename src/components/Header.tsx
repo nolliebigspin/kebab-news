@@ -17,8 +17,7 @@ export const Header = () => {
             href={GITHUB_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="hairline inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors hover:bg-(--bg-warm)"
-            style={{ color: "var(--ink-soft)" }}
+            className="hairline inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-ink-soft text-sm transition-colors hover:bg-bg-warm"
           >
             <FaGithub />
             <span className="font-mono text-xs">{t("github")}</span>
