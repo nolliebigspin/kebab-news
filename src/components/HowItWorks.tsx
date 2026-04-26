@@ -5,7 +5,7 @@ export const HowItWorks = () => {
   const steps = t.raw("steps") as { n: string; h: string; b: string }[];
 
   return (
-    <section className="hairline border-t" style={{ background: "var(--bg-warm)" }}>
+    <section className="hairline border-y" style={{ background: "var(--bg-warm)" }}>
       <div className="mx-auto max-w-5xl px-6 py-20">
         <h2
           className="mb-10 font-mono text-xs uppercase tracking-[0.14em]"

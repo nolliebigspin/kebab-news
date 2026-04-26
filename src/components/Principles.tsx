@@ -1,5 +1,5 @@
-import { Code, ShieldCheck, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { LuCode, LuShieldCheck, LuUsers } from "react-icons/lu";
 import { PrincipleCard } from "@/components/PrincipleCard";
 
 export const Principles = () => {
@@ -15,17 +15,17 @@ export const Principles = () => {
       </h2>
       <div className="grid gap-6 sm:grid-cols-3">
         <PrincipleCard
-          icon={<ShieldCheck size={18} strokeWidth={1.75} />}
+          icon={<LuShieldCheck size={18} strokeWidth={1.75} />}
           title={t("transparent.title")}
           body={t("transparent.body")}
         />
         <PrincipleCard
-          icon={<Users size={18} strokeWidth={1.75} />}
+          icon={<LuUsers size={18} strokeWidth={1.75} />}
           title={t("community.title")}
           body={t("community.body")}
         />
         <PrincipleCard
-          icon={<Code size={18} strokeWidth={1.75} />}
+          icon={<LuCode size={18} strokeWidth={1.75} />}
           title={t("open.title")}
           body={t("open.body")}
         />

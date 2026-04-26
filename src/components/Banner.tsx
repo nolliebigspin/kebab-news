@@ -1,13 +1,13 @@
-import { ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { LuShieldCheck } from "react-icons/lu";
 
 export const Banner = () => {
   const t = useTranslations("banner");
 
   return (
-    <section className="hairline border-y py-6" style={{ background: "var(--bg-warm)" }}>
+    <section className="hairline border-y bg-warm py-6" style={{ background: "var(--bg-warm)" }}>
       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-6">
-        <ShieldCheck size={16} style={{ color: "var(--accent)" }} strokeWidth={1.75} />
+        <LuShieldCheck size={16} style={{ color: "var(--accent)" }} strokeWidth={1.75} />
         <p className="text-sm" style={{ color: "var(--ink-soft)" }}>
           <span style={{ color: "var(--ink)" }} className="font-medium">
             {t("bold")}

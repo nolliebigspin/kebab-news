@@ -6,7 +6,7 @@
     "badge": "In development",
     "tagline": "News, told from every perspective.",
     "tagline_accent": "We always show you where the information comes from.",
-    "description": "unsere.news is an open-source, community-driven platform for traceable research. The community votes on which questions get investigated. When a topic crosses the threshold, our AI — verified by editors — produces a source analysis built strictly on primary sources. Every claim traceable. Every source linked.",
+    "description": "unsere.news is an open-source, community-driven platform for traceable research. The community votes on which questions get investigated. When a topic crosses the threshold, our AI produces a source analysis built strictly on primary sources. Every claim is traceable. Every source will be linked.",
     "cta_github": "View on GitHub",
     "cta_soon": "Launch newsletter coming soon"
   },
