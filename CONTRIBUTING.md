@@ -1,6 +1,6 @@
-# Contributing to unsere.news 🚀
+# Contributing to kebab.news 🚀
 
-First off, thank you for considering contributing to **unsere.news**! It’s people like you who make the truth accessible again.
+First off, thank you for considering contributing to **kebab.news**! It’s people like you who make the truth accessible again.
 
 ## ⚖️ Code of Conduct
 - Stay objective. This project is about facts, not political warfare.

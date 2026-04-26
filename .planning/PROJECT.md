@@ -1,10 +1,10 @@
-# unsere.news
+# kebab.news
 
 ## What This Is
 
-unsere.news is an open-source, community-driven platform for traceable, verifiable research. The community votes on which questions get investigated (infrastructure spending, international conflicts, environmental data), and the platform produces AI-powered, human-verified source analyses built strictly on primary sources — government PDFs, scientific papers, raw data — with every claim linked directly to its source.
+kebab.news is an open-source, community-driven platform for traceable, verifiable research. The community votes on which questions get investigated (infrastructure spending, international conflicts, environmental data), and the platform produces AI-powered, human-verified source analyses built strictly on primary sources — government PDFs, scientific papers, raw data — with every claim linked directly to its source.
 
-unsere.news is not a news platform. It is a verification interface for information. We do not claim neutrality — we make every selection decision visible so users can follow along, question it, and verify independently.
+kebab.news is not a news platform. It is a verification interface for information. We do not claim neutrality — we make every selection decision visible so users can follow along, question it, and verify independently.
 
 **Motto:** "We don't tell you what to think. We show you where the information comes from."
 
@@ -14,7 +14,7 @@ Every published sourced claim must be traceable to a verifiable primary source t
 
 ## Current Milestone: v1.0 Foundation & Landing
 
-**Goal:** Scaffold the project and ship a public landing page that teases the unsere.news platform.
+**Goal:** Scaffold the project and ship a public landing page that teases the kebab.news platform.
 
 **Target features:**
 - Bun via mise.toml as the runtime (documented so contributors know mise is required)

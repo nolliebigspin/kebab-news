@@ -1,10 +1,10 @@
-# unsere.news
+# kebab.news
 
 > **We don't tell you what to think. We show you where the information comes from.**
 
 ## The Vision
 
-In a world where news is often perceived as biased or manipulative, **unsere.news** creates a space for traceable, verifiable research. We are not a traditional editorial operation — we are a community-driven tool. Our goal is to shift the focus from opinion back to evidence.
+In a world where news is often perceived as biased or manipulative, **kebab.news** creates a space for traceable, verifiable research. We are not a traditional editorial operation — we are a community-driven tool. Our goal is to shift the focus from opinion back to evidence.
 
 We do not claim neutrality. We make selection decisions too — which sources to include, how to frame questions, which perspectives to surface. No platform is free from this. That's why we make every step visible, so you can follow along, question it, and disagree.
 
@@ -14,7 +14,7 @@ We do not claim neutrality. We make selection decisions too — which sources to
 
 **Transparency over neutrality. Verification over authority. Structure over narrative.**
 
-unsere.news is not a news platform. It is a **verification interface for information**.
+kebab.news is not a news platform. It is a **verification interface for information**.
 
 ---
 
@@ -59,7 +59,7 @@ Once a topic is commissioned:
 
 ## Open Source & Contribution
 
-**unsere.news** is being developed as an open-source project. We need developers, data analysts, journalists, and fact-checkers.
+**kebab.news** is being developed as an open-source project. We need developers, data analysts, journalists, and fact-checkers.
 
 - **Status:** Vision & Prototyping (MVP Phase)
 - **License:** MIT

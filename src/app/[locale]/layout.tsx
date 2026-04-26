@@ -22,12 +22,13 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "unsere.news — Jede Zahl belegbar",
+  title: "kebab.news — Jede Behauptung belegbar",
   description:
-    "Community-driven investigative news built on primary sources. Every claim traceable. Every source linked.",
+    "Community-getriebene Plattform für nachvollziehbare Recherche. Jede Aussage belegbar. Jede Quelle verlinkt.",
   openGraph: {
-    title: "unsere.news",
-    description: "We don't tell you what to think. We show you where the information comes from.",
+    title: "kebab.news",
+    description:
+      "Wir zeigen dir nicht, was du denken sollst. Wir zeigen dir, woher die Informationen kommen.",
     type: "website",
   },
 };

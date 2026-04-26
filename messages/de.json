@@ -3,53 +3,53 @@
     "github": "GitHub"
   },
   "hero": {
-    "badge": "In Entwicklung",
-    "tagline": "Nachrichten, von allen Seiten betrachtet.",
+    "badge": "Noch am Aufbau — mach mit",
+    "tagline": "Nachrichten, die du selbst checken kannst.",
     "tagline_accent": "Wir zeigen dir immer, woher die Informationen kommen.",
-    "description": "unsere.news ist eine offene, community-getriebene Plattform für nachvollziehbare Recherche. Die Community stimmt ab, welche Themen untersucht werden. Wenn ein Thema die Schwelle erreicht, produziert unsere KI, eine Quellenanalyse ausschließlich auf Basis öffentlicher Primärquellen. Jede Aussage ist zurückführbar. Jede Quelle wird verlinkt.",
+    "description": "Jedes Thema hat mehrere Seiten — kebab.news zeigt sie alle. Die Community bestimmt, was untersucht wird. Wir beleuchten verschiedene Perspektiven, belegen jede Aussage mit Primärquellen und machen Unsicherheiten sichtbar. Für mehr Achtsamkeit im Umgang mit Informationen.",
     "cta_github": "Auf GitHub ansehen",
     "cta_soon": "Launch-Newsletter demnächst"
   },
   "banner": {
     "bold": "Jede Aussage belegbar.",
-    "text": "Jeder Bericht ist KI-recherchiert, redaktionell geprüft und auf Primärquellen zurückführbar.",
+    "text": "Jeder Bericht ist KI-recherchiert und von Menschen gegengeprüft. Jede Aussage direkt verknüpft mit ihrer Quelle.",
     "tags": "gemeinnützig · werbefrei · open source"
   },
   "principles": {
     "heading": "Prinzipien",
     "transparent": {
       "title": "Transparenz",
-      "body": "Jede veröffentlichte belegte Aussage ist auf eine verifizierbare Primärquelle zurückführbar — Behördendokumente, Studien, Rohdaten, etc, alles mit einem Klick zugänglich."
+      "body": "Jede veröffentlichte Aussage lässt sich auf eine primäre Quelle zurückführen — per Klick, direkt, ohne Umwege."
     },
     "community": {
-      "title": "Community-Getrieben",
-      "body": "Die Community entscheidet, welche Themen untersucht werden — nicht, was die Antwort ist. Kein redaktionelles Gatekeeping. Wenn ein Thema die Abstimmungsschwelle erreicht, startet die Recherche automatisch."
+      "title": "Von der Community",
+      "body": "Die Community entscheidet, welche Themen untersucht werden. Kein Chefredakteur, keine Agenda — nur Abstimmungen."
     },
     "open": {
       "title": "Open Source",
-      "body": "MIT-Lizenz. Öffentliches Repository von Tag eins. Code, Methodik und Finanzierung sind offen einsehbar und prüfbar."
+      "body": "MIT-lizenziert. Öffentliches Repository von Tag eins. Wer uns nicht traut, kann den Code lesen."
     }
   },
   "howItWorks": {
     "heading": "So funktioniert es",
     "steps": [
-      { "n": "01", "h": "Vorschlag", "b": "Jedes Mitglied kann ein prüfbares Thema einreichen." },
-      { "n": "02", "h": "Voting", "b": "Themen mit genug Unterstützung werden untersucht." },
+      { "n": "01", "h": "Vorschlag", "b": "Du wirfst ein Thema in die Runde." },
+      { "n": "02", "h": "Voting", "b": "Die Community entscheidet, was untersucht wird." },
       {
         "n": "03",
         "h": "Quellenanalyse",
-        "b": "KI sammelt Primärquellen, die Redaktion prüft manuell."
+        "b": "KI recherchiert Primärquellen. Menschen prüfen nach."
       },
       {
         "n": "04",
         "h": "Veröffentlichung",
-        "b": "Artikel veröffentlicht mit verschiedenen Betrachtungsweisen"
+        "b": "Bericht erscheint — mit Quellen, Methodik, und allem was wir nicht wissen."
       }
     ]
   },
   "trustStatement": {
-    "heading": "Warum nicht einfach alles glauben solltest",
-    "body": "Auch diese Plattform trifft Auswahlentscheidungen! Welche Quellen einbezogen werden, wie Fragen formuliert werden und welche Perspektiven angezeigt werden. Keine Plattform ist davon frei. Deshalb legt unsere.news jeden Schritt offen — damit du nachvollziehen, hinterfragen und widersprechen kannst.",
+    "heading": "Warum du uns auch nicht einfach glauben solltest",
+    "body": "Auch wir treffen Entscheidungen — welche Quellen, welche Fragestellung, welche KI. Deshalb machen wir alles davon sichtbar.",
     "items": [
       {
         "label": "Quellen prüfen",

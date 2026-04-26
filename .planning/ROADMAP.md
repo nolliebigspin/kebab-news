@@ -1,8 +1,8 @@
-# Roadmap: unsere.news
+# Roadmap: kebab.news
 
 ## Overview
 
-unsere.news ships in six phases that build strictly on one another. Phase 1 lays the entire database schema and deployment scaffold so nothing is bolted on later. Phase 2 wires authentication so every subsequent feature can assume an authenticated user exists. Phase 3 delivers the full community experience — design system, topic board, and voting — as one coherent slice, because the UI and voting budget are inseparable from the board. Phase 4 is the platform's core engine: the Upstash Workflow pipeline that triggers Claude to produce sourced claims from primary sources. Phase 5 surfaces that output — sourced claims with traceable sources and the Bias Radar on the published article page. Phase 6 closes the loop with community discussion and AI moderation. Every v1 requirement maps to exactly one phase.
+kebab.news ships in six phases that build strictly on one another. Phase 1 lays the entire database schema and deployment scaffold so nothing is bolted on later. Phase 2 wires authentication so every subsequent feature can assume an authenticated user exists. Phase 3 delivers the full community experience — design system, topic board, and voting — as one coherent slice, because the UI and voting budget are inseparable from the board. Phase 4 is the platform's core engine: the Upstash Workflow pipeline that triggers Claude to produce sourced claims from primary sources. Phase 5 surfaces that output — sourced claims with traceable sources and the Bias Radar on the published article page. Phase 6 closes the loop with community discussion and AI moderation. Every v1 requirement maps to exactly one phase.
 
 ## Phases
 

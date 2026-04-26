@@ -3,53 +3,53 @@
     "github": "GitHub"
   },
   "hero": {
-    "badge": "In development",
-    "tagline": "News, told from every perspective.",
+    "badge": "Still building — join us",
+    "tagline": "News you can actually verify.",
     "tagline_accent": "We always show you where the information comes from.",
-    "description": "unsere.news is an open-source, community-driven platform for traceable research. The community votes on which questions get investigated. When a topic crosses the threshold, our AI produces a source analysis built strictly on primary sources. Every claim is traceable. Every source will be linked.",
+    "description": "Every topic has more than one side — kebab.news shows them all. The community decides what gets investigated. We surface different perspectives, back every claim with primary sources, and make uncertainty visible. For a more mindful relationship with information.",
     "cta_github": "View on GitHub",
     "cta_soon": "Launch newsletter coming soon"
   },
   "banner": {
     "bold": "Every claim verifiable.",
-    "text": "Every report is AI-researched, editorially reviewed and traceable to primary sources.",
+    "text": "Every report is AI-researched and human-verified. Every statement linked directly to its source.",
     "tags": "non-profit · ad-free · open source"
   },
   "principles": {
     "heading": "Principles",
     "transparent": {
       "title": "Transparency",
-      "body": "Every published sourced claim is traceable to a verifiable primary source — government PDFs, scientific papers, raw data, etc, everything accessible in a single click."
+      "body": "Every published claim traces back to a primary source — one click, directly, no detours."
     },
     "community": {
       "title": "Community-Driven",
-      "body": "The community decides which Topics get investigated — not what the answers are. No editorial gatekeeping. When a topic crosses the vote threshold, the research begins automatically."
+      "body": "The community decides which topics get investigated. No editor-in-chief, no agenda — just votes."
     },
     "open": {
       "title": "Open Source",
-      "body": "MIT licensed. Public repository from day one. The code, methodology, and funding are all open for inspection."
+      "body": "MIT licensed. Public repository from day one. If you don't trust us, read the code."
     }
   },
   "howItWorks": {
     "heading": "How it works",
     "steps": [
-      { "n": "01", "h": "Propose", "b": "Any member can submit a verifiable topic." },
-      { "n": "02", "h": "Vote", "b": "Topics with enough support get commissioned." },
+      { "n": "01", "h": "Propose", "b": "You throw a topic into the ring." },
+      { "n": "02", "h": "Vote", "b": "The community decides what gets investigated." },
       {
         "n": "03",
         "h": "Source Analysis",
-        "b": "AI gathers primary sources; editors verify manually."
+        "b": "AI gathers primary sources. Humans verify."
       },
       {
         "n": "04",
         "h": "Publish",
-        "b": "Article published with different point of views"
+        "b": "Report goes live — with sources, methodology, and everything we don't know."
       }
     ]
   },
   "trustStatement": {
-    "heading": "Why you shouldn't just trust everything",
-    "body": "Also this platform makes decisions! Which sources to include, how to frame questions and which perspectives to surface. No platform is free from this. That's why unsere.news make every step visible — so you can follow along, question it, and disagree.",
+    "heading": "Why you shouldn't just trust us either",
+    "body": "We make decisions too — which sources, how to frame questions, which AI. That's why we make all of it visible.",
     "items": [
       {
         "label": "Check the sources",

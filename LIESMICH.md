@@ -1,10 +1,10 @@
-# unsere.news
+# kebab.news
 
 > **Wir zeigen dir nicht, was du denken sollst. Wir zeigen dir, woher die Informationen stammen.**
 
 ## Die Vision
 
-In einer Welt, in der Nachrichten oft als einseitig oder manipulativ wahrgenommen werden, schafft **unsere.news** einen Raum für nachvollziehbare, überprüfbare Recherche. Wir sind keine klassische Redaktion, sondern ein gemeinschaftliches Werkzeug. Unser Ziel: den Fokus von der Meinung zurück auf den Beleg lenken.
+In einer Welt, in der Nachrichten oft als einseitig oder manipulativ wahrgenommen werden, schafft **kebab.news** einen Raum für nachvollziehbare, überprüfbare Recherche. Wir sind keine klassische Redaktion, sondern ein gemeinschaftliches Werkzeug. Unser Ziel: den Fokus von der Meinung zurück auf den Beleg lenken.
 
 Wir behaupten keine Neutralität. Auch wir treffen Auswahlentscheidungen — welche Quellen wir einbeziehen, wie wir Fragen formulieren, welche Perspektiven wir zeigen. Deshalb legen wir jeden Schritt offen, damit du nachvollziehen, hinterfragen und widersprechen kannst.
 
@@ -14,7 +14,7 @@ Wir behaupten keine Neutralität. Auch wir treffen Auswahlentscheidungen — wel
 
 **Transparenz statt Neutralität. Nachvollziehbarkeit statt Autorität. Struktur statt Narrativ.**
 
-unsere.news ist kein Nachrichtenmedium. Es ist eine **Verifikationsschnittstelle für Informationen**.
+kebab.news ist kein Nachrichtenmedium. Es ist eine **Verifikationsschnittstelle für Informationen**.
 
 ---
 
@@ -61,10 +61,11 @@ Sobald ein Thema gewählt wurde:
 
 ## Open Source & Mitwirkung
 
-**unsere.news** wird als Open-Source-Projekt entwickelt. Wir brauchen Entwickler, Datenanalysten, Journalisten und Faktenchecker.
+**kebab.news** wird als Open-Source-Projekt entwickelt. Wir brauchen Entwickler, Datenanalysten, Journalisten und Faktenchecker.
 
 - **Status:** Vision & Prototyping (MVP Phase)
 - **Lizenz:** MIT
+- **Ziel:** Eine Plattform von der Community, für die Community.
 
 ---
 

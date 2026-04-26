@@ -1,4 +1,4 @@
-# Requirements: unsere.news
+# Requirements: kebab.news
 
 **Defined:** 2026-04-23
 **Core Value:** Every published sourced claim must be traceable to a verifiable primary source that any user can access in a single click.
@@ -14,7 +14,7 @@
 
 ### Landing Page
 
-- [ ] **LAND-01**: Landing page displays the unsere.news logo (wordmark: "unsere" in ink + ".news" in accent teal)
+- [ ] **LAND-01**: Landing page displays the kebab.news logo (wordmark: "unsere" in ink + ".news" in accent teal)
 - [ ] **LAND-02**: Landing page presents the platform vision and motto ("We don't tell you what to think. We show you where the information comes from.")
 - [ ] **LAND-03**: Landing page includes a link to the GitHub repository
 - [ ] **LAND-04**: Landing page uses the project design system (tokens, Inter font, IBM Plex Mono for data/labels)

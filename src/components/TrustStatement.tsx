@@ -12,10 +12,7 @@ export const TrustStatement = () => {
       >
         {t("heading")}
       </h2>
-      <p
-        className="mb-10 max-w-2xl text-base leading-relaxed"
-        style={{ color: "var(--ink-soft)" }}
-      >
+      <p className="mb-10 max-w-2xl text-base leading-relaxed" style={{ color: "var(--ink-soft)" }}>
         {t("body")}
       </p>
       <div className="grid gap-6 sm:grid-cols-2">
