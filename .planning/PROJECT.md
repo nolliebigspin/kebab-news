@@ -12,33 +12,63 @@ kebab.news is not a news platform. It is a verification interface for informatio
 
 Every published sourced claim must be traceable to a verifiable primary source that any user can access in a single click — without this guarantee, the platform has no reason to exist.
 
-## Current Milestone: v1.0 Foundation & Landing
+## Versioning Model
 
-**Goal:** Scaffold the project and ship a public landing page that teases the kebab.news platform.
+The road to v1.0 is split into shippable 0.x releases. **v1.0 is reserved for the full public community launch** — explicitly a maturity milestone, not another feature wave.
+
+- **v0.1** Foundation & Landing — Completed (2026-04-27)
+- **v0.2** Topic Schema & Magic-Link Auth — Active
+- **v0.3** Topic Board MVP (the public-facing MVP) — Planned
+- **v0.4** Source Analysis Pipeline — Planned
+- **v0.5** Fact Cards & Bias Radar — Planned
+- **v0.6** Discussion & Moderation — Planned
+- **v1.0** Community Launch — Reserved
+
+## Current Milestone: v0.2 — Topic Schema & Magic-Link Auth
+
+**Goal:** Backend foundation that v0.3 strictly needs — Drizzle schema (users, topics, votes only) on Neon with pgvector, plus passwordless Magic-Link authentication via Better Auth.
 
 **Target features:**
-- Bun via mise.toml as the runtime (documented so contributors know mise is required)
-- Next.js 16 App Router + TypeScript + Biome + Tailwind CSS + next-intl project skeleton
-- Design system tokens from .claude/design wired into Tailwind config (CSS vars, fonts)
-- Landing page: logo, platform vision/motto, GitHub link — teaser only, no app UI
+- Drizzle ORM connected to Neon Postgres with three tables: users (with trust_score), topics, votes
+- pgvector extension enabled from day one (semantic search lands in v0.4)
+- Better Auth Magic Link plugin (passwordless email) — no password UI, no verify-email UI in scope
+- Vercel + Upstash environment scaffold (env vars only; QStash not yet invoked)
+
+## MVP Definition (v0.3)
+
+The MVP that makes the idea visibly distinct from HN/Reddit:
+1. Authenticated user opens Propose Modal, types a topic question
+2. Claude rewrites it neutrally on submit (Objectivity Filter — synchronous, sub-30s)
+3. User sees both original and neutral rewrite, confirms or edits before storage
+4. Other users vote with a 10-vote weekly budget; pip strip shows remaining votes
+5. Topics sortable: most votes / close to goal / newest
+
+If any of those four steps doesn't work end-to-end, v0.3 isn't done.
 
 ## Requirements
 
-### Validated
+### Validated (v0.1)
 
-(None yet — ship to validate)
+- [x] SETUP-01..04: Bun + mise + Next.js 16 + TS + Tailwind + Biome + next-intl scaffold
+- [x] LAND-01..04: Landing with wordmark, vision/motto, GitHub link, design system
 
-### Active
+### Active (v0.2 → v0.3)
 
-- [ ] Topic Board: landing page where users submit questions and upvote others
-- [ ] Bias Radar: aggregates RSS headlines across left/right/public-broadcaster outlets to visualize the reporting gap per topic
-- [ ] Fact Cards: structured output where every claim links to a verifiable primary source (with archive.org fallback)
-- [ ] Deep-Dive pipeline: when a topic crosses a vote threshold, an Upstash Workflow job triggers Claude to research and synthesize Fact Cards from primary sources
-- [ ] Objectivity Filter: prompt-engineering layer that reframes biased/emotional topic submissions into neutral, researchable inquiries before storing
-- [ ] Authentication: Better Auth for community member accounts and voting rights
-- [ ] Human review queue: AI-generated Fact Cards are queued for community verification before publishing
-- [ ] Trust Score schema: `trust_score` column on Users with basic seeding rules (verified email, account age) — full algorithm deferred
-- [ ] Base schema: Users, Topics, Votes, FactCards, Sources in Drizzle/Neon with pgvector extension enabled
+**v0.2 (next):**
+- [ ] Drizzle schema: users (with trust_score), topics, votes — pgvector enabled
+- [ ] Better Auth Magic Link: passwordless login, session persistence, logout
+- [ ] Vercel + Upstash env scaffold
+
+**v0.3 (MVP):**
+- [ ] Topic Board UI: status tabs (only "In Voting" active), sorting, featured topic, sticky header
+- [ ] Propose Modal + Objectivity Filter: Claude rewrites submissions neutrally, user confirms before save
+- [ ] Voting + weekly 10-vote budget: pip strip, retract, derived weekly reset
+
+### Backlog (v0.4+)
+
+- [ ] Source Analysis Pipeline (v0.4): Upstash Workflows, vote-threshold trigger, Claude synthesis from primary sources, FactCards / Sources / Articles tables added in this milestone
+- [ ] Fact Cards & Bias Radar (v0.5): public article pages, human review queue, archive.org fallback, RSS-aggregated perspective grouping
+- [ ] Discussion & Moderation (v0.6): comments, AI moderator, editorial picks, comment voting
 
 ### Out of Scope
 
@@ -78,6 +108,11 @@ Every published sourced claim must be traceable to a verifiable primary source t
 | Vote-threshold triggers | Automatic pipeline start removes editorial gatekeeping; aligns with community-driven mission | — Pending |
 | AI + human review | AI speed + human credibility check before publishing; prevents hallucinated sources going live | — Pending |
 | MIT public repo from day one | Community trust requires transparency; contributors can self-host | — Pending |
+| 0.x versioning before v1.0 | v1.0 reserved for full community launch; ship working slices to validate before committing to the full vision | 2026-04-27 |
+| Magic Link over full Better Auth in MVP | Passwordless covers the trust needs of voting; no password / verify-email UI to maintain in v0.x; full email-verify lands in v1.0 hardening | 2026-04-27 |
+| Schema right-sized per milestone | Don't pre-build FactCards / Sources / Articles tables in v0.2 — add them in v0.4 via migration when the pipeline actually consumes them. Avoids YAGNI on schema | 2026-04-27 |
+| Objectivity Filter in MVP, not pipeline-phase | Claude-rewrites-on-submit is the visible differentiator from HN/Reddit; without it, v0.3 board feels generic | 2026-04-27 |
+| Phase 0 closed retrospectively | Foundation & Landing was already shipped to `main` before being formally tracked; closing it makes the validated state explicit | 2026-04-27 |
 
 ## Evolution
 
@@ -97,4 +132,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-23 after milestone v1.0 start*
+*Last updated: 2026-04-27 — restructured into 0.x milestones; v0.1 (Foundation & Landing) closed retrospectively; v0.2 active*

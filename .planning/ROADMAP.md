@@ -2,109 +2,274 @@
 
 ## Overview
 
-kebab.news ships in six phases that build strictly on one another. Phase 1 lays the entire database schema and deployment scaffold so nothing is bolted on later. Phase 2 wires authentication so every subsequent feature can assume an authenticated user exists. Phase 3 delivers the full community experience — design system, topic board, and voting — as one coherent slice, because the UI and voting budget are inseparable from the board. Phase 4 is the platform's core engine: the Upstash Workflow pipeline that triggers Claude to produce sourced claims from primary sources. Phase 5 surfaces that output — sourced claims with traceable sources and the Bias Radar on the published article page. Phase 6 closes the loop with community discussion and AI moderation. Every v1 requirement maps to exactly one phase.
-
-## Phases
+kebab.news ships in shippable 0.x releases on the way to v1.0 (full community launch). Each milestone is independently usable. The MVP that makes the idea visibly distinct from existing platforms is **v0.3 — Topic Board MVP**: community-submitted topics that Claude rewrites neutrally on submit, with weekly-budget voting. AI synthesis pipeline and public Fact Cards arrive after v0.3 has had time to validate the core community loop.
 
 **Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
+- Integer phases (0, 1, 2, …) — planned phases in milestone order
+- Decimal phases (e.g. 2.1) — urgent insertions (marked INSERTED), placed in numeric order between integers
 
-Decimal phases appear between their surrounding integers in numeric order.
+---
 
-- [ ] **Phase 1: Infrastructure & Schema** - Neon/pgvector/Drizzle schema, Vercel + Upstash scaffold, Next.js project skeleton
-- [ ] **Phase 2: Authentication** - Better Auth email/password signup, login, session persistence, logout
-- [ ] **Phase 3: Topic Board, Voting & Design System** - Full design system, sticky header, topic board with filtering/sorting, propose modal, vote budget, weekly reset
-- [ ] **Phase 4: Source Analysis Pipeline** - Upstash Workflow integration, vote-threshold trigger, Claude synthesis, objectivity filter, status progression
-- [ ] **Phase 5: Fact Cards & Bias Radar** - Published article page, typed Fact Cards with primary source links, archive.org fallback, human review queue, Bias Radar RSS aggregation
-- [ ] **Phase 6: Discussion & Moderation** - Community comments on published articles, AI moderation, upvotes/downvotes, editorial badges
+## Milestone Map
+
+| Milestone | Phases | Theme |
+|-----------|--------|-------|
+| v0.1 | 0 | Foundation & Landing (Completed) |
+| v0.2 | 1, 2 | Topic Schema & Magic-Link Auth |
+| v0.3 | 3, 4, 5 | Topic Board MVP (the public-facing MVP) |
+| v0.4 | 6, 7, 8 | Source Analysis Pipeline |
+| v0.5 | 9, 10, 11 | Fact Cards & Bias Radar |
+| v0.6 | 12, 13, 14 | Discussion & Moderation |
+| v1.0 | TBD | Community Launch (hardening, marketing, onboarding) |
+
+---
 
 ## Phase Details
 
-### Phase 1: Infrastructure & Schema
-**Goal**: The project runs locally and on Vercel with a complete, migration-ready database schema — every table, column, and extension that any later phase requires is defined now.
-**Depends on**: Nothing (first phase)
-**Requirements**: INFRA-01, INFRA-02, INFRA-03, INFRA-04, INFRA-05, INFRA-06, INFRA-07, INFRA-08, INFRA-09
-**Success Criteria** (what must be TRUE):
-  1. `npm run dev` starts the Next.js App Router project with TypeScript and Tailwind without errors
-  2. Drizzle migrations run against Neon and create all six tables (Users, Topics, Votes, FactCards, Sources, Articles) with correct columns and constraints
-  3. pgvector extension is enabled on the Neon database (verifiable via `SELECT * FROM pg_extension WHERE extname = 'vector'`)
-  4. Vercel deployment succeeds with all required env vars documented; Upstash QStash client initializes without error
-  5. No secrets are hardcoded; all credentials flow through env vars with a documented `.env.example`
-**Plans**: TBD
+### Phase 0: Foundation & Landing — **Completed**
+**Milestone:** v0.1
+**Goal:** Project scaffold + public landing page that teases the kebab.news platform.
+**Depends on:** Nothing
+**Requirements:** SETUP-01, SETUP-02, SETUP-03, SETUP-04, LAND-01, LAND-02, LAND-03, LAND-04
+**Success Criteria** (verified TRUE in current `main`):
+  1. `bun dev` starts the Next.js 16 App Router project with TypeScript, Tailwind 4, and next-intl without errors
+  2. mise.toml pins Bun and is documented in README/CONTRIBUTING
+  3. Landing renders Header, Hero, Banner, Principles, HowItWorks, TrustStatement, Footer
+  4. Wordmark uses the design system (ink + accent teal); GitHub link present
+  5. EN + DE translations work; default locale is `de`; language switcher functional
+  6. Inter and IBM Plex Mono fonts wired; OKLCH design tokens (`--ink`, `--accent`, `--bg`, `--warn`, `--left`, `--right`) available in globals.css
+  7. SEO meta, sitemap.ts, robots.ts present
+**Plans:** Retrospectively closed — no PLAN.md required
+**UI hint:** delivered
 
-### Phase 2: Authentication
-**Goal**: Community members can create accounts, verify their email, and maintain persistent sessions — the trust foundation every voting and submission feature depends on.
-**Depends on**: Phase 1
-**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04
-**Success Criteria** (what must be TRUE):
-  1. User can sign up with email and password; Better Auth creates the record and sends a verification email
-  2. User who clicks the verification link has `emailVerified` set to true and trust_score seeded accordingly
-  3. User can log in and the session persists across a full browser refresh without re-authentication
-  4. User can log out from any page and is immediately redirected away from protected routes
-**Plans**: TBD
+---
 
-### Phase 3: Topic Board, Voting & Design System
-**Goal**: Any visitor can browse community topics; authenticated users can propose questions and spend their weekly vote budget — the full community board is live with the complete design system.
-**Depends on**: Phase 2
-**Requirements**: TOPIC-01, TOPIC-02, TOPIC-03, TOPIC-04, TOPIC-05, TOPIC-06, TOPIC-07, TOPIC-08, TOPIC-09, VOTE-01, VOTE-02, VOTE-03, VOTE-04, VOTE-05, VOTE-06, VOTE-07, UI-01, UI-02, UI-03, UI-04, UI-05, UI-06
+### Phase 1: Database Foundation
+**Milestone:** v0.2
+**Goal:** Drizzle ORM connected to Neon Postgres with three tables (users, topics, votes) + pgvector enabled. Right-sized — no FactCards / Sources / Articles tables yet.
+**Depends on:** Phase 0
+**Requirements:** INFRA-01, INFRA-02, INFRA-03, INFRA-07, INFRA-08, INFRA-09
 **Success Criteria** (what must be TRUE):
-  1. Authenticated user opens the Propose Modal, submits a topic question, and sees it appear in the board after the objectivity filter rewrites it to a neutral framing — with a toast notification confirming submission
-  2. Topic list renders with In Voting / In Investigation / Published tabs and correct status badges; featured topic (highest votes in filter) appears at larger size
-  3. User can sort voting topics by most votes / close to goal / newest; investigating topics show the 4-step Investigation Timeline with progress %
-  4. User's weekly vote budget appears as a pip strip; upvoting costs one pip, retracting returns it; vote button is disabled with tooltip when budget is exhausted; vote pulse animation fires on click
-  5. Sticky header, footer, CSS custom property token set, Inter + IBM Plex Mono type system, and i18n infrastructure are in place across all pages
-**Plans**: TBD
-**UI hint**: yes
+  1. Drizzle migrations run against Neon and create three tables: `users` (with `trust_score` int default 0), `topics` (id, title, original_submission, neutral_rewrite, status enum {voting, investigating, done}, vote_count, created_by, created_at), `votes` (user_id, topic_id, week_bucket — unique composite key)
+  2. pgvector extension enabled on Neon (`SELECT * FROM pg_extension WHERE extname = 'vector'` returns a row)
+  3. `bun dev` connects to the local DATABASE_URL without errors; migrations idempotent
+  4. `.env.example` lists every required env var; no hardcoded secrets in source
+  5. Vercel deployment succeeds with all env vars wired; Upstash QStash client initializes (env present, not yet invoked)
+**Plans:** TBD
 
-### Phase 4: Source Analysis Pipeline
-**Goal**: When a topic crosses its vote threshold the platform automatically starts an AI research job — sourcing, synthesis, and status updates happen entirely through Upstash Workflows, never timing out on Vercel.
-**Depends on**: Phase 3
-**Requirements**: PIPE-01, PIPE-02, PIPE-03, PIPE-04, PIPE-05, PIPE-06, PIPE-07
-**Success Criteria** (what must be TRUE):
-  1. When a topic's vote count crosses the configurable goal threshold, an Upstash Workflow job is triggered automatically and the topic status changes from `voting` to `investigating`
-  2. Admin can manually trigger a Deep-Dive on any topic from an admin interface regardless of vote count
-  3. Pipeline fetches content from the topic's referenced primary source URLs/PDFs and passes it to Claude within the Upstash Workflow (no Vercel timeout risk)
-  4. Claude returns structured sourced claim drafts synthesized exclusively from primary source content; no secondary reporting is used
-  5. Topic status progresses through `voting → investigating → done` and is visible on the board in real time on next page load
-**Plans**: TBD
+---
 
-### Phase 5: Fact Cards & Bias Radar
-**Goal**: Published topics have a full article page — every AI-generated claim is traceable to a primary source, every source has an archive.org fallback, and the Bias Radar shows how different outlets covered the story.
-**Depends on**: Phase 4
-**Requirements**: FACT-01, FACT-02, FACT-03, FACT-04, FACT-05, FACT-06, FACT-07, FACT-08, FACT-09, FACT-10, BIAS-01, BIAS-02, BIAS-03, BIAS-04, BIAS-05
+### Phase 2: Magic-Link Authentication
+**Milestone:** v0.2
+**Goal:** Passwordless authentication via Better Auth's Magic Link plugin — minimum trust foundation for v0.3 voting.
+**Depends on:** Phase 1
+**Requirements:** AUTH-01, AUTH-03, AUTH-04, VOTE-07
 **Success Criteria** (what must be TRUE):
-  1. AI-generated Fact Cards enter a human review queue before publishing; reviewer can approve or reject; only approved cards appear on the public article page
-  2. Published article page shows all Fact Cards in sequence with correct type labels (claim / evidence / context / openq), ScienceStamp badge matching confidence level, and a large figure layout for evidence cards with key statistics
-  3. Every Fact Card's source citation is expandable inline and shows org, document name, date, file size, a working primary URL, and a working archive.org fallback URL
-  4. The Download Block on the article page lists all primary sources for individual download and offers a ZIP of all sources
-  5. Bias Radar appears as a collapsible section on the article page; it shows grouped headlines from left / public broadcaster / right-leaning outlets with a tone meter bar, article count per group, and the explanatory note about perspective visibility
-**Plans**: TBD
-**UI hint**: yes
+  1. User submits email → Better Auth sends a Magic Link → clicking it creates a session
+  2. Session persists across full browser refresh
+  3. User can log out from any page; protected routes redirect after logout
+  4. trust_score column exists on users; +1 increment fires on first successful Magic-Link login
+  5. No password UI, no verify-email UI, no account-settings page in scope
+**Plans:** TBD
 
-### Phase 6: Discussion & Moderation
-**Goal**: Community members can submit corrections and comments on published articles; the AI moderator flags unsourced inflammatory content; editorial picks are surfaced — the feedback loop between readers and the investigation is live.
-**Depends on**: Phase 5
-**Requirements**: DISC-01, DISC-02, DISC-03, DISC-04, DISC-05, DISC-06, DISC-07
+---
+
+### Phase 3: Topic Board UI
+**Milestone:** v0.3
+**Goal:** Public-facing topic board renders with status tabs, sortable list, featured topic, sticky header — read-only view (propose + vote actions land in Phase 4 + 5).
+**Depends on:** Phase 2
+**Requirements:** TOPIC-04, TOPIC-05, TOPIC-06, TOPIC-07, TOPIC-09, UI-01, UI-02, UI-03, UI-04, UI-06
 **Success Criteria** (what must be TRUE):
-  1. Authenticated user can submit a comment on a published article with optional primary source URL and optional reference to a specific Fact Card
-  2. Comments containing inflammatory language without a source citation are flagged by the Claude moderator and display the "KI-Moderator: ohne Quelle" warning badge
-  3. Comment list can be filtered to show only comments that include a source citation
-  4. Editorial team can mark a comment as "Redaktion übernommen" and that badge appears on the comment
-  5. Users can upvote and downvote comments; vote counts are visible
-**Plans**: TBD
-**UI hint**: yes
+  1. Topic board page renders a list of topics with the **In Voting** tab active; "In Investigation" and "Published" tabs are scaffolded but disabled with tooltip "Available in v0.4 / v0.5"
+  2. User can sort voting topics by: most votes / close to goal / newest
+  3. Featured topic (highest votes in current filter) renders at larger size
+  4. Each topic card shows: title (neutral_rewrite), Voting status badge, vote count, submission timestamp
+  5. Sticky header includes: wordmark, navigation, vote-budget pip strip placeholder (live in Phase 5), "Propose Topic" button (opens modal in Phase 4)
+  6. EN + DE i18n strings present for board copy (next-intl)
+**Plans:** TBD
+**UI hint:** yes
+
+---
+
+### Phase 4: Propose Modal + Objectivity Filter
+**Milestone:** v0.3
+**Goal:** The signature differentiator — submit a topic, Claude rewrites it neutrally on the spot, user sees both versions and confirms before storage.
+**Depends on:** Phase 3
+**Requirements:** TOPIC-01, TOPIC-02, TOPIC-03, PIPE-05, UI-05
+**Success Criteria** (what must be TRUE):
+  1. Authenticated user opens Propose Modal, types a question, optionally adds category / rationale / source URLs
+  2. On submit, the form calls a server action that runs Claude with the Objectivity Filter prompt; response (neutral rewrite) returns within Vercel's 30s timeout (no Upstash needed)
+  3. UI shows both `original_submission` and `neutral_rewrite` side-by-side; user confirms or edits before final save
+  4. On confirm, topic is stored with status `voting` and appears in the Phase 3 board
+  5. Toast notification fires confirming submission
+  6. ANTHROPIC_API_KEY is read from env; objectivity prompt lives in a dedicated module (`src/lib/ai/objectivity.ts` or similar) for later reuse
+**Plans:** TBD
+**UI hint:** yes
+
+---
+
+### Phase 5: Voting & Weekly Budget
+**Milestone:** v0.3
+**Goal:** Authenticated users spend a weekly vote budget on topics; live pip strip, retract support, automatic reset.
+**Depends on:** Phase 4
+**Requirements:** VOTE-01, VOTE-02, VOTE-03, VOTE-04, VOTE-05
+**Success Criteria** (what must be TRUE):
+  1. Each user starts each ISO-week with 10 votes; current `week_bucket` is computed at vote time
+  2. Upvote on a topic costs 1 vote; vote_count increments; pip strip updates
+  3. Retract returns the vote to budget; vote_count decrements; idempotent (no double-retract)
+  4. Vote button shows pulse animation on click; disabled with tooltip when budget = 0
+  5. Weekly reset happens automatically — implemented as derived from `week_bucket`, no cron job needed (votes from prior weeks remain in DB but don't count against current budget)
+**Plans:** TBD
+**UI hint:** yes
+
+---
+
+### Phase 6: Schema Extension + Upstash Wiring
+**Milestone:** v0.4
+**Goal:** Add the three tables that the AI pipeline produces output into — fact_cards, sources, articles — and verify the Upstash QStash client can dispatch a no-op job.
+**Depends on:** Phase 5
+**Requirements:** INFRA-04, INFRA-05, INFRA-06
+**Success Criteria** (what must be TRUE):
+  1. Drizzle migration adds `fact_cards`, `sources`, `articles` tables; existing data unaffected
+  2. Schema includes pgvector embedding columns where roadmap calls for them (sources, fact_cards)
+  3. A test endpoint dispatches a QStash message that triggers a stub worker; worker logs receipt
+  4. Worker invocation is verified end-to-end on Vercel (not just local)
+**Plans:** TBD
+
+---
+
+### Phase 7: Pipeline Worker (Vote-Threshold + Claude Synthesis)
+**Milestone:** v0.4
+**Goal:** Topic crossing vote threshold automatically kicks off an Upstash Workflow that fetches primary sources, calls Claude with the source-constraint prompt, and produces FactCard drafts.
+**Depends on:** Phase 6
+**Requirements:** PIPE-01, PIPE-03, PIPE-04, PIPE-06, PIPE-07, VOTE-06, TOPIC-08
+**Success Criteria** (what must be TRUE):
+  1. Per-topic configurable `vote_goal` exists; vote increment that crosses the threshold dispatches a QStash job exactly once (idempotent)
+  2. Workflow fetches content from the topic's referenced primary source URLs/PDFs and passes it to Claude
+  3. Claude returns structured FactCard drafts; output is constrained to cited primary source content (no secondary reporting)
+  4. Topic status progresses voting → investigating → done as workflow steps complete
+  5. Investigation Timeline UI (4 steps with progress %) renders for topics in `investigating` state on the board
+  6. All long-running work happens inside the Upstash Workflow — no Vercel function exceeds 30s
+**Plans:** TBD
+
+---
+
+### Phase 8: Admin Trigger UI
+**Milestone:** v0.4
+**Goal:** Admin can manually trigger Deep-Dive on any topic regardless of vote count — needed for testing pipeline correctness before publishing.
+**Depends on:** Phase 7
+**Requirements:** PIPE-02
+**Success Criteria** (what must be TRUE):
+  1. `/admin/topics` route gated by an admin role flag on users table
+  2. Admin can click "Trigger Deep-Dive" on any topic; same workflow as automatic trigger
+  3. FactCard drafts produced this way are visible in the admin queue but NOT yet on a public article page (article page lands in Phase 10)
+**Plans:** TBD
+
+---
+
+### Phase 9: Human Review Queue
+**Milestone:** v0.5
+**Goal:** Reviewers approve or reject AI-generated FactCard drafts before they become publicly visible.
+**Depends on:** Phase 8
+**Requirements:** FACT-06
+**Success Criteria** (what must be TRUE):
+  1. Reviewer role exists on users; `/review` route shows pending FactCard drafts
+  2. Reviewer can approve, reject (with reason), or request edits per card
+  3. Only approved cards become public; rejected cards stay in DB with audit trail
+  4. Approval transitions the parent article from `draft` → `published`
+**Plans:** TBD
+
+---
+
+### Phase 10: Article Page + Fact Cards
+**Milestone:** v0.5
+**Goal:** Published article pages — every Fact Card displays type, confidence, primary source links with archive.org fallback; download block aggregates all sources.
+**Depends on:** Phase 9
+**Requirements:** FACT-01, FACT-02, FACT-03, FACT-04, FACT-05, FACT-07, FACT-08, FACT-09, FACT-10
+**Success Criteria** (what must be TRUE):
+  1. `/articles/[slug]` renders article header + all approved FactCards in sequence
+  2. Each card shows type badge (claim / evidence / context / openq), ScienceStamp confidence badge (primary / conflicting / insufficient)
+  3. Evidence cards with key statistics use the large-figure layout
+  4. Sources expandable inline per card; show org, doc name, date, file size, primary URL, archive.org fallback URL
+  5. Download Block lists all primary sources individually + offers a ZIP of all sources
+**Plans:** TBD
+**UI hint:** yes
+
+---
+
+### Phase 11: Bias Radar
+**Milestone:** v0.5
+**Goal:** Article page shows the Bias Radar — RSS-aggregated headlines grouped by political orientation (left / public broadcaster / right) with tone meter.
+**Depends on:** Phase 10
+**Requirements:** BIAS-01, BIAS-02, BIAS-03, BIAS-04, BIAS-05
+**Success Criteria** (what must be TRUE):
+  1. Curated RSS feed list seeded (left, public broadcaster, right groups)
+  2. Article page has a collapsible Bias Radar section showing grouped headlines per outlet group
+  3. Tone meter bar + article count per group rendered
+  4. Explanatory note ("Goal is not one truth but to make perspectives visible") visible
+  5. RSS fetch is cached (article-page render must not block on live RSS pulls)
+**Plans:** TBD
+**UI hint:** yes
+
+---
+
+### Phase 12: Comments Schema + UI
+**Milestone:** v0.6
+**Goal:** Authenticated users post comments / corrections on published articles, optionally citing a primary source URL or referencing a specific FactCard.
+**Depends on:** Phase 11
+**Requirements:** DISC-01, DISC-02
+**Success Criteria** (what must be TRUE):
+  1. `comments` table exists with: user_id, article_id, body, optional source_url, optional fact_card_id, created_at, status
+  2. Comment form on article page accepts: free text, optional primary source URL, optional FactCard reference
+  3. Comments list under article renders authored comments with author + timestamp
+**Plans:** TBD
+
+---
+
+### Phase 13: AI Moderation + Source Filtering
+**Milestone:** v0.6
+**Goal:** Claude-based moderator flags inflammatory comments without citations; users can filter to source-citing comments only.
+**Depends on:** Phase 12
+**Requirements:** DISC-03, DISC-04, DISC-05
+**Success Criteria** (what must be TRUE):
+  1. New comment passes through Claude moderator; if inflammatory + no source → status flagged, badge "KI-Moderator: ohne Quelle" displayed
+  2. Comment list filter: All / With Source — toggle works without page reload
+  3. Moderation runs async (QStash) so comment submission isn't blocked by AI latency
+**Plans:** TBD
+
+---
+
+### Phase 14: Editorial Picks + Comment Voting
+**Milestone:** v0.6
+**Goal:** Editorial team can mark a comment as "Redaktion übernommen" (taken into editorial); users can up/downvote comments.
+**Depends on:** Phase 13
+**Requirements:** DISC-06, DISC-07
+**Success Criteria** (what must be TRUE):
+  1. Editorial role exists; editor can pin a comment with the "Redaktion übernommen" badge
+  2. Up/downvote buttons on each comment; net score visible
+  3. Comments sortable by newest / top score
+**Plans:** TBD
+
+---
 
 ## Progress
 
-**Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
+**Execution Order:** Phases execute in numeric order: 0 → 1 → 2 → … → 14
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Infrastructure & Schema | 0/TBD | Not started | - |
-| 2. Authentication | 0/TBD | Not started | - |
-| 3. Topic Board, Voting & Design System | 0/TBD | Not started | - |
-| 4. Source Analysis Pipeline | 0/TBD | Not started | - |
-| 5. Fact Cards & Bias Radar | 0/TBD | Not started | - |
-| 6. Discussion & Moderation | 0/TBD | Not started | - |
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 0. Foundation & Landing | v0.1 | — | Completed | 2026-04-27 |
+| 1. Database Foundation | v0.2 | 0/TBD | Next | — |
+| 2. Magic-Link Authentication | v0.2 | 0/TBD | Not started | — |
+| 3. Topic Board UI | v0.3 | 0/TBD | Not started | — |
+| 4. Propose Modal + Objectivity Filter | v0.3 | 0/TBD | Not started | — |
+| 5. Voting & Weekly Budget | v0.3 | 0/TBD | Not started | — |
+| 6. Schema Extension + Upstash Wiring | v0.4 | 0/TBD | Not started | — |
+| 7. Pipeline Worker | v0.4 | 0/TBD | Not started | — |
+| 8. Admin Trigger UI | v0.4 | 0/TBD | Not started | — |
+| 9. Human Review Queue | v0.5 | 0/TBD | Not started | — |
+| 10. Article Page + Fact Cards | v0.5 | 0/TBD | Not started | — |
+| 11. Bias Radar | v0.5 | 0/TBD | Not started | — |
+| 12. Comments Schema + UI | v0.6 | 0/TBD | Not started | — |
+| 13. AI Moderation + Source Filtering | v0.6 | 0/TBD | Not started | — |
+| 14. Editorial Picks + Comment Voting | v0.6 | 0/TBD | Not started | — |

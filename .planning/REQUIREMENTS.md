@@ -1,56 +1,111 @@
 # Requirements: kebab.news
 
 **Defined:** 2026-04-23
+**Restructured into 0.x milestones:** 2026-04-27
 **Core Value:** Every published sourced claim must be traceable to a verifiable primary source that any user can access in a single click.
 
-## v1.0 Requirements (Milestone: Foundation & Landing)
+## Versioning Model
 
-### Project Setup
+- **0.x milestones** — incremental releases, each independently shippable
+- **v1.0** — full public community launch (reserved; explicitly a maturity milestone, not another feature wave)
 
-- [ ] **SETUP-01**: Project uses Bun as the runtime, managed via mise.toml (contributors must install mise)
-- [ ] **SETUP-02**: mise.toml documents that `mise install` is required before running the project
-- [ ] **SETUP-03**: Next.js 16 App Router project exists in /src with TypeScript (latest), Biome (latest), Tailwind CSS (latest), next-intl (latest)
-- [ ] **SETUP-04**: Design system CSS custom properties (--bg, --ink-*, --accent, --line-*, --warn, --oerr, --left, --right) and fonts (Inter + IBM Plex Mono) are wired into the Tailwind config
+---
 
-### Landing Page
+## v0.1 — Foundation & Landing (Validated)
 
-- [ ] **LAND-01**: Landing page displays the kebab.news logo (wordmark: "unsere" in ink + ".news" in accent teal)
-- [ ] **LAND-02**: Landing page presents the platform vision and motto ("We don't tell you what to think. We show you where the information comes from.")
-- [ ] **LAND-03**: Landing page includes a link to the GitHub repository
-- [ ] **LAND-04**: Landing page uses the project design system (tokens, Inter font, IBM Plex Mono for data/labels)
+Closed retrospectively 2026-04-27. All requirements delivered in current `main`.
 
-## Full v1 Requirements (Phases 1–6)
+- [x] **SETUP-01**: Project uses Bun as the runtime, managed via mise.toml
+- [x] **SETUP-02**: mise.toml documents that `mise install` is required before running the project
+- [x] **SETUP-03**: Next.js 16 App Router project exists in /src with TypeScript, Biome, Tailwind CSS, next-intl
+- [x] **SETUP-04**: Design system CSS custom properties (--bg, --ink-*, --accent, --line-*, --warn, --left, --right) and fonts (Inter + IBM Plex Mono) are wired into the Tailwind config
+- [x] **LAND-01**: Landing page displays the kebab.news logo (wordmark: ink + ".news" in accent teal)
+- [x] **LAND-02**: Landing page presents the platform vision and motto
+- [x] **LAND-03**: Landing page includes a link to the GitHub repository
+- [x] **LAND-04**: Landing page uses the project design system (tokens, Inter, IBM Plex Mono)
 
-See earlier REQUIREMENTS.md content — the complete 64-requirement set (INFRA, AUTH, TOPIC, VOTE, PIPE, FACT, BIAS, DISC, UI) is the roadmap scope for this milestone. Reproduced below for reference.
+---
+
+## v0.2 — Topic Schema & Magic-Link Auth (Active)
+
+Backend foundation that v0.3 strictly needs. Schema is right-sized: only users / topics / votes — FactCards, Sources, Articles, Comments are added in later milestones when they're actually used.
+
+### Infrastructure & Schema (subset)
+
+- [ ] **INFRA-01**: Drizzle ORM schema: Users table (with `trust_score` column seeded at 0)
+- [ ] **INFRA-02**: Drizzle ORM schema: Topics table (id, title, original_submission, neutral_rewrite, status enum, vote_count, created_by, created_at)
+- [ ] **INFRA-03**: Drizzle ORM schema: Votes table (user_id, topic_id, week_bucket — composite unique key)
+- [ ] **INFRA-07**: pgvector extension enabled on Neon Postgres from day one (forward compatibility for v0.4 semantic search)
+- [ ] **INFRA-08**: Vercel + Upstash environment scaffold wired from project initialization (env vars only; QStash not yet invoked)
+- [ ] **INFRA-09**: Drizzle migrations + `.env.example` patterns for Neon DATABASE_URL, no hardcoded secrets
 
 ### Authentication
 
-- [ ] **AUTH-01**: User can sign up with email and password via Better Auth
-- [ ] **AUTH-02**: User receives email verification after signup (verified status seeds trust_score)
-- [ ] **AUTH-03**: User can log in and session persists across browser refresh
+- [ ] **AUTH-01**: User can sign up via Better Auth Magic Link (passwordless email)
+- [ ] **AUTH-03**: Session persists across browser refresh
 - [ ] **AUTH-04**: User can log out from any page
+
+### Voting (schema only)
+
+- [ ] **VOTE-07**: trust_score column on Users table seeded with basic rule (verified Magic-Link login = +1)
+
+---
+
+## v0.3 — Topic Board MVP (Active)
+
+The MVP that makes the idea visibly distinct. Community submits topics → Claude rewrites them neutrally on submit → others vote with weekly budget.
 
 ### Topic Board
 
 - [ ] **TOPIC-01**: Authenticated user can submit a topic question via Propose Modal
-- [ ] **TOPIC-02**: Submitted topic is run through the Objectivity Filter (Claude prompt layer) before being stored — emotional language reduced, researchable framing enforced (not a neutrality claim)
-- [ ] **TOPIC-03**: User can optionally provide: category, rationale ("why important"), possible primary sources
-- [ ] **TOPIC-04**: Topics display in a filterable list with tabs: In Voting / In Investigation / Published
+- [ ] **TOPIC-02**: Submitted topic is run through the Objectivity Filter (Claude prompt layer); user sees both original and neutral rewrite before final submit
+- [ ] **TOPIC-03**: User can optionally provide: category, rationale, possible primary sources
+- [ ] **TOPIC-04**: Topics display in a list with the **In Voting** tab active *(In Investigation / Published tabs are scaffolded but disabled in v0.3 — activated in v0.4 / v0.5)*
 - [ ] **TOPIC-05**: Topics in "voting" state are sortable: most votes / close to goal / newest
 - [ ] **TOPIC-06**: Featured topic (highest votes in current filter) is displayed at larger size
-- [ ] **TOPIC-07**: Each topic shows status badge: Voting / In Investigation / Published
-- [ ] **TOPIC-08**: Topics in "investigating" state show a 4-step Investigation Timeline with progress %
-- [ ] **TOPIC-09**: Published topics show source count, comment count, and link to Fact Card article
+- [ ] **TOPIC-07**: Each topic shows status badge (Voting only in v0.3)
+- [ ] **TOPIC-09**: Topics show vote count and submission metadata *(source/comment counts deferred until v0.5/v0.6)*
 
 ### Voting
 
-- [ ] **VOTE-01**: Authenticated user has a configurable weekly vote budget (default: 10 votes, resets Monday)
+- [ ] **VOTE-01**: Authenticated user has a weekly vote budget (default: 10 votes, resets Monday)
 - [ ] **VOTE-02**: User can upvote a topic (costs 1 vote from budget)
 - [ ] **VOTE-03**: User can retract their vote (returns 1 vote to budget)
 - [ ] **VOTE-04**: Vote budget is displayed as a visual pip strip (used vs. remaining)
 - [ ] **VOTE-05**: Vote button shows pulse animation on click; disabled + tooltip when budget exhausted
+
+### AI / Pipeline (objectivity layer only)
+
+- [ ] **PIPE-05**: Objectivity Filter prompt layer reduces emotional language in topic submissions to make them verifiable before storing — runs synchronously in propose flow (no Upstash needed; short Claude call fits in Vercel 30s)
+
+### Design System & UI
+
+- [ ] **UI-01**: Inter (sans/display) + IBM Plex Mono (data/labels/metadata) type system
+- [ ] **UI-02**: CSS custom properties token set — already in v0.1; v0.3 extends with any board-specific tokens
+- [ ] **UI-03**: Sticky header with logo, navigation, vote budget pip strip, "Propose Topic" button
+- [ ] **UI-04**: Footer remains as v0.1 — no changes needed
+- [ ] **UI-05**: Toast notification on topic submission
+- [ ] **UI-06**: i18n strings for board / propose / voting in EN + DE
+
+---
+
+## v0.4 — Source Analysis Pipeline (Backlog)
+
+Vote-threshold-triggered Upstash Workflow → Claude synthesis from primary sources → status progression. Schema extends to add FactCards / Sources / Articles tables.
+
+### Infrastructure & Schema (extension)
+
+- [ ] **INFRA-04**: Drizzle ORM schema: FactCards table
+- [ ] **INFRA-05**: Drizzle ORM schema: Sources table
+- [ ] **INFRA-06**: Drizzle ORM schema: Articles table
+
+### Topic Board (extensions)
+
+- [ ] **TOPIC-08**: Topics in "investigating" state show 4-step Investigation Timeline with progress %
+
+### Voting (extension)
+
 - [ ] **VOTE-06**: Each topic has a configurable vote goal threshold; crossing it auto-triggers the Deep-Dive pipeline
-- [ ] **VOTE-07**: trust_score column on Users table seeded with basic rules (verified email +1, account age)
 
 ### Deep-Dive Pipeline
 
@@ -58,9 +113,12 @@ See earlier REQUIREMENTS.md content — the complete 64-requirement set (INFRA, 
 - [ ] **PIPE-02**: Admin can manually trigger a Deep-Dive on any topic regardless of vote count
 - [ ] **PIPE-03**: Pipeline fetches referenced primary source URLs / PDFs and passes content to Claude
 - [ ] **PIPE-04**: Claude synthesizes sourced claims from primary source content only (no secondary reporting)
-- [ ] **PIPE-05**: Objectivity Filter prompt layer reduces emotional language in topic submissions to make them verifiable before storing
 - [ ] **PIPE-06**: All AI research tasks are offloaded to Upstash Workflows/QStash (Vercel 30s timeout)
 - [ ] **PIPE-07**: Pipeline updates topic status: voting → investigating → done
+
+---
+
+## v0.5 — Fact Cards & Bias Radar (Backlog)
 
 ### Fact Cards
 
@@ -73,7 +131,7 @@ See earlier REQUIREMENTS.md content — the complete 64-requirement set (INFRA, 
 - [ ] **FACT-07**: Evidence cards with a key statistic display a large figure + sub-label layout
 - [ ] **FACT-08**: Sources are expandable inline per card
 - [ ] **FACT-09**: All primary sources for an article are available in a Download Block (individual + ZIP)
-- [ ] **FACT-10**: Published article page shows article header, all Fact Cards, Bias Radar, Download Block, Discussion
+- [ ] **FACT-10**: Published article page shows article header, all Fact Cards, Bias Radar, Download Block, Discussion-shell
 
 ### Bias Radar
 
@@ -83,7 +141,9 @@ See earlier REQUIREMENTS.md content — the complete 64-requirement set (INFRA, 
 - [ ] **BIAS-04**: Bias Radar is collapsible within the article page
 - [ ] **BIAS-05**: Explanatory note: "Goal is not one truth but to make perspectives visible"
 
-### Discussion & Moderation
+---
+
+## v0.6 — Discussion & Moderation (Backlog)
 
 - [ ] **DISC-01**: Authenticated users can submit comments/corrections on a published article
 - [ ] **DISC-02**: Comment form allows: free text, optional primary source URL, optional card reference
@@ -93,28 +153,20 @@ See earlier REQUIREMENTS.md content — the complete 64-requirement set (INFRA, 
 - [ ] **DISC-06**: Editorial-picked comments show "Redaktion übernommen" badge
 - [ ] **DISC-07**: Users can upvote/downvote comments
 
-### Design System & UI
+---
 
-- [ ] **UI-01**: Inter (sans/display) + IBM Plex Mono (data/labels/metadata) type system
-- [ ] **UI-02**: CSS custom properties token set: --bg, --bg-warm, --ink, --ink-soft, --ink-mute, --line, --line-soft, --accent, --warn, --oerr, --left, --right
-- [ ] **UI-03**: Sticky header with logo, navigation tabs, vote budget pill, "Propose Topic" button
-- [ ] **UI-04**: Footer with nonprofit tagline and links
-- [ ] **UI-05**: Toast notification on topic submission
-- [ ] **UI-06**: English UI with i18n infrastructure ready (next-intl); German translation strings prepared
+## v1.0 — Community Launch (Reserved)
 
-### Infrastructure & Schema
+Hardening + maturity work, not a feature wave. Defined in detail when v0.6 is closed.
 
-- [ ] **INFRA-01**: Drizzle ORM schema: Users table
-- [ ] **INFRA-02**: Drizzle ORM schema: Topics table
-- [ ] **INFRA-03**: Drizzle ORM schema: Votes table
-- [ ] **INFRA-04**: Drizzle ORM schema: FactCards table
-- [ ] **INFRA-05**: Drizzle ORM schema: Sources table
-- [ ] **INFRA-06**: Drizzle ORM schema: Articles table
-- [ ] **INFRA-07**: pgvector extension enabled on Neon Postgres from day one
-- [ ] **INFRA-08**: Vercel + Upstash environment scaffold wired from project initialization
-- [ ] **INFRA-09**: Next.js App Router project with TypeScript, Tailwind CSS, proper env var patterns
+- [ ] **AUTH-02**: Email verification UI on top of Magic Link (verified status seeds trust_score upgrade)
+- [ ] **NOTF-01**: User notified when a topic they voted for enters investigation
+- [ ] **NOTF-02**: User notified when a topic they voted for is published
+- Plus: docs, onboarding, performance hardening, marketing copy
 
-## v2 Requirements
+---
+
+## Future / v2.0+
 
 ### Anti-Abuse
 
@@ -127,18 +179,15 @@ See earlier REQUIREMENTS.md content — the complete 64-requirement set (INFRA, 
 - **MIRROR-01**: Self-hosted PDF/snapshot storage in object storage
 - **MIRROR-02**: Automated archiving pipeline
 
-### Notifications
-
-- **NOTF-01**: User notified when a topic they voted for enters investigation
-- **NOTF-02**: User notified when a topic they voted for is published
-
 ### Internationalization
 
-- **I18N-01**: Full German translation
+- **I18N-01**: Full German translation polish (EN + DE skeleton already present from v0.1)
 
 ### Payments / Membership
 
 - **PAY-01**: Membership / donation flow
+
+---
 
 ## Out of Scope
 
@@ -146,95 +195,104 @@ See earlier REQUIREMENTS.md content — the complete 64-requirement set (INFRA, 
 |---------|--------|
 | Mobile native app | Web-first; mobile browser supported |
 | Real-time vote counts (WebSocket) | Not needed for MVP; polling sufficient |
-| OAuth login (Google, GitHub) | Email/password sufficient for v1 |
+| OAuth login (Google, GitHub) | Magic Link sufficient for v0.x; v1.0 reconsiders |
 | Full anti-abuse scoring algorithm | Schema seeds trust_score; algorithm deferred to v2 |
 | Self-hosted PDF mirroring | archive.org fallback is zero-infra; S3 mirroring is v2 |
 | Video/audio content | Text and data only |
 | Multi-tenant / white-label | Single community deployment |
 
+---
+
 ## Traceability
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| SETUP-01 | Phase 0 (Setup) | Pending |
-| SETUP-02 | Phase 0 (Setup) | Pending |
-| SETUP-03 | Phase 0 (Setup) | Pending |
-| SETUP-04 | Phase 0 (Setup) | Pending |
-| LAND-01 | Phase 0 (Setup) | Pending |
-| LAND-02 | Phase 0 (Setup) | Pending |
-| LAND-03 | Phase 0 (Setup) | Pending |
-| LAND-04 | Phase 0 (Setup) | Pending |
-| INFRA-01 | Phase 1 | Pending |
-| INFRA-02 | Phase 1 | Pending |
-| INFRA-03 | Phase 1 | Pending |
-| INFRA-04 | Phase 1 | Pending |
-| INFRA-05 | Phase 1 | Pending |
-| INFRA-06 | Phase 1 | Pending |
-| INFRA-07 | Phase 1 | Pending |
-| INFRA-08 | Phase 1 | Pending |
-| INFRA-09 | Phase 1 | Pending |
-| AUTH-01 | Phase 2 | Pending |
-| AUTH-02 | Phase 2 | Pending |
-| AUTH-03 | Phase 2 | Pending |
-| AUTH-04 | Phase 2 | Pending |
-| TOPIC-01 | Phase 3 | Pending |
-| TOPIC-02 | Phase 3 | Pending |
-| TOPIC-03 | Phase 3 | Pending |
-| TOPIC-04 | Phase 3 | Pending |
-| TOPIC-05 | Phase 3 | Pending |
-| TOPIC-06 | Phase 3 | Pending |
-| TOPIC-07 | Phase 3 | Pending |
-| TOPIC-08 | Phase 3 | Pending |
-| TOPIC-09 | Phase 3 | Pending |
-| VOTE-01 | Phase 3 | Pending |
-| VOTE-02 | Phase 3 | Pending |
-| VOTE-03 | Phase 3 | Pending |
-| VOTE-04 | Phase 3 | Pending |
-| VOTE-05 | Phase 3 | Pending |
-| VOTE-06 | Phase 3 | Pending |
-| VOTE-07 | Phase 3 | Pending |
-| UI-01 | Phase 3 | Pending |
-| UI-02 | Phase 3 | Pending |
-| UI-03 | Phase 3 | Pending |
-| UI-04 | Phase 3 | Pending |
-| UI-05 | Phase 3 | Pending |
-| UI-06 | Phase 3 | Pending |
-| PIPE-01 | Phase 4 | Pending |
-| PIPE-02 | Phase 4 | Pending |
-| PIPE-03 | Phase 4 | Pending |
-| PIPE-04 | Phase 4 | Pending |
-| PIPE-05 | Phase 4 | Pending |
-| PIPE-06 | Phase 4 | Pending |
-| PIPE-07 | Phase 4 | Pending |
-| FACT-01 | Phase 5 | Pending |
-| FACT-02 | Phase 5 | Pending |
-| FACT-03 | Phase 5 | Pending |
-| FACT-04 | Phase 5 | Pending |
-| FACT-05 | Phase 5 | Pending |
-| FACT-06 | Phase 5 | Pending |
-| FACT-07 | Phase 5 | Pending |
-| FACT-08 | Phase 5 | Pending |
-| FACT-09 | Phase 5 | Pending |
-| FACT-10 | Phase 5 | Pending |
-| BIAS-01 | Phase 5 | Pending |
-| BIAS-02 | Phase 5 | Pending |
-| BIAS-03 | Phase 5 | Pending |
-| BIAS-04 | Phase 5 | Pending |
-| BIAS-05 | Phase 5 | Pending |
-| DISC-01 | Phase 6 | Pending |
-| DISC-02 | Phase 6 | Pending |
-| DISC-03 | Phase 6 | Pending |
-| DISC-04 | Phase 6 | Pending |
-| DISC-05 | Phase 6 | Pending |
-| DISC-06 | Phase 6 | Pending |
-| DISC-07 | Phase 6 | Pending |
+| Requirement | Milestone | Phase | Status |
+|-------------|-----------|-------|--------|
+| SETUP-01 | v0.1 | 0 | Validated |
+| SETUP-02 | v0.1 | 0 | Validated |
+| SETUP-03 | v0.1 | 0 | Validated |
+| SETUP-04 | v0.1 | 0 | Validated |
+| LAND-01 | v0.1 | 0 | Validated |
+| LAND-02 | v0.1 | 0 | Validated |
+| LAND-03 | v0.1 | 0 | Validated |
+| LAND-04 | v0.1 | 0 | Validated |
+| INFRA-01 | v0.2 | 1 | Pending |
+| INFRA-02 | v0.2 | 1 | Pending |
+| INFRA-03 | v0.2 | 1 | Pending |
+| INFRA-07 | v0.2 | 1 | Pending |
+| INFRA-08 | v0.2 | 1 | Pending |
+| INFRA-09 | v0.2 | 1 | Pending |
+| AUTH-01 | v0.2 | 2 | Pending |
+| AUTH-03 | v0.2 | 2 | Pending |
+| AUTH-04 | v0.2 | 2 | Pending |
+| VOTE-07 | v0.2 | 2 | Pending |
+| TOPIC-01 | v0.3 | 4 | Pending |
+| TOPIC-02 | v0.3 | 4 | Pending |
+| TOPIC-03 | v0.3 | 4 | Pending |
+| TOPIC-04 | v0.3 | 3 | Pending |
+| TOPIC-05 | v0.3 | 3 | Pending |
+| TOPIC-06 | v0.3 | 3 | Pending |
+| TOPIC-07 | v0.3 | 3 | Pending |
+| TOPIC-09 | v0.3 | 3 | Pending |
+| VOTE-01 | v0.3 | 5 | Pending |
+| VOTE-02 | v0.3 | 5 | Pending |
+| VOTE-03 | v0.3 | 5 | Pending |
+| VOTE-04 | v0.3 | 5 | Pending |
+| VOTE-05 | v0.3 | 5 | Pending |
+| PIPE-05 | v0.3 | 4 | Pending |
+| UI-01 | v0.3 | 3 | Pending |
+| UI-02 | v0.3 | 3 | Pending |
+| UI-03 | v0.3 | 3 | Pending |
+| UI-04 | v0.3 | 3 | Pending |
+| UI-05 | v0.3 | 4 | Pending |
+| UI-06 | v0.3 | 3 | Pending |
+| INFRA-04 | v0.4 | 6 | Pending |
+| INFRA-05 | v0.4 | 6 | Pending |
+| INFRA-06 | v0.4 | 6 | Pending |
+| TOPIC-08 | v0.4 | 7 | Pending |
+| VOTE-06 | v0.4 | 7 | Pending |
+| PIPE-01 | v0.4 | 7 | Pending |
+| PIPE-02 | v0.4 | 8 | Pending |
+| PIPE-03 | v0.4 | 7 | Pending |
+| PIPE-04 | v0.4 | 7 | Pending |
+| PIPE-06 | v0.4 | 7 | Pending |
+| PIPE-07 | v0.4 | 7 | Pending |
+| FACT-01 | v0.5 | 10 | Pending |
+| FACT-02 | v0.5 | 10 | Pending |
+| FACT-03 | v0.5 | 10 | Pending |
+| FACT-04 | v0.5 | 10 | Pending |
+| FACT-05 | v0.5 | 10 | Pending |
+| FACT-06 | v0.5 | 9 | Pending |
+| FACT-07 | v0.5 | 10 | Pending |
+| FACT-08 | v0.5 | 10 | Pending |
+| FACT-09 | v0.5 | 10 | Pending |
+| FACT-10 | v0.5 | 10 | Pending |
+| BIAS-01 | v0.5 | 11 | Pending |
+| BIAS-02 | v0.5 | 11 | Pending |
+| BIAS-03 | v0.5 | 11 | Pending |
+| BIAS-04 | v0.5 | 11 | Pending |
+| BIAS-05 | v0.5 | 11 | Pending |
+| DISC-01 | v0.6 | 12 | Pending |
+| DISC-02 | v0.6 | 12 | Pending |
+| DISC-03 | v0.6 | 13 | Pending |
+| DISC-04 | v0.6 | 13 | Pending |
+| DISC-05 | v0.6 | 13 | Pending |
+| DISC-06 | v0.6 | 14 | Pending |
+| DISC-07 | v0.6 | 14 | Pending |
+| AUTH-02 | v1.0 | TBD | Pending |
+| NOTF-01 | v1.0 | TBD | Pending |
+| NOTF-02 | v1.0 | TBD | Pending |
 
 **Coverage:**
-- v1.0 milestone requirements: 8 total (SETUP + LAND)
-- Full v1 roadmap requirements: 72 total (8 new + 64 existing)
-- Mapped to phases: 72
-- Unmapped: 0 ✓
+- v0.1 (Validated): 8 / 8
+- v0.2 (Active): 10 requirements
+- v0.3 (Active): 20 requirements
+- v0.4 (Backlog): 11 requirements
+- v0.5 (Backlog): 15 requirements
+- v0.6 (Backlog): 7 requirements
+- v1.0 (Reserved): 3 requirements (+ hardening defined later)
+- **Total mapped:** 74 / 74 ✓
 
 ---
+
 *Requirements defined: 2026-04-23*
-*Last updated: 2026-04-23 — milestone v1.0 initialized with SETUP + LAND requirements*
+*Restructured into 0.x milestones: 2026-04-27*

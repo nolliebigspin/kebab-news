@@ -2,32 +2,35 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-23)
+See: .planning/PROJECT.md (updated 2026-04-27)
 
-**Core value:** Every published Fact Card must be traceable to a verifiable primary source that any user can access in a single click.
-**Current focus:** Phase 1 — Infrastructure & Schema
+**Core value:** Every published sourced claim must be traceable to a verifiable primary source that any user can access in a single click.
+**Current focus:** v0.2 Phase 1 — Database Foundation (Drizzle schema for users / topics / votes + pgvector on Neon)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Milestone: v0.2 — Topic Schema & Magic-Link Auth
+Phase: 1 — Database Foundation (next; not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-23 — Milestone v1.0 started (Foundation & Landing)
+Status: Ready to plan Phase 1
+Last activity: 2026-04-27 — Restructured planning into 0.x milestones; v0.1 closed retrospectively
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] ~7%   (1 of 14 phases delivered)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
+- Total phases completed: 1 (Phase 0 — closed retrospectively)
+- Total plans completed: 0 (Phase 0 had no formal PLAN.md)
 - Average duration: —
-- Total execution time: 0 hours
+- Total execution time: — (Phase 0 done before formal tracking)
 
 **By Phase:**
 
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| — | — | — | — |
+| Phase | Milestone | Plans | Status |
+|-------|-----------|-------|--------|
+| 0 — Foundation & Landing | v0.1 | retrospective | Completed 2026-04-27 |
+| 1 — Database Foundation | v0.2 | 0/TBD | Next |
 
 **Recent Trend:**
 - Last 5 plans: —
@@ -42,9 +45,12 @@ Progress: [░░░░░░░░░░] 0%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- Roadmap: Phase 3 bundles TOPIC + VOTE + UI because vote budget pip strip and board UI are inseparable — splitting them would leave a broken intermediate state
-- Roadmap: Phase 4 (Pipeline) is deliberately isolated from Phase 5 (Fact Cards) so the Upstash Workflow integration can be tested end-to-end before building the display layer
-- Roadmap: PIPE-05 (Objectivity Filter) is assigned to Phase 3 as TOPIC-02 covers the same user-visible behavior; the prompt engineering is built when the propose modal is built
+- 2026-04-27: Restructured into 0.x milestones — v1.0 reserved for full community launch; ship working slices in v0.2..v0.6 first
+- 2026-04-27: Magic Link over full Better Auth in v0.x — passwordless email is enough trust for voting; no password / verify-email UI in scope
+- 2026-04-27: Schema right-sized per milestone — v0.2 ships only users/topics/votes; FactCards/Sources/Articles added in v0.4 via migration
+- 2026-04-27: Objectivity Filter ships in v0.3 (Topic Board MVP), not later — synchronous Claude rewrite on submit is the visible differentiator
+- 2026-04-27: Phase 0 (Foundation & Landing) closed retrospectively — work was already in `main` before formal tracking
+- Roadmap (original): TOPIC-04's three tabs (In Voting / In Investigation / Published) — only "In Voting" active in v0.3; other tabs scaffolded but disabled until v0.4 / v0.5 produce their content
 
 ### Pending Todos
 
@@ -62,6 +68,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-23
-Stopped at: Roadmap created — ready to plan Phase 1
+Last session: 2026-04-27
+Stopped at: Planning docs restructured into 0.x milestones — ready to plan v0.2 Phase 1 (Database Foundation)
 Resume file: None
+Next action: `/gsd-plan-phase 1` to draft the Database Foundation plan
