@@ -4,18 +4,24 @@ import { integer, pgEnum, pgTable, text, timestamp, unique, uuid } from "drizzle
 
 /**
  * usersSync is owned by Neon Auth (lives in neon_auth schema, never in our migrations).
- * Re-exported so app code can `import { usersSync } from "@/lib/db"`.
+ * Re-exported so app code can `import { usersSync } from "@/lib/db"` once Phase 2
+ * enables Neon Auth on the Neon project.
  *
  * usersSync.id is text (verified from drizzle-orm@0.45.2/neon/neon-auth.js).
  * Therefore public.users.id MUST be text to satisfy the FK type match.
  */
 export { usersSync };
 
-// public.users — profile-only; identity is in neon_auth.users_sync
+// public.users — profile-only; identity is in neon_auth.users_sync.
+//
+// PHASE 2 TODO: re-add the cross-schema FK once Neon Auth is enabled on the
+// Neon project (which auto-creates neon_auth.users_sync). Phase 1 ships
+// without the FK because Neon Auth provisioning is a Phase 2 task; the FK
+// would otherwise fail at migration time. Phase 1's success criteria require
+// the table to exist, not the FK.
+//   .references(() => usersSync.id, { onDelete: "cascade" })
 export const users = pgTable("users", {
-  id: text("id")
-    .primaryKey()
-    .references(() => usersSync.id, { onDelete: "cascade" }),
+  id: text("id").primaryKey(),
   trustScore: integer("trust_score").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

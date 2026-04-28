@@ -5,8 +5,10 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.string().url().min(1),
 
-    NEON_AUTH_BASE_URL: z.string().url().min(1),
-    NEON_AUTH_COOKIE_SECRET: z.string().min(32),
+    // Phase 2 will tighten these to required. Phase 1 only needs them
+    // declared so .env.example covers the full v0.2 surface.
+    NEON_AUTH_BASE_URL: z.string().url().optional(),
+    NEON_AUTH_COOKIE_SECRET: z.string().min(32).optional(),
 
     QSTASH_URL: z.string().url().default("https://qstash.upstash.io"),
     QSTASH_TOKEN: z.string().min(1).optional(),

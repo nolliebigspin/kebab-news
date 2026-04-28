@@ -16,13 +16,11 @@ CREATE TABLE "users" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
--- NOTE: drizzle-kit emits a CREATE TABLE for neon_auth.users_sync because
--- the usersSync helper from drizzle-orm/neon is referenced in our schema for
--- typing. We REMOVE that statement here — Neon Auth owns and creates the
--- neon_auth schema (and its users_sync table) automatically. Attempting to
--- create it from our migration would conflict with Neon Auth's provisioning.
--- The FK from public.users.id → neon_auth.users_sync(id) (emitted below)
--- requires the neon_auth schema to already exist; Neon Auth provides this.
+-- NOTE: drizzle-kit emits CREATE TABLE for neon_auth.users_sync because the
+-- usersSync helper is referenced in our schema for typing. We REMOVE that
+-- statement here — Neon Auth owns and provisions neon_auth.users_sync. Phase 2
+-- enables Neon Auth on the project, after which the cross-schema FK from
+-- public.users.id → neon_auth.users_sync.id will be added back to schema.ts.
 
 CREATE TABLE "votes" (
 	"user_id" text NOT NULL,
@@ -33,6 +31,5 @@ CREATE TABLE "votes" (
 );
 --> statement-breakpoint
 ALTER TABLE "topics" ADD CONSTRAINT "topics_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "users" ADD CONSTRAINT "users_id_users_sync_id_fk" FOREIGN KEY ("id") REFERENCES "neon_auth"."users_sync"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "votes" ADD CONSTRAINT "votes_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "votes" ADD CONSTRAINT "votes_topic_id_topics_id_fk" FOREIGN KEY ("topic_id") REFERENCES "public"."topics"("id") ON DELETE cascade ON UPDATE no action;
