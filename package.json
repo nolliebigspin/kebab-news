@@ -20,7 +20,10 @@
     "check:all": "bun check:imports && bun check:format && bun check:lint && bun check:ts"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@t3-oss/env-nextjs": "^0.13.11",
+    "@upstash/qstash": "^2.10.1",
+    "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.2",
     "next": "^16.2.4",
     "next-intl": "^4.9.1",
