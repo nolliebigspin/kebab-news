@@ -9,6 +9,10 @@
     "test": "vitest run",
     "test:db": "vitest run tests/db",
     "test:watch": "vitest",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
     "check:lint": "biome lint --write ./",
     "check:format": "biome format --write ./",
     "check:imports": "biome check --formatter-enabled=false --linter-enabled=false --write ./",
@@ -16,11 +20,14 @@
     "check:all": "bun check:imports && bun check:format && bun check:lint && bun check:ts"
   },
   "dependencies": {
+    "@t3-oss/env-nextjs": "^0.13.11",
+    "drizzle-orm": "^0.45.2",
     "next": "^16.2.4",
     "next-intl": "^4.9.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
-    "react-icons": "^5.6.0"
+    "react-icons": "^5.6.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.12",
@@ -29,6 +36,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitest/coverage-v8": "^2.1.9",
+    "drizzle-kit": "^0.31.10",
     "postcss": "^8.5.10",
     "tailwindcss": "^4.2.4",
     "typescript": "^6.0.3",
