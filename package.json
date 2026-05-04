@@ -13,6 +13,7 @@
     "check:all": "bun check:imports && bun check:format && bun check:lint && bun check:ts"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "next": "^16.2.4",
     "next-intl": "^4.9.1",
     "react": "^19.2.5",
