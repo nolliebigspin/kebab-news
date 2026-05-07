@@ -31,14 +31,13 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "hero" });
-  const tb = await getTranslations({ locale, namespace: "banner" });
   const url = locale === "de" ? BASE_URL : `${BASE_URL}/${locale}`;
   const ogLocale = locale === "de" ? "de_DE" : "en_US";
   const ogAltLocale = locale === "de" ? "en_US" : "de_DE";
 
   const title = `kebab.news — ${t("tagline")}`;
-  const description = `${t("tagline_accent")} ${tb("bold")} ${tb("text")}`;
-  const ogDescription = `${t("tagline")} ${t("tagline_accent")} ${tb("bold")}`;
+  const description = `${t("tagline")} ${t("tagline_accent")}`;
+  const ogDescription = description;
 
   return {
     title,

@@ -6,81 +6,12 @@
     "badge": "Still building, join us",
     "tagline": "News without blinders.",
     "tagline_accent": "Different perspectives. Sourced facts. Your own conclusion.",
+    "stance": "We don't claim to be neutral. We show how a story is being told, and let you decide.",
     "description_before": "Big news platforms filter, simplify, and polarize, often without realising it. kebab.news does things differently: inspired by ",
-    "description_after": ", but focused on the German-speaking world. The community votes on what gets investigated. We look at different social perspectives and back every claim with primary sources, so you can dig deeper and actually enjoy the debate.",
-    "cta_github": "View on GitHub",
-    "cta_soon": "Launch newsletter coming soon"
-  },
-  "banner": {
-    "bold": "Every claim verifiable.",
-    "text": "Every report is AI-researched and human-verified. Every statement linked directly to its source.",
-    "tags": "non-profit · ad-free · open source"
-  },
-  "principles": {
-    "heading": "What we stand for",
-    "transparent": {
-      "title": "Sources first",
-      "body": "Every claim on this platform links to a primary source. No need to trust us, just check for yourself."
-    },
-    "community": {
-      "title": "The community decides",
-      "body": "What gets investigated is not up to an editorial team, it's up to you. By vote, transparently, without hidden agendas."
-    },
-    "open": {
-      "title": "Everything open",
-      "body": "MIT licensed, public repository from day one. If you don't trust us, read the code. That's how it should be."
-    }
-  },
-  "howItWorks": {
-    "heading": "How it works",
-    "steps": [
-      {
-        "n": "01",
-        "h": "Throw in a topic",
-        "b": "You suggest what the community should investigate."
-      },
-      { "n": "02", "h": "Vote", "b": "Enough votes? The research begins." },
-      {
-        "n": "03",
-        "h": "Source analysis",
-        "b": "AI gathers primary sources, humans verify and add context."
-      },
-      {
-        "n": "04",
-        "h": "Publication",
-        "b": "The report goes live with all sources, the methodology, and open questions."
-      }
-    ]
-  },
-  "trustStatement": {
-    "heading": "Why you shouldn't just trust us either",
-    "body": "We make choices too: which sources, how we frame questions, which AI we use. That's unavoidable. So we make every step visible, so you can judge for yourself.",
-    "items": [
-      {
-        "label": "Read the sources yourself",
-        "text": "Every report includes direct links to the original documents. Not because we say so, but because you should be able to verify it."
-      },
-      {
-        "label": "Uncertainty is part of it",
-        "text": "When data is conflicting or evidence is missing, it says so in the report. We don't hide gaps."
-      },
-      {
-        "label": "Methodology open for inspection",
-        "text": "Every report shows: which sources were used, which were excluded, when the data was collected, and whether AI or humans verified it."
-      },
-      {
-        "label": "Objectivity filter",
-        "text": "Emotionally worded questions are neutralised before research begins. No claim of perfect neutrality, but a commitment to fair framing."
-      }
-    ]
+    "description_after": ", but focused on the German-speaking world. We put the same story side by side across the political spectrum, surface framing differences, and link to primary sources where available. Later, the community will help decide which topics get a deeper dive.",
+    "cta_github": "View on GitHub"
   },
   "footer": {
-    "nonprofit": "non-profit · ad-free · open source",
-    "links": {
-      "methodology": "Methodology",
-      "ai_transparency": "AI Transparency",
-      "source_code": "Source Code",
-      "contact": "Contact"
-    }
+    "nonprofit": "non-profit · ad-free · open source"
   }
 }

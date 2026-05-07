@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { FaGithub } from "react-icons/fa6";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/Wordmark";
 import { GITHUB_URL } from "@/lib/constants";
 
@@ -13,15 +14,17 @@ export const Header = () => {
         <Wordmark />
         <div className="flex items-center gap-4 md:gap-8">
           <LanguageSwitcher />
-          <a
-            href={GITHUB_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hairline inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-ink-soft text-sm transition-colors hover:bg-bg-warm"
-          >
-            <FaGithub />
-            <span className="font-mono text-xs">{t("github")}</span>
-          </a>
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={
+              <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
+                <FaGithub />
+                <span className="font-mono text-xs">{t("github")}</span>
+              </a>
+            }
+          />
         </div>
       </div>
     </header>

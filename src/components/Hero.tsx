@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { FaGithub } from "react-icons/fa6";
+import { Button } from "@/components/ui/button";
 import { GITHUB_URL } from "@/lib/constants";
 
 export const Hero = () => {
@@ -9,10 +10,10 @@ export const Hero = () => {
     <section className="mx-auto flex min-h-[calc(100vh-var(--header-h,64px)-var(--footer-h,72px))] max-w-5xl flex-col items-start justify-center px-6 py-24">
       <div className="hairline mb-8 inline-flex items-center gap-2 rounded-full border px-3 py-1">
         <span className="relative flex h-1.5 w-1.5">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
-          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand" />
         </span>
-        <span className="font-mono text-[11px] text-accent-ink uppercase tracking-[0.12em]">
+        <span className="font-mono text-[11px] text-brand-ink uppercase tracking-[0.12em]">
           {t("badge")}
         </span>
       </div>
@@ -25,10 +26,14 @@ export const Hero = () => {
       </h1>
 
       <p
-        className="mb-8 font-display text-2xl text-accent sm:text-3xl"
+        className="mb-8 font-display text-2xl text-brand sm:text-3xl"
         style={{ textWrap: "balance" } as React.CSSProperties}
       >
         {t("tagline_accent")}
+      </p>
+
+      <p className="mb-8 max-w-2xl border-brand border-l-2 pl-4 text-base text-ink italic leading-relaxed">
+        {t("stance")}
       </p>
 
       <p className="mb-12 max-w-2xl text-base text-ink-soft leading-relaxed">
@@ -37,7 +42,7 @@ export const Hero = () => {
           href="https://ground.news"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-accent hover:underline"
+          className="text-brand hover:underline"
         >
           ground.news
         </a>
@@ -45,18 +50,16 @@ export const Hero = () => {
       </p>
 
       <div className="flex flex-wrap items-center gap-3">
-        <a
-          href={GITHUB_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 font-medium text-sm text-white transition-opacity hover:opacity-90"
-        >
-          <FaGithub />
-          {t("cta_github")}
-        </a>
-        <span className="hairline rounded-md border px-5 py-2.5 text-ink-mute text-sm">
-          {t("cta_soon")}
-        </span>
+        <Button
+          size="lg"
+          nativeButton={false}
+          render={
+            <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
+              <FaGithub />
+              {t("cta_github")}
+            </a>
+          }
+        />
       </div>
     </section>
   );

@@ -6,81 +6,12 @@
     "badge": "Noch am Aufbau, mach mit",
     "tagline": "Nachrichten ohne Scheuklappen.",
     "tagline_accent": "Verschiedene Blickwinkel. Belegte Fakten. Deine Meinung.",
+    "stance": "Wir behaupten keine Neutralität. Wir zeigen, wie über ein Thema berichtet wird, und du entscheidest selbst.",
     "description_before": "Klassische Nachrichtenportale filtern, vereinfachen und polarisieren, oft ohne es selbst zu merken. kebab.news macht das anders. Inspiriert von ",
-    "description_after": ", aber mit Fokus auf den deutschen Raum. Die Community stimmt ab, was untersucht wird. Wir beleuchten verschiedene gesellschaftliche Blickwinkel und belegen jede Aussage mit Primärquellen, damit du selbst nachforschen und entspannt diskutieren kannst.",
-    "cta_github": "Auf GitHub ansehen",
-    "cta_soon": "Launch-Newsletter demnächst"
-  },
-  "banner": {
-    "bold": "Jede Aussage belegbar.",
-    "text": "Jeder Bericht ist KI-recherchiert und von Menschen gegengeprüft. Jede Aussage direkt verknüpft mit ihrer Quelle.",
-    "tags": "gemeinnützig · werbefrei · open source"
-  },
-  "principles": {
-    "heading": "Wofür wir stehen",
-    "transparent": {
-      "title": "Quellen zuerst",
-      "body": "Jede Aussage auf dieser Plattform ist mit einer Primärquelle verknüpft. Kein Vertrauen nötig, einfach selbst nachschauen."
-    },
-    "community": {
-      "title": "Die Community entscheidet",
-      "body": "Was untersucht wird, bestimmt nicht eine Redaktion, sondern ihr. Per Abstimmung, transparent, ohne versteckte Agenda."
-    },
-    "open": {
-      "title": "Alles offen",
-      "body": "MIT-lizenziert, öffentliches Repository von Tag eins. Wer uns nicht traut, kann den Code lesen. So soll es sein."
-    }
-  },
-  "howItWorks": {
-    "heading": "So läuft es ab",
-    "steps": [
-      {
-        "n": "01",
-        "h": "Thema einwerfen",
-        "b": "Du schlägst vor, was die Community untersuchen soll."
-      },
-      { "n": "02", "h": "Abstimmen", "b": "Genug Stimmen? Dann geht die Recherche los." },
-      {
-        "n": "03",
-        "h": "Quellenanalyse",
-        "b": "KI sammelt Primärquellen, Menschen prüfen nach und ergänzen Kontext."
-      },
-      {
-        "n": "04",
-        "h": "Veröffentlichung",
-        "b": "Der Bericht erscheint mit allen Quellen, der Methodik und offenen Fragen."
-      }
-    ]
-  },
-  "trustStatement": {
-    "heading": "Warum du uns auch nicht einfach glauben solltest",
-    "body": "Auch wir wählen aus: welche Quellen, wie wir Fragen formulieren, welche KI wir einsetzen. Das ist unvermeidbar. Deshalb legen wir jeden Schritt offen, damit du selbst urteilen kannst.",
-    "items": [
-      {
-        "label": "Lies die Quellen selbst",
-        "text": "Jeder Bericht enthält direkte Links zu den Originaldokumenten. Nicht weil wir es sagen, sondern weil du es prüfen sollst."
-      },
-      {
-        "label": "Unsicherheit gehört dazu",
-        "text": "Wenn Daten widersprüchlich sind oder Belege fehlen, steht das im Bericht. Wir verstecken keine Lücken."
-      },
-      {
-        "label": "Methodik offen einsehbar",
-        "text": "Jeder Bericht zeigt: welche Quellen wurden genutzt, welche ausgeschlossen, wann die Daten erhoben wurden und ob KI oder Menschen geprüft haben."
-      },
-      {
-        "label": "Sachlichkeits-Filter",
-        "text": "Emotional formulierte Fragen werden vor der Recherche neutralisiert. Kein Anspruch auf perfekte Neutralität, aber auf faire Fragestellungen."
-      }
-    ]
+    "description_after": ", aber mit Fokus auf den deutschsprachigen Raum. Wir stellen dieselbe Geschichte aus dem politischen Spektrum nebeneinander, machen unterschiedliche Rahmungen sichtbar und verlinken, wo möglich, direkt auf Primärquellen. Später soll die Community mitbestimmen, welche Themen tiefer recherchiert werden.",
+    "cta_github": "Auf GitHub ansehen"
   },
   "footer": {
-    "nonprofit": "gemeinnützig · werbefrei · open source",
-    "links": {
-      "methodology": "Methodik",
-      "ai_transparency": "KI-Transparenz",
-      "source_code": "Quellcode",
-      "contact": "Kontakt"
-    }
+    "nonprofit": "gemeinnützig · werbefrei · open source"
   }
 }
