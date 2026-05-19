@@ -24,27 +24,73 @@ type OutletResult = {
   error?: string;
 };
 
+/**
+ * Structured logger. Every line is one JSON object so Vercel logs and
+ * `bun dev` terminal output can both be grepped by `event` and `runId`.
+ */
+function log(runId: string, event: string, fields: Record<string, unknown> = {}) {
+  console.log(
+    JSON.stringify({
+      ts: new Date().toISOString(),
+      runId,
+      event,
+      ...fields,
+    })
+  );
+}
+
+/**
+ * GET — Vercel Cron hits this every 30 min with a CRON_SECRET bearer token.
+ * Auth is enforced.
+ */
 export async function GET(request: Request) {
   const auth = request.headers.get("authorization");
   if (auth !== `Bearer ${env.CRON_SECRET}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+  return runIngest("cron");
+}
+
+/**
+ * POST — manual trigger from the /radar/admin button. Public for now (no
+ * auth) per the SLC plan; lock down later if abuse becomes a concern.
+ */
+export async function POST() {
+  return runIngest("manual");
+}
+
+async function runIngest(trigger: "cron" | "manual") {
+  const runId = `run_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+  const startedAt = Date.now();
+  log(runId, "ingest.start", { trigger });
 
   const allOutlets = await db.select().from(outlets);
+  log(runId, "ingest.outlets_loaded", { count: allOutlets.length });
 
   const results: OutletResult[] = [];
   let totalNewArticles = 0;
   let totalNewStories = 0;
 
   for (const outlet of allOutlets) {
+    const outletStartedAt = Date.now();
     try {
-      const r = await ingestOutlet(outlet);
+      const r = await ingestOutlet(outlet, runId);
       totalNewArticles += r.newArticles;
       totalNewStories += r.newStories;
       results.push(r);
+      log(runId, "outlet.done", {
+        slug: outlet.slug,
+        newArticles: r.newArticles,
+        newStories: r.newStories,
+        durationMs: Date.now() - outletStartedAt,
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      console.error(`ingest[${outlet.slug}] failed:`, message);
+      log(runId, "outlet.error", {
+        slug: outlet.slug,
+        error: message,
+        durationMs: Date.now() - outletStartedAt,
+      });
       results.push({
         slug: outlet.slug,
         newArticles: 0,
@@ -54,16 +100,33 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.json({
+  const durationMs = Date.now() - startedAt;
+  log(runId, "ingest.finish", {
+    trigger,
     outlets: allOutlets.length,
     newArticles: totalNewArticles,
     newStories: totalNewStories,
+    errors: results.filter((r) => r.error).length,
+    durationMs,
+  });
+
+  return NextResponse.json({
+    runId,
+    trigger,
+    outlets: allOutlets.length,
+    newArticles: totalNewArticles,
+    newStories: totalNewStories,
+    durationMs,
     results,
   });
 }
 
-async function ingestOutlet(outlet: Outlet): Promise<OutletResult> {
+async function ingestOutlet(outlet: Outlet, runId: string): Promise<OutletResult> {
   const feed = await parser.parseURL(outlet.feedUrl);
+  log(runId, "outlet.feed_parsed", {
+    slug: outlet.slug,
+    feedItems: feed.items.length,
+  });
 
   type IncomingItem = {
     url: string;
@@ -112,6 +175,12 @@ async function ingestOutlet(outlet: Outlet): Promise<OutletResult> {
       teaser: articles.teaser,
     });
 
+  log(runId, "outlet.articles_inserted", {
+    slug: outlet.slug,
+    candidates: incoming.length,
+    newArticles: inserted.length,
+  });
+
   if (inserted.length === 0) {
     return { slug: outlet.slug, newArticles: 0, newStories: 0 };
   }
@@ -157,6 +226,14 @@ async function ingestOutlet(outlet: Outlet): Promise<OutletResult> {
           lastSeenAt: new Date(),
         })
         .where(eq(stories.id, storyId));
+      log(runId, "article.clustered", {
+        slug: outlet.slug,
+        articleId: article.id,
+        storyId,
+        action: "attach",
+        headlineSpans: headlineAnnotations.length,
+        teaserSpans: teaserAnnotations.length,
+      });
     } else {
       const slug = generateStorySlug(article.headline);
       const inserted_stories = await db
@@ -170,6 +247,14 @@ async function ingestOutlet(outlet: Outlet): Promise<OutletResult> {
         .returning({ id: stories.id });
       storyId = inserted_stories[0].id;
       newStoriesCount += 1;
+      log(runId, "article.clustered", {
+        slug: outlet.slug,
+        articleId: article.id,
+        storyId,
+        action: "new",
+        headlineSpans: headlineAnnotations.length,
+        teaserSpans: teaserAnnotations.length,
+      });
     }
 
     await db
