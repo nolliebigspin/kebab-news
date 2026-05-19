@@ -18,41 +18,39 @@ What we do instead: we **expose every step**. The framing, the sources, the AI p
 
 ---
 
-## What we're building (in two layers)
+## What we're building
 
-We ship in two layers. They're separate features, not one big thing.
+We ship as an **SLC — Simple, Lovable, Complete**. One thing, done well, before adding anything else.
 
-### Layer 1 — Radar (MVP)
+### v1 — Radar
 
-A German-language **multi-source aggregator**. The same story, side-by-side, across the political spectrum (taz / SZ / FAZ / Welt / NZZ / Junge Freiheit / Nius / öffentlich-rechtlich and more). Framing differences highlighted. Blind spots — what one side isn't covering — surfaced explicitly.
+A read-only German-language **multi-source radar**. The same story, side-by-side, across the political spectrum (taz / SZ / FAZ / Welt / NZZ / Junge Freiheit / Nius / öffentlich-rechtlich and more). Framing differences highlighted on publisher headlines. Blind spots — what one side isn't covering — surfaced explicitly.
 
-No AI-generated articles. AI is used only for clustering stories, detecting framing language, and linking to primary sources where available.
+No AI-generated articles. No user accounts. No comments. AI is used only for clustering stories and annotating framing language on the publisher headlines themselves.
 
 **Why:** Ground.news solved this for English. Nobody serves it in German. That's the gap.
 
-### Layer 2 — Verification Loop (post-MVP)
+### Later — Verification Loop
 
-For topics the community votes worth investigating, we run AI-assisted **research over primary sources** — Bundestag-Drucksachen, Destatis, BMF-Haushalt, RKI/PEI, EU documents, court rulings. The output is structured Fact-Cards: every claim hoverable, linked directly to its source, with explicit uncertainty labels where data is contested or thin.
+Once the radar earns it, we add a community-voted research layer. For topics worth investigating, AI-assisted **research over primary sources** — Bundestag-Drucksachen, Destatis, BMF-Haushalt, RKI/PEI, EU documents, court rulings. The output is structured Fact-Cards: every claim hoverable, linked directly to its source, with explicit uncertainty labels where data is contested or thin.
 
 The AI summarizes and links. It does not opine. Every step is shown to the reader: prompt used, sources consulted, sources excluded, whether a human verified.
 
 ---
 
-## How it works
+## How it works (v1)
 
-### 1. Community decides the questions
-Users propose verifiable questions. A weekly budget of votes ("Fact-Pips") routes attention. **The community decides what is worth investigating — not what the answer is.**
+### 1. Spectrum coverage, side-by-side
+For each top story of the day, we show how each outlet covered it — across the political spectrum, on one screen.
 
 ### 2. Framing is annotated, not rewritten
-When you submit a question, AI flags loaded language and presupposed framing. **You** rewrite it. We don't replace your bias with the model's training-data bias and call it neutral.
+AI flags loaded language and presupposed framing on the publisher headlines. The original headline stays visible. We don't replace anyone's framing with the model's training-data framing and call it neutral.
 
 ### 3. Sources are the product
-- **Radar:** spectrum coverage with framing annotations.
-- **Fact-Cards (Layer 2):** every claim links to a primary document. Conflicts are labeled "widersprüchliche Quellen", thin data is labeled "Datenlage unklar". Gaps are visible, not hidden.
-- **Methodology section:** which sources were used, which were excluded, when the data was collected, who verified.
+Every cluster links back to the original outlet articles. Blind spots — outlets that didn't cover a story — are shown, not hidden.
 
-### 4. Discussion is moderated openly
-Comments can be up- and down-voted. Heavily-downvoted comments collapse with a "Low quality" label — content stays accessible. Human moderation contact is named and reachable (this is also a DSA / German legal obligation, not just a nice-to-have).
+### 4. Methodology is visible
+Which outlets are included, which feeds, how clustering works, when the data was last refreshed.
 
 ---
 
@@ -61,9 +59,8 @@ Comments can be up- and down-voted. Heavily-downvoted comments collapse with a "
 - **Framework:** [Next.js](https://nextjs.org/) (App Router, TypeScript)
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/)
 - **i18n:** [next-intl](https://next-intl.dev/) — German first, English secondary
-- **Auth:** [Better Auth](https://better-auth.com/) (Magic Link only)
 - **Database:** [Neon](https://neon.tech/) Postgres + [Drizzle ORM](https://orm.drizzle.team/) + `pgvector`
-- **Background jobs:** [Upstash QStash / Workflows](https://upstash.com/) (mandatory for any AI work — never in route handlers)
+- **Scheduled jobs:** Vercel Cron (no external queue in v1)
 - **AI:** [Claude](https://www.anthropic.com/) (Anthropic API)
 - **Hosting:** [Vercel](https://vercel.com/)
 - **Tooling:** [Bun](https://bun.sh/) (managed via [mise](https://mise.jdx.dev/)), [Biome](https://biomejs.dev/), [Vitest](https://vitest.dev/)
