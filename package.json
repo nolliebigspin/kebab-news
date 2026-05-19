@@ -13,6 +13,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
+    "ingest:run": "bun scripts/ingest-run.ts",
     "check:lint": "biome lint --write ./",
     "check:format": "biome format --write ./",
     "check:imports": "biome check --formatter-enabled=false --linter-enabled=false --write ./",

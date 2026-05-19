@@ -40,8 +40,8 @@ function log(runId: string, event: string, fields: Record<string, unknown> = {})
 }
 
 /**
- * GET — Vercel Cron hits this every 30 min with a CRON_SECRET bearer token.
- * Auth is enforced.
+ * Vercel Cron hits this every 30 min with a CRON_SECRET bearer token.
+ * Manual runs use the same auth via `bun ingest:run`.
  */
 export async function GET(request: Request) {
   const auth = request.headers.get("authorization");
@@ -51,15 +51,7 @@ export async function GET(request: Request) {
   return runIngest("cron");
 }
 
-/**
- * POST — manual trigger from the /radar/admin button. Public for now (no
- * auth) per the SLC plan; lock down later if abuse becomes a concern.
- */
-export async function POST() {
-  return runIngest("manual");
-}
-
-async function runIngest(trigger: "cron" | "manual") {
+async function runIngest(trigger: "cron") {
   const runId = `run_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
   const startedAt = Date.now();
   log(runId, "ingest.start", { trigger });
