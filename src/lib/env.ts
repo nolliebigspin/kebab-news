@@ -9,11 +9,21 @@ export const env = createEnv({
     VOYAGE_API_KEY: z.string().min(1),
     CRON_SECRET: z.string().min(16),
 
+    // When "true", the Vercel-Cron-scheduled hits to /api/cron/ingest run
+    // normally. When "false" (default), scheduled hits are short-circuited
+    // and `bun ingest:run` is the only way to ingest. Manual runs are
+    // distinguished by the absence of the `user-agent: vercel-cron/*` header
+    // and are NEVER blocked by this flag.
+    AUTOMATIC_CRON: z
+      .enum(["true", "false"])
+      .default("false")
+      .transform((v) => v === "true"),
+
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   },
 
   client: {
-    NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
+    NEXT_PUBLIC_APP_URL: z.url().default("http://localhost:3000"),
   },
 
   runtimeEnv: {
@@ -21,6 +31,7 @@ export const env = createEnv({
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
     VOYAGE_API_KEY: process.env.VOYAGE_API_KEY,
     CRON_SECRET: process.env.CRON_SECRET,
+    AUTOMATIC_CRON: process.env.AUTOMATIC_CRON,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   },

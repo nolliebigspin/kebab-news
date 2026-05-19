@@ -50,10 +50,24 @@ export async function GET(request: Request) {
   if (auth !== `Bearer ${env.CRON_SECRET}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
-  return runIngest("cron");
+
+  // Distinguish Vercel-Cron auto-fires from manual runs. Vercel-Cron sends
+  // a fixed user-agent; anything else (curl, bun ingest:run, browser) is
+  // treated as manual and bypasses the AUTOMATIC_CRON flag.
+  const userAgent = request.headers.get("user-agent") ?? "";
+  const isVercelCron = userAgent.startsWith("vercel-cron/");
+
+  if (isVercelCron && !env.AUTOMATIC_CRON) {
+    return NextResponse.json({
+      skipped: true,
+      reason: "AUTOMATIC_CRON=false — scheduled ingest is disabled",
+    });
+  }
+
+  return runIngest(isVercelCron ? "cron" : "manual");
 }
 
-async function runIngest(trigger: "cron") {
+async function runIngest(trigger: "cron" | "manual") {
   const runId = `run_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
   const startedAt = Date.now();
   log(runId, "ingest.start", { trigger });
