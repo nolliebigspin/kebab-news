@@ -2,10 +2,12 @@
  * Pure clustering primitives. No IO, no DB — just math.
  *
  * The cron handler is responsible for loading candidate stories (those with
- * last_seen_at > now() - 72h) and calling `assignStory` for each new article.
+ * last_seen_at > now() - STORY_WINDOW_HOURS) and calling `assignStory` for
+ * each new article.
  */
+import { DEFAULT_CLUSTER_THRESHOLD } from "@/lib/constants";
 
-export const DEFAULT_CLUSTER_THRESHOLD = 0.78;
+export { DEFAULT_CLUSTER_THRESHOLD };
 
 export type ClusterCandidate = {
   storyId: string;

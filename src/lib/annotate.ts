@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 
+import { ANNOTATION_MODEL, ANNOTATION_SYSTEM_PROMPT, MAX_ANNOTATION_SPANS } from "@/lib/constants";
 import { env } from "@/lib/env";
 
 export const annotationTypeValues = [
@@ -21,25 +22,8 @@ export const AnnotationSchema = z
   })
   .refine((a) => a.start < a.end, { message: "start must be < end" });
 
-export const AnnotationsSchema = z.array(AnnotationSchema).max(10);
+export const AnnotationsSchema = z.array(AnnotationSchema).max(MAX_ANNOTATION_SPANS);
 export type Annotation = z.infer<typeof AnnotationSchema>;
-
-const ANNOTATION_MODEL = "claude-opus-4-7";
-
-const SYSTEM_PROMPT = [
-  "Du bist ein Framing-Analyse-Werkzeug für deutschsprachige Nachrichten.",
-  "Aufgabe: Im gegebenen Text geladene Begriffe, emotionale Trigger, vorausgesetzte Annahmen,",
-  "Euphemismen und auffällige Auslassungen markieren.",
-  "",
-  "Regeln:",
-  "- start und end sind UTF-16-Code-Unit-Offsets im Originaltext (wie String#length und String#slice in JavaScript).",
-  "- start < end, beide ≥ 0, end ≤ text.length.",
-  "- Höchstens 10 Annotationen. Nur wirklich auffällige Stellen markieren — keine Marker um neutralen Text.",
-  "- note ist eine kurze deutsche Begründung (max ~30 Wörter), die erklärt, warum diese Stelle Framing trägt.",
-  "- type ist genau einer von: loaded-term, emotional-trigger, presupposition, euphemism, omission.",
-  "- Wenn der Text neutral ist: leeres Array zurückgeben.",
-  "- Niemals umschreiben, niemals korrigieren — nur annotieren.",
-].join("\n");
 
 const JSON_SCHEMA = {
   type: "object",
@@ -48,7 +32,7 @@ const JSON_SCHEMA = {
   properties: {
     annotations: {
       type: "array",
-      maxItems: 10,
+      maxItems: MAX_ANNOTATION_SPANS,
       items: {
         type: "object",
         additionalProperties: false,
@@ -90,7 +74,7 @@ export async function annotateText(text: string): Promise<Annotation[]> {
     const response = await client.messages.create({
       model: ANNOTATION_MODEL,
       max_tokens: 1024,
-      system: SYSTEM_PROMPT,
+      system: ANNOTATION_SYSTEM_PROMPT,
       output_config: {
         format: { type: "json_schema", schema: JSON_SCHEMA },
       },

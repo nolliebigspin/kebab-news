@@ -1,8 +1,5 @@
-import { EMBEDDING_DIMENSIONS } from "@/lib/db/schema";
+import { EMBEDDING_DIMENSIONS, VOYAGE_MODEL, VOYAGE_URL } from "@/lib/constants";
 import { env } from "@/lib/env";
-
-const VOYAGE_MODEL = "voyage-3-lite";
-const VOYAGE_URL = "https://api.voyageai.com/v1/embeddings";
 
 type VoyageResponse = {
   data?: Array<{ embedding?: number[] }>;

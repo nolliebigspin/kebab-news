@@ -4,19 +4,15 @@ import Parser from "rss-parser";
 
 import { annotateText } from "@/lib/annotate";
 import { assignStory, type ClusterCandidate } from "@/lib/cluster";
+import {
+  MAX_NEW_ARTICLES_PER_OUTLET,
+  PER_OUTLET_FEED_SCAN,
+  STORY_WINDOW_HOURS,
+} from "@/lib/constants";
 import { articles, db, type Outlet, outlets, stories } from "@/lib/db";
 import { embedText } from "@/lib/embeddings";
 import { env } from "@/lib/env";
 import { generateStorySlug } from "@/lib/slug";
-
-const STORY_WINDOW_HOURS = 72;
-// How many newest items from each feed to *consider*. We slice further below
-// to MAX_NEW_ARTICLES_PER_OUTLET after dedup against the DB.
-const PER_OUTLET_FEED_SCAN = 30;
-// Hard cap on new articles ingested per outlet per run. The AI pipeline does
-// 1 embedding + 2 annotation calls per article, so this directly bounds the
-// wall-clock cost. Remaining articles stay un-ingested until the next run.
-const MAX_NEW_ARTICLES_PER_OUTLET = 5;
 
 const parser = new Parser({
   timeout: 20_000,
