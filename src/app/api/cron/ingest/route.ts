@@ -1,4 +1,4 @@
-import { eq, gt } from "drizzle-orm";
+import { eq, gt, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import Parser from "rss-parser";
 
@@ -10,7 +10,13 @@ import { env } from "@/lib/env";
 import { generateStorySlug } from "@/lib/slug";
 
 const STORY_WINDOW_HOURS = 72;
-const PER_OUTLET_LIMIT = 30; // newest N items per feed per run
+// How many newest items from each feed to *consider*. We slice further below
+// to MAX_NEW_ARTICLES_PER_OUTLET after dedup against the DB.
+const PER_OUTLET_FEED_SCAN = 30;
+// Hard cap on new articles ingested per outlet per run. The AI pipeline does
+// 1 embedding + 2 annotation calls per article, so this directly bounds the
+// wall-clock cost. Remaining articles stay un-ingested until the next run.
+const MAX_NEW_ARTICLES_PER_OUTLET = 5;
 
 const parser = new Parser({
   timeout: 20_000,
@@ -128,7 +134,7 @@ async function ingestOutlet(outlet: Outlet, runId: string): Promise<OutletResult
   };
 
   const incoming: IncomingItem[] = [];
-  for (const item of feed.items.slice(0, PER_OUTLET_LIMIT)) {
+  for (const item of feed.items.slice(0, PER_OUTLET_FEED_SCAN)) {
     if (!item.link || !item.title) continue;
     const publishedAt = item.isoDate
       ? new Date(item.isoDate)
@@ -148,11 +154,42 @@ async function ingestOutlet(outlet: Outlet, runId: string): Promise<OutletResult
     return { slug: outlet.slug, newArticles: 0, newStories: 0 };
   }
 
-  // ON CONFLICT (url) DO NOTHING, returning only newly inserted rows.
+  // Filter out URLs we already have, BEFORE applying the AI cap. This way the
+  // cap counts new articles only — if 25 of the top 30 feed items are
+  // already ingested, we still ingest the 5 that are actually new (not 0
+  // because the cap got "spent" on dedup).
+  const existingRows = await db
+    .select({ url: articles.url })
+    .from(articles)
+    .where(
+      inArray(
+        articles.url,
+        incoming.map((i) => i.url)
+      )
+    );
+  const existingUrls = new Set(existingRows.map((r) => r.url));
+  const fresh = incoming.filter((i) => !existingUrls.has(i.url));
+
+  const skippedByCap = Math.max(0, fresh.length - MAX_NEW_ARTICLES_PER_OUTLET);
+  const toInsert = fresh.slice(0, MAX_NEW_ARTICLES_PER_OUTLET);
+
+  if (toInsert.length === 0) {
+    log(runId, "outlet.articles_inserted", {
+      slug: outlet.slug,
+      candidates: incoming.length,
+      newArticles: 0,
+      skippedByCap,
+    });
+    return { slug: outlet.slug, newArticles: 0, newStories: 0 };
+  }
+
+  // ON CONFLICT (url) DO NOTHING is belt-and-suspenders against a race
+  // between our dedup query and the insert (another run, manual + cron
+  // overlap). Returning still gives us only newly inserted rows.
   const inserted = await db
     .insert(articles)
     .values(
-      incoming.map((i) => ({
+      toInsert.map((i) => ({
         outletId: outlet.id,
         url: i.url,
         headline: i.headline,
@@ -171,6 +208,7 @@ async function ingestOutlet(outlet: Outlet, runId: string): Promise<OutletResult
     slug: outlet.slug,
     candidates: incoming.length,
     newArticles: inserted.length,
+    skippedByCap,
   });
 
   if (inserted.length === 0) {
