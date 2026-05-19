@@ -5,17 +5,9 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.string().url().min(1),
 
-    // Phase 2 will tighten these to required. Phase 1 only needs them
-    // declared so .env.example covers the full v0.2 surface.
-    NEON_AUTH_BASE_URL: z.string().url().optional(),
-    NEON_AUTH_COOKIE_SECRET: z.string().min(32).optional(),
-
-    QSTASH_URL: z.string().url().default("https://qstash.upstash.io"),
-    QSTASH_TOKEN: z.string().min(1).optional(),
-    QSTASH_CURRENT_SIGNING_KEY: z.string().min(1).optional(),
-    QSTASH_NEXT_SIGNING_KEY: z.string().min(1).optional(),
-
-    ANTHROPIC_API_KEY: z.string().min(1).optional(),
+    ANTHROPIC_API_KEY: z.string().min(1),
+    VOYAGE_API_KEY: z.string().min(1),
+    CRON_SECRET: z.string().min(16),
 
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   },
@@ -26,13 +18,9 @@ export const env = createEnv({
 
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
-    NEON_AUTH_BASE_URL: process.env.NEON_AUTH_BASE_URL,
-    NEON_AUTH_COOKIE_SECRET: process.env.NEON_AUTH_COOKIE_SECRET,
-    QSTASH_URL: process.env.QSTASH_URL,
-    QSTASH_TOKEN: process.env.QSTASH_TOKEN,
-    QSTASH_CURRENT_SIGNING_KEY: process.env.QSTASH_CURRENT_SIGNING_KEY,
-    QSTASH_NEXT_SIGNING_KEY: process.env.QSTASH_NEXT_SIGNING_KEY,
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+    VOYAGE_API_KEY: process.env.VOYAGE_API_KEY,
+    CRON_SECRET: process.env.CRON_SECRET,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   },

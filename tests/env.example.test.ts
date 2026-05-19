@@ -1,18 +1,14 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-describe(".env.example (INFRA-09)", () => {
+describe(".env.example", () => {
   it("declares every server var validated by env.ts", () => {
     const example = readFileSync(".env.example", "utf-8");
     const required = [
       "DATABASE_URL",
-      "NEON_AUTH_BASE_URL",
-      "NEON_AUTH_COOKIE_SECRET",
-      "QSTASH_URL",
-      "QSTASH_TOKEN",
-      "QSTASH_CURRENT_SIGNING_KEY",
-      "QSTASH_NEXT_SIGNING_KEY",
       "ANTHROPIC_API_KEY",
+      "VOYAGE_API_KEY",
+      "CRON_SECRET",
       "NEXT_PUBLIC_APP_URL",
     ];
     for (const key of required) {
@@ -20,8 +16,10 @@ describe(".env.example (INFRA-09)", () => {
     }
   });
 
-  it("does NOT contain BETTER_AUTH_* vars (Neon Auth replaces them per RESEARCH §7)", () => {
+  it("does not carry over removed v0.2 scaffolding", () => {
     const example = readFileSync(".env.example", "utf-8");
+    expect(example).not.toMatch(/^QSTASH_/m);
+    expect(example).not.toMatch(/^NEON_AUTH_/m);
     expect(example).not.toMatch(/^BETTER_AUTH_/m);
   });
 });
