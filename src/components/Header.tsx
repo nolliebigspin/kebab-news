@@ -3,6 +3,7 @@ import { FaGithub } from "react-icons/fa6";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/Wordmark";
+import { Link } from "@/i18n/routing";
 import { GITHUB_URL } from "@/lib/constants";
 
 export const Header = () => {
@@ -13,6 +14,12 @@ export const Header = () => {
       <div className="mx-auto flex max-w-5xl items-center justify-between">
         <Wordmark />
         <div className="flex items-center gap-4 md:gap-8">
+          <Link
+            href="/radar"
+            className="font-mono text-ink-soft text-xs uppercase tracking-[0.12em] hover:text-brand"
+          >
+            {t("radar")}
+          </Link>
           <LanguageSwitcher />
           <Button
             variant="outline"

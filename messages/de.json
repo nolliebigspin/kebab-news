@@ -1,6 +1,7 @@
 {
   "header": {
-    "github": "GitHub"
+    "github": "GitHub",
+    "radar": "Radar"
   },
   "hero": {
     "badge": "Noch am Aufbau, mach mit",
@@ -13,5 +14,31 @@
   },
   "footer": {
     "nonprofit": "gemeinnützig · werbefrei · open source"
+  },
+  "radar": {
+    "page_title": "Radar",
+    "page_subtitle": "Dieselbe Geschichte, nebeneinander, über das politische Spektrum hinweg. Rahmung wird an den Schlagzeilen markiert — geschrieben wird nichts um.",
+    "empty": "Noch keine Geschichten. Das Radar füllt sich, sobald die ersten Quellen aktualisiert sind.",
+    "article_count": "{count, plural, one {# Artikel} other {# Artikel}}",
+    "blind_spots_label": "Blindstellen",
+    "no_blind_spots": "Keine Blindstellen — alle politischen Lager berichten.",
+    "read_at_source": "Beim Outlet lesen →",
+    "back_to_radar": "Zurück zum Radar",
+    "lean": {
+      "left": "Links",
+      "center-left": "Mitte-Links",
+      "center": "Mitte",
+      "center-right": "Mitte-Rechts",
+      "right": "Rechts",
+      "right-fringe": "Rechter Rand",
+      "public": "Öffentlich-Rechtlich"
+    },
+    "annotation": {
+      "loaded-term": "Geladener Begriff",
+      "emotional-trigger": "Emotionaler Trigger",
+      "presupposition": "Vorausgesetzte Annahme",
+      "euphemism": "Euphemismus",
+      "omission": "Auslassung"
+    }
   }
 }

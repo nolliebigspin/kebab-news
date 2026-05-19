@@ -1,6 +1,7 @@
 {
   "header": {
-    "github": "GitHub"
+    "github": "GitHub",
+    "radar": "Radar"
   },
   "hero": {
     "badge": "Still building, join us",
@@ -13,5 +14,31 @@
   },
   "footer": {
     "nonprofit": "non-profit · ad-free · open source"
+  },
+  "radar": {
+    "page_title": "Radar",
+    "page_subtitle": "The same story, side by side, across the political spectrum. Framing is annotated on the headlines themselves — never rewritten.",
+    "empty": "No stories yet. The radar fills in once the first feeds update.",
+    "article_count": "{count, plural, one {# article} other {# articles}}",
+    "blind_spots_label": "Blind spots",
+    "no_blind_spots": "No blind spots — every political camp covered this.",
+    "read_at_source": "Read at source →",
+    "back_to_radar": "Back to radar",
+    "lean": {
+      "left": "Left",
+      "center-left": "Center-left",
+      "center": "Center",
+      "center-right": "Center-right",
+      "right": "Right",
+      "right-fringe": "Right fringe",
+      "public": "Public broadcaster"
+    },
+    "annotation": {
+      "loaded-term": "Loaded term",
+      "emotional-trigger": "Emotional trigger",
+      "presupposition": "Presupposition",
+      "euphemism": "Euphemism",
+      "omission": "Omission"
+    }
   }
 }
