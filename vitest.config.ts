@@ -4,6 +4,8 @@ import { defineConfig } from "vitest/config";
 
 // Load .env / .env.local for tests (Next.js does this automatically at runtime,
 // but vitest doesn't — without this, env.DATABASE_URL would be undefined).
+// Env placeholders for vars we don't actually exercise live in tests/db/setup.ts
+// because they need to be re-applied per vitest worker.
 config({ path: ".env.local", quiet: true });
 config({ path: ".env", quiet: true });
 
