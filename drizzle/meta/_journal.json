@@ -12,8 +12,8 @@
     {
       "idx": 1,
       "version": "7",
-      "when": 1777342271137,
-      "tag": "0001_initial_schema",
+      "when": 1779200641656,
+      "tag": "0001_radar_schema",
       "breakpoints": true
     }
   ]

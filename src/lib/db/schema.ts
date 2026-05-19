@@ -1,68 +1,82 @@
 import { sql } from "drizzle-orm";
-import { usersSync } from "drizzle-orm/neon";
-import { integer, pgEnum, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import {
+  index,
+  integer,
+  jsonb,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+  vector,
+} from "drizzle-orm/pg-core";
 
-/**
- * usersSync is owned by Neon Auth (lives in neon_auth schema, never in our migrations).
- * Re-exported so app code can `import { usersSync } from "@/lib/db"` once Phase 2
- * enables Neon Auth on the Neon project.
- *
- * usersSync.id is text (verified from drizzle-orm@0.45.2/neon/neon-auth.js).
- * Therefore public.users.id MUST be text to satisfy the FK type match.
- */
-export { usersSync };
+export const EMBEDDING_DIMENSIONS = 512;
 
-// public.users — profile-only; identity is in neon_auth.users_sync.
-//
-// PHASE 2 TODO: re-add the cross-schema FK once Neon Auth is enabled on the
-// Neon project (which auto-creates neon_auth.users_sync). Phase 1 ships
-// without the FK because Neon Auth provisioning is a Phase 2 task; the FK
-// would otherwise fail at migration time. Phase 1's success criteria require
-// the table to exist, not the FK.
-//   .references(() => usersSync.id, { onDelete: "cascade" })
-export const users = pgTable("users", {
-  id: text("id").primaryKey(),
-  trustScore: integer("trust_score").notNull().default(0),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const outletLeanValues = [
+  "left",
+  "center-left",
+  "center",
+  "center-right",
+  "right",
+  "right-fringe",
+  "public",
+] as const;
+export const outletLeanEnum = pgEnum("outlet_lean", outletLeanValues);
+export type OutletLean = (typeof outletLeanValues)[number];
 
-// topics
-export const topicStatusValues = ["voting", "investigating", "done"] as const;
-export const topicStatusEnum = pgEnum("topic_status", topicStatusValues);
-export type TopicStatus = (typeof topicStatusValues)[number];
-
-export const topics = pgTable("topics", {
+export const outlets = pgTable("outlets", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  title: text("title").notNull(),
-  originalSubmission: text("original_submission").notNull(),
-  neutralRewrite: text("neutral_rewrite"),
-  status: topicStatusEnum("status").notNull().default("voting"),
-  voteCount: integer("vote_count").notNull().default(0),
-  createdBy: text("created_by")
-    .notNull()
-    .references(() => users.id, { onDelete: "restrict" }),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  politicalLean: outletLeanEnum("political_lean").notNull(),
+  feedUrl: text("feed_url").notNull(),
+  homepageUrl: text("homepage_url").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-// votes
-export const votes = pgTable(
-  "votes",
+export const stories = pgTable(
+  "stories",
   {
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    topicId: uuid("topic_id")
-      .notNull()
-      .references(() => topics.id, { onDelete: "cascade" }),
-    weekBucket: text("week_bucket").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    slug: text("slug").notNull().unique(),
+    label: text("label").notNull(),
+    firstSeenAt: timestamp("first_seen_at", { withTimezone: true }).notNull().defaultNow(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
+    centroid: vector("centroid", { dimensions: EMBEDDING_DIMENSIONS }).notNull(),
+    articleCount: integer("article_count").notNull().default(0),
   },
-  (t) => [unique("votes_user_topic_week_unique").on(t.userId, t.topicId, t.weekBucket)]
+  (t) => [index("stories_last_seen_at_idx").on(t.lastSeenAt.desc())]
 );
 
-export type User = typeof users.$inferSelect;
-export type NewUser = typeof users.$inferInsert;
-export type Topic = typeof topics.$inferSelect;
-export type NewTopic = typeof topics.$inferInsert;
-export type Vote = typeof votes.$inferSelect;
-export type NewVote = typeof votes.$inferInsert;
+export const articles = pgTable(
+  "articles",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    outletId: uuid("outlet_id")
+      .notNull()
+      .references(() => outlets.id, { onDelete: "cascade" }),
+    url: text("url").notNull(),
+    headline: text("headline").notNull(),
+    teaser: text("teaser"),
+    headlineAnnotations: jsonb("headline_annotations").notNull().default(sql`'[]'::jsonb`),
+    teaserAnnotations: jsonb("teaser_annotations").notNull().default(sql`'[]'::jsonb`),
+    publishedAt: timestamp("published_at", { withTimezone: true }).notNull(),
+    fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),
+    embedding: vector("embedding", { dimensions: EMBEDDING_DIMENSIONS }),
+    storyId: uuid("story_id").references(() => stories.id, { onDelete: "set null" }),
+  },
+  (t) => [
+    uniqueIndex("articles_url_unique").on(t.url),
+    index("articles_published_at_idx").on(t.publishedAt.desc()),
+    index("articles_story_id_idx").on(t.storyId),
+  ]
+);
+
+export type Outlet = typeof outlets.$inferSelect;
+export type NewOutlet = typeof outlets.$inferInsert;
+export type Story = typeof stories.$inferSelect;
+export type NewStory = typeof stories.$inferInsert;
+export type Article = typeof articles.$inferSelect;
+export type NewArticle = typeof articles.$inferInsert;
