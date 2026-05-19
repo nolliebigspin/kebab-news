@@ -1,13 +1,17 @@
-import { eq } from "drizzle-orm";
-import { afterAll, describe, expect, it } from "vitest";
+import { eq, or } from "drizzle-orm";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { db, outlets } from "@/lib/db";
 
 const TEST_SLUG = "__test_outlet_schema__";
+const BOGUS_SLUG = "__bogus__";
 
-afterAll(async () => {
-  await db.delete(outlets).where(eq(outlets.slug, TEST_SLUG));
-});
+async function cleanup() {
+  await db.delete(outlets).where(or(eq(outlets.slug, TEST_SLUG), eq(outlets.slug, BOGUS_SLUG)));
+}
+
+beforeAll(cleanup);
+afterAll(cleanup);
 
 describe("outlets schema", () => {
   it("inserts and selects a row with each enum value accepted", async () => {
