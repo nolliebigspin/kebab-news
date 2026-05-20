@@ -17,6 +17,9 @@ build/
 .env.local
 .env.*.local
 
+# Operator-local output (spike reports, scratchpads)
+tmp/
+
 # Misc
 .DS_Store
 *.pem
