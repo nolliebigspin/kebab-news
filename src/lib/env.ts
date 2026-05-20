@@ -9,6 +9,11 @@ export const env = createEnv({
     VOYAGE_API_KEY: z.string().min(1),
     CRON_SECRET: z.string().min(16),
 
+    // Daily-rotating salt for hashing voter IPs before they hit the DB.
+    // Stable enough to dedup the same IP across the day, ephemeral enough
+    // that we can't reconstruct yesterday's voters. Rotate manually.
+    VOTE_DAILY_SALT: z.string().min(16),
+
     // When "true", the Vercel-Cron-scheduled hits to /api/cron/ingest run
     // normally. When "false" (default), scheduled hits are short-circuited
     // and `bun ingest:run` is the only way to ingest. Manual runs are
@@ -31,6 +36,7 @@ export const env = createEnv({
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
     VOYAGE_API_KEY: process.env.VOYAGE_API_KEY,
     CRON_SECRET: process.env.CRON_SECRET,
+    VOTE_DAILY_SALT: process.env.VOTE_DAILY_SALT,
     AUTOMATIC_CRON: process.env.AUTOMATIC_CRON,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,

@@ -19,5 +19,9 @@ export default defineConfig({
     environment: "node",
     include: ["tests/**/*.test.ts"],
     setupFiles: ["./tests/db/setup.ts"],
+    // All DB-touching test files share a real Neon dev DB. Running in
+    // parallel causes one file's cleanup to wipe another file's fixtures
+    // mid-test. Serialize file execution to avoid this.
+    fileParallelism: false,
   },
 });

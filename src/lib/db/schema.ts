@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  date,
   index,
   integer,
   jsonb,
@@ -74,9 +75,34 @@ export const articles = pgTable(
   ]
 );
 
+/**
+ * Reader votes on radar stories. One vote per (story, ip_hash, day_bucket) —
+ * the unique constraint enforces "one vote per IP per story per day". Raw IPs
+ * never land here; we store sha256(ip + VOTE_DAILY_SALT) so the bucket rotates
+ * daily and the original IP is unrecoverable for DSGVO compliance.
+ */
+export const votes = pgTable(
+  "votes",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    storyId: uuid("story_id")
+      .notNull()
+      .references(() => stories.id, { onDelete: "cascade" }),
+    ipHash: text("ip_hash").notNull(),
+    dayBucket: date("day_bucket").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("votes_story_ip_day_unique").on(t.storyId, t.ipHash, t.dayBucket),
+    index("votes_story_day_idx").on(t.storyId, t.dayBucket),
+  ]
+);
+
 export type Outlet = typeof outlets.$inferSelect;
 export type NewOutlet = typeof outlets.$inferInsert;
 export type Story = typeof stories.$inferSelect;
 export type NewStory = typeof stories.$inferInsert;
 export type Article = typeof articles.$inferSelect;
 export type NewArticle = typeof articles.$inferInsert;
+export type Vote = typeof votes.$inferSelect;
+export type NewVote = typeof votes.$inferInsert;
