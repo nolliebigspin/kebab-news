@@ -1,56 +1,39 @@
 # kebab.news
 
-> **Wir sagen dir nicht, was du denken sollst. Wir zeigen dir, woher die Information kommt.**
+> **Eine Geschichte. Eine neutrale Fassung. Alle Quellen sichtbar.**
 
-kebab.news ist eine **Verifikationsschnittstelle für deutschsprachige Nachrichten**. Wir arbeiten gegen Framing, emotionale Sprache und die Themensetzung klassischer Nachrichtenportale, indem wir sichtbar machen, **wie** über etwas berichtet wird — und parallel, **was die Primärquellen tatsächlich hergeben**.
+kebab.news ist eine KI-redigierte Nachrichten-Redaktion für den deutschsprachigen Raum. Wir nehmen die wichtigsten Geschichten des Tages, schauen uns an, wie jedes Outlet über das politische Spektrum hinweg darüber berichtet, und veröffentlichen **eine neutrale, KI-umformulierte Fassung pro Geschichte** — mit jedem Originalartikel der Outlets als Beleg sichtbar darunter.
 
-Wir sind kein Nachrichtenmedium. Wir sind ein Werkzeug.
-
----
-
-## Unsere Haltung: Transparenz statt Neutralität
-
-Wir behaupten nicht, neutral zu sein. Auch wir treffen Entscheidungen — welche Quellen wir einbeziehen, welche Fragen wir stellen, welche Perspektiven wir zeigen. Keine Plattform entkommt dem.
-
-Was wir stattdessen tun: wir **machen jeden Schritt sichtbar**. Die Rahmung, die Quellen, die KI-Prompts, das, was wir bewusst nicht einbezogen haben. Du kannst nachvollziehen, hinterfragen und widersprechen — mit Belegen, nicht mit Bauchgefühl.
-
-> *Transparenz statt Neutralität. Nachvollziehbarkeit statt Autorität. Struktur statt Narrativ.*
+Wir sind kein Verlag mit Journalisten. Wir sind ein einzelner, möglichst rahmungsarmer Einstieg in die deutschsprachige Nachrichtenlage — mit allen Quellen weiterhin auf dem Tisch.
 
 ---
 
-## Was wir bauen
+## Unsere Haltung
 
-Wir starten als **SLC — Simple, Lovable, Complete**. Eine Sache, gut gemacht, bevor irgendetwas anderes dazukommt.
+Wir versprechen keine Wahrheit. Wir versprechen **eine konsistente, neutral formulierte Fassung jeder Geschichte** plus die vollständige Originalberichterstattung der Outlets darunter. Wenn unsere Fassung anders klingt als das, was taz, FAZ oder Welt geschrieben haben, kannst du das mit einem Klick prüfen.
 
-### v1 — Radar
+Jeder veröffentlichte Artikel trägt einen sichtbaren Hinweis: *„KI-generierte Zusammenfassung. Ungeprüft."*
 
-Ein nur-lesendes, deutschsprachiges **Multi-Quellen-Radar**. Dieselbe Geschichte, nebeneinander, über das politische Spektrum hinweg (taz / SZ / FAZ / Welt / NZZ / Junge Freiheit / Nius / öffentlich-rechtlich und mehr). Framing-Unterschiede direkt an den Schlagzeilen der jeweiligen Outlets hervorgehoben. Blindstellen — was eine Seite *nicht* berichtet — explizit benannt.
-
-Keine KI-generierten Artikel. Keine Nutzerkonten. Keine Kommentare. KI dient ausschließlich dem Clustern von Geschichten und dem Annotieren von Framing-Sprache auf den Schlagzeilen selbst.
-
-**Warum:** Ground.news hat das für den englischsprachigen Raum gelöst. Im deutschsprachigen Raum macht es niemand. Das ist die Lücke.
-
-### Später — Verifikationsschleife
-
-Sobald das Radar es verdient hat, kommt eine community-getriebene Recherche-Schicht dazu. Für Themen, die untersuchenswert sind, läuft eine KI-gestützte **Recherche über Primärquellen** — Bundestag-Drucksachen, Destatis, BMF-Haushalt, RKI/PEI, EU-Dokumente, Gerichtsurteile. Das Ergebnis sind strukturierte Fact-Cards: jede Aussage hovergenau verlinkt auf ihre Quelle, mit expliziten Unsicherheits-Labels, wo die Datenlage dünn oder widersprüchlich ist.
-
-Die KI fasst zusammen und verlinkt. Sie kommentiert nicht. Jeder Schritt ist für die Lesenden einsehbar: verwendeter Prompt, herangezogene Quellen, ausgeschlossene Quellen, ob eine menschliche Prüfung stattgefunden hat.
+> *Neutralität durch Umschreiben. Transparenz durch Quellenangabe.*
 
 ---
 
-## Wie es funktioniert (v1)
+## Wie es funktioniert
 
-### 1. Spektrum-Berichterstattung, nebeneinander
-Für jede Top-Geschichte des Tages zeigen wir, wie jedes Outlet darüber berichtet hat — über das politische Spektrum hinweg, auf einem Screen.
+### 1. Wir sammeln, was deutschsprachige Outlets veröffentlichen
+Ein geplanter Ingest holt Schlagzeilen und Teaser von taz, SZ, FAZ, Welt, NZZ, Junge Freiheit, Nius, tagesschau und weiteren. Artikel werden über semantische Ähnlichkeit zu Geschichten geclustert — „dieselbe Nachricht" aus verschiedenen Outlets landet in einer Gruppe, egal wie sie der jeweilige Verlag betitelt hat.
 
-### 2. Framing wird annotiert, nicht umgeschrieben
-Die KI markiert geladene Begriffe und implizite Rahmungen direkt an den Schlagzeilen der Outlets. Die Originalschlagzeile bleibt sichtbar. Wir ersetzen nicht die eine Voreingenommenheit durch die eines Sprachmodells und nennen das dann neutral.
+### 2. Wir annotieren Framing in den Outlet-Schlagzeilen
+Die KI markiert geladene Begriffe, emotionale Trigger, vorausgesetzte Annahmen, Euphemismen und auffällige Auslassungen — direkt auf den Originalschlagzeilen der Outlets. Die Originalschlagzeile bleibt sichtbar; die Annotation erklärt, *warum* diese Geschichte eine neutrale Fassung verdient.
 
-### 3. Quellen sind das Produkt
-Jedes Cluster verlinkt zurück auf die Originalartikel der Outlets. Blindstellen — Outlets, die eine Geschichte nicht berichtet haben — werden gezeigt, nicht versteckt.
+### 3. Lesende stimmen ab, was neu geschrieben wird
+Das Radar zeigt die wichtigsten Cluster des Tages. Lesende stimmen ab, welche Geschichte eine vollständige neutrale Fassung bekommen soll. Eine Stimme pro IP pro Tag pro Geschichte. Die Geschichte mit den meisten Stimmen wird ausgewählt.
 
-### 4. Methodik ist sichtbar
-Welche Outlets sind enthalten, welche Feeds, wie funktioniert das Clustering, wann wurden die Daten zuletzt aktualisiert.
+### 4. Wir schreiben den Gewinner neutral um
+Für die ausgewählte Geschichte holen wir Schlagzeilen + Teaser + Artikeltexte aller Outlets, die darüber berichtet haben, schicken sie durch Claude mit einem strikten Prompt für neutrales Deutsch und erzeugen eine Schlagzeile und einen Text von etwa 200–400 Wörtern. Das Ergebnis wird unter `/artikel/[slug]` veröffentlicht.
+
+### 5. Quellen bleiben sichtbar
+Jeder veröffentlichte Artikel hat unterhalb der Umschreibung einen „Quellen"-Bereich — jeder Originalartikel der Outlets, sein Lean-Label, seine Framing-Markierungen und ein Link nach außen. Wenn unsere Fassung schräg klingt, kannst du das prüfen.
 
 ---
 
@@ -60,8 +43,9 @@ Welche Outlets sind enthalten, welche Feeds, wie funktioniert das Clustering, wa
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/)
 - **Sprache:** [next-intl](https://next-intl.dev/) — Deutsch primär, Englisch sekundär
 - **Datenbank:** [Neon](https://neon.tech/) Postgres + [Drizzle ORM](https://orm.drizzle.team/) + `pgvector`
-- **Geplante Jobs:** Vercel Cron (keine externe Queue in v1)
-- **KI:** [Claude](https://www.anthropic.com/) (Anthropic API)
+- **Geplante Jobs:** Vercel Cron
+- **KI — Embeddings:** [Voyage AI](https://www.voyageai.com/) (`voyage-3-lite`, 512 Dimensionen) fürs Clustern
+- **KI — Framing-Annotation & neutrale Umschreibung:** [Claude](https://www.anthropic.com/) (`claude-opus-4-7`)
 - **Hosting:** [Vercel](https://vercel.com/)
 - **Werkzeuge:** [Bun](https://bun.sh/) (verwaltet über [mise](https://mise.jdx.dev/)), [Biome](https://biomejs.dev/), [Vitest](https://vitest.dev/)
 
@@ -77,6 +61,14 @@ mise exec -- bun install        # installiert die npm-Abhängigkeiten
 mise exec -- bun dev            # startet den Dev-Server
 ```
 
+Operator-Befehle (v1 ist absichtlich manuell):
+
+```bash
+mise exec -- bun ingest:run                        # Feeds holen, clustern, annotieren
+mise exec -- bun rewrite:run --story SLUG          # neutralen Entwurf erzeugen
+mise exec -- bun rewrite:publish --story SLUG      # Entwurf live schalten
+```
+
 Bevor eine Änderung als fertig gilt:
 
 ```bash
@@ -84,6 +76,15 @@ mise exec -- bun check:all      # Imports, Format, Lint, Typecheck
 ```
 
 > Alle Befehle laufen über `mise exec --`. Bare `bun` / `npm` / `pnpm` / `yarn` benutzen die falsche Runtime.
+
+---
+
+## Eine Anmerkung zu Recht und Bias
+
+Das hier ist ein Ein-Personen-Open-Source-Experiment, kein lizenziertes Medienhaus. Zwei ehrliche Hinweise:
+
+- **Claudes „neutral" ist das Neutral seiner Trainingsdaten.** Deutsche KI-Umschreibungen tendieren stilistisch in Richtung öffentlich-rechtlicher Berichterstattung und übersetzter angelsächsischer Texte. Wir tun nicht so, als wäre das nicht so — die Original-Outlet-Fassungen sind immer einen Klick entfernt.
+- **Die Veröffentlichung von KI-Umschreibungen über identifizierbare Personen löst presserechtliche Pflichten aus** (Sorgfaltspflicht, Persönlichkeitsrechte). Der Hinweis ist Ehrlichkeitsgebot, kein Rechtsschutz. Der Betreiber übernimmt persönlich die Haftung.
 
 ---
 
@@ -97,4 +98,4 @@ kebab.news ist MIT-lizenziert und wird offen entwickelt. Wir suchen Entwickler, 
 
 ---
 
-*Gemacht für deutschsprachige Lesende (DE / AT / CH), die Primärquellen wollen, keine Meinungen.*
+*Gemacht für deutschsprachige Lesende (DE / AT / CH), die einen neutralen Einstieg in die Nachrichtenlage wollen — mit den Originalquellen immer einen Klick entfernt.*
