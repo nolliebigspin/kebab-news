@@ -6,10 +6,12 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { AnnotatedText } from "@/components/AnnotatedText";
+import { VoteButton } from "@/components/VoteButton";
 import { Link } from "@/i18n/routing";
 import { type Annotation, AnnotationsSchema } from "@/lib/annotate";
 import { articles, db, type OutletLean, outlets, stories } from "@/lib/db";
 import { LEAN_ORDER, leanI18nKey } from "@/lib/lean";
+import { countVotesToday } from "@/lib/vote";
 
 type StoryArticle = {
   id: string;
@@ -83,6 +85,7 @@ export default async function StoryPage({
   const t = await getTranslations({ locale, namespace: "radar" });
   const dateLocale = locale === "de" ? de : enUS;
   const { story, items } = data;
+  const voteCount = await countVotesToday(story.id);
 
   // Group articles by lean, in LEAN_ORDER. Filter empty leans into the
   // "blind spots" list.
@@ -104,9 +107,12 @@ export default async function StoryPage({
 
       <header className="mb-10">
         <h1 className="font-display text-3xl leading-tight sm:text-4xl">{story.label}</h1>
-        <p className="mt-3 font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]">
-          {t("article_count", { count: story.articleCount })}
-        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-4">
+          <p className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]">
+            {t("article_count", { count: story.articleCount })}
+          </p>
+          <VoteButton storyId={story.id} initialCount={voteCount} />
+        </div>
       </header>
 
       <div className="space-y-12">

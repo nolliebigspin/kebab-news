@@ -2,9 +2,11 @@ import { desc, sql } from "drizzle-orm";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
+import { VoteButton } from "@/components/VoteButton";
 import { Link } from "@/i18n/routing";
 import { articles, db, type OutletLean, outlets, stories } from "@/lib/db";
 import { LEAN_ORDER } from "@/lib/lean";
+import { getStoryVoteCounts } from "@/lib/vote";
 
 export async function generateMetadata({
   params,
@@ -49,6 +51,7 @@ export default async function RadarPage({ params }: { params: Promise<{ locale: 
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "radar" });
   const stories_ = await loadStories();
+  const voteCounts = await getStoryVoteCounts(stories_.map((s) => s.id));
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-12">
@@ -74,6 +77,7 @@ export default async function RadarPage({ params }: { params: Promise<{ locale: 
                     {t("article_count", { count: story.articleCount })}
                   </span>
                   <SpectrumStrip covered={story.leans} />
+                  <VoteButton storyId={story.id} initialCount={voteCounts.get(story.id) ?? 0} />
                 </div>
               </Link>
             </li>

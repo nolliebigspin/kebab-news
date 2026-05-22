@@ -39,6 +39,12 @@
       "presupposition": "Presupposition",
       "euphemism": "Euphemism",
       "omission": "Omission"
+    },
+    "vote": {
+      "cta": "Vote",
+      "voted": "Vote counted",
+      "already_voted": "Already voted today",
+      "error": "Error — try again"
     }
   }
 }

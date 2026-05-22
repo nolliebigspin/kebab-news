@@ -9,7 +9,7 @@
  */
 import { createHash } from "node:crypto";
 
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 
 import { db, votes } from "@/lib/db";
 import { env } from "@/lib/env";
@@ -80,4 +80,23 @@ export async function countVotesToday(storyId: string): Promise<number> {
     .from(votes)
     .where(and(eq(votes.storyId, storyId), eq(votes.dayBucket, dayBucket)));
   return rows[0]?.count ?? 0;
+}
+
+/**
+ * Count of votes-today for many stories, returned as a Map keyed by storyId.
+ * Stories with zero votes are simply absent from the map — callers should
+ * default to 0. One round-trip; used to hydrate the radar list cheaply.
+ */
+export async function getStoryVoteCounts(storyIds: string[]): Promise<Map<string, number>> {
+  if (storyIds.length === 0) return new Map();
+  const dayBucket = todayBucket();
+  const rows = await db
+    .select({
+      storyId: votes.storyId,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(votes)
+    .where(and(inArray(votes.storyId, storyIds), eq(votes.dayBucket, dayBucket)))
+    .groupBy(votes.storyId);
+  return new Map(rows.map((r) => [r.storyId, r.count]));
 }

@@ -39,6 +39,12 @@
       "presupposition": "Vorausgesetzte Annahme",
       "euphemism": "Euphemismus",
       "omission": "Auslassung"
+    },
+    "vote": {
+      "cta": "Abstimmen",
+      "voted": "Stimme gezählt",
+      "already_voted": "Heute schon abgestimmt",
+      "error": "Fehler — erneut versuchen"
     }
   }
 }
