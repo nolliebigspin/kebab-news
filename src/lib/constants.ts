@@ -42,7 +42,7 @@ export const DEFAULT_CLUSTER_THRESHOLD = 0.78;
  * The detail page (/radar/[slug]) is always reachable via direct URL —
  * the filter only hides them from the list.
  */
-export const RADAR_MIN_OUTLETS = 5;
+export const RADAR_MIN_OUTLETS = 3;
 
 // ============================================================================
 // Radar — embeddings (Voyage AI)
@@ -95,8 +95,8 @@ export const REWRITE_MODEL = "claude-opus-4-7";
 export const REWRITE_PROMPT_VERSION = "v1-2026-05";
 
 /** Target length of the neutral body in words. Claude is told this. */
-export const REWRITE_TARGET_WORDS_MIN = 200;
-export const REWRITE_TARGET_WORDS_MAX = 400;
+export const REWRITE_TARGET_WORDS_MIN = 300;
+export const REWRITE_TARGET_WORDS_MAX = 600;
 
 export const REWRITE_SYSTEM_PROMPT = [
   "Du bist ein neutraler Nachrichten-Redakteur für deutschsprachige Lesende.",

@@ -88,8 +88,11 @@ export async function generateRewrite(
 ): Promise<Rewrite | null> {
   const client = getClient();
   const userMessage = buildUserMessage(label, sources);
-  // ~400 words ≈ ~600 tokens for German; generous headroom for headline + JSON.
-  const maxTokens = Math.min(2048, Math.ceil(REWRITE_TARGET_WORDS_MAX * 2));
+  // German is ~2–2.5 tokens/word (denser than English). 400 words ≈ ~1000
+  // tokens for the body alone; add JSON wrapper + headline + safety margin.
+  // 4× the word cap keeps us safely under the 4096-token sanity ceiling
+  // while never silently truncating a valid response.
+  const maxTokens = Math.min(4096, REWRITE_TARGET_WORDS_MAX * 4);
 
   try {
     const response = await client.messages.create({
@@ -102,10 +105,28 @@ export async function generateRewrite(
       messages: [{ role: "user", content: userMessage }],
     });
 
+    // If Claude hit the token cap, the JSON is truncated mid-string.
+    // JSON.parse would throw; abort cleanly instead.
+    if (response.stop_reason === "max_tokens") {
+      console.error(
+        `[rewrite] response truncated at max_tokens (${maxTokens}). Raise the cap or shorten the prompt.`
+      );
+      return null;
+    }
+
     const block = response.content.find((b) => b.type === "text");
     if (!block || block.type !== "text") return null;
 
-    const raw = JSON.parse(block.text) as unknown;
+    let raw: unknown;
+    try {
+      raw = JSON.parse(block.text);
+    } catch (parseErr) {
+      console.error(
+        `[rewrite] JSON parse failed (${(parseErr as Error).message}). First 200 chars: ${block.text.slice(0, 200)}`
+      );
+      return null;
+    }
+
     const parsed = RewriteSchema.safeParse(raw);
     if (!parsed.success) {
       console.error("[rewrite] schema parse failed:", parsed.error.format());
