@@ -1,7 +1,8 @@
 {
   "header": {
     "github": "GitHub",
-    "radar": "Radar"
+    "radar": "Radar",
+    "artikel": "Articles"
   },
   "hero": {
     "badge": "Still building, join us",
@@ -24,6 +25,7 @@
     "no_blind_spots": "No blind spots — every political camp covered this.",
     "read_at_source": "Read at source →",
     "back_to_radar": "Back to radar",
+    "published_rewrite_label": "Neutral rewrite available",
     "lean": {
       "left": "Left",
       "center-left": "Center-left",
@@ -46,5 +48,17 @@
       "already_voted": "Already voted today",
       "error": "Error — try again"
     }
+  },
+  "artikel": {
+    "page_title": "Articles",
+    "page_subtitle": "AI-generated neutral versions of selected stories. The original sources are linked below every article.",
+    "empty": "No published articles yet.",
+    "source_count": "{count, plural, one {# source} other {# sources}}",
+    "disclaimer_title": "AI-generated summary.",
+    "disclaimer_body": "Unverified. Automatically rewritten in neutral language based on the original sources linked below. The editorial team does not fact-check.",
+    "sources_heading": "Sources",
+    "sources_subheading": "These outlets covered the story. Click to read the original — framing annotations are visible on the headlines.",
+    "back_to_index": "Back to all articles",
+    "see_on_radar": "This story on the radar"
   }
 }

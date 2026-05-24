@@ -1,7 +1,8 @@
 {
   "header": {
     "github": "GitHub",
-    "radar": "Radar"
+    "radar": "Radar",
+    "artikel": "Artikel"
   },
   "hero": {
     "badge": "Noch am Aufbau, mach mit",
@@ -24,6 +25,7 @@
     "no_blind_spots": "Keine Blindstellen — alle politischen Lager berichten.",
     "read_at_source": "Beim Outlet lesen →",
     "back_to_radar": "Zurück zum Radar",
+    "published_rewrite_label": "Neutrale Fassung verfügbar",
     "lean": {
       "left": "Links",
       "center-left": "Mitte-Links",
@@ -46,5 +48,17 @@
       "already_voted": "Heute schon abgestimmt",
       "error": "Fehler — erneut versuchen"
     }
+  },
+  "artikel": {
+    "page_title": "Artikel",
+    "page_subtitle": "KI-generierte neutrale Fassungen ausgewählter Geschichten. Die Originalquellen sind unter jedem Artikel verlinkt.",
+    "empty": "Noch keine veröffentlichten Artikel.",
+    "source_count": "{count, plural, one {# Quelle} other {# Quellen}}",
+    "disclaimer_title": "KI-generierte Zusammenfassung.",
+    "disclaimer_body": "Ungeprüft. Auf Basis der unten verlinkten Originalquellen automatisch in neutraler Sprache umgeschrieben. Faktenprüfung erfolgt nicht durch die Redaktion.",
+    "sources_heading": "Quellen",
+    "sources_subheading": "Diese Outlets haben über die Geschichte berichtet. Klicke, um die Originalfassung zu lesen — Framing-Markierungen sind auf den Schlagzeilen sichtbar.",
+    "back_to_index": "Zurück zu allen Artikeln",
+    "see_on_radar": "Diese Geschichte im Radar"
   }
 }

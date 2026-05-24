@@ -9,7 +9,7 @@ import { AnnotatedText } from "@/components/AnnotatedText";
 import { VoteButton } from "@/components/VoteButton";
 import { Link } from "@/i18n/routing";
 import { type Annotation, AnnotationsSchema } from "@/lib/annotate";
-import { articles, db, type OutletLean, outlets, stories } from "@/lib/db";
+import { articles, db, type OutletLean, outlets, publishedArticles, stories } from "@/lib/db";
 import { LEAN_ORDER, leanI18nKey } from "@/lib/lean";
 import { countVotesToday } from "@/lib/vote";
 
@@ -59,7 +59,26 @@ async function loadStory(slug: string) {
     teaserAnnotations: parseAnnotations(r.teaserAnnotations),
   }));
 
-  return { story, items };
+  // Look up the live published rewrite (if any) so we can link to /artikel.
+  // We don't follow stories.publishedArticleId — that pointer can be stale
+  // if a draft was deleted. Source of truth is publishedArticles.publishedAt.
+  let published: { slug: string; neutralHeadline: string } | null = null;
+  if (story.publishedArticleId) {
+    const pubRows = await db
+      .select({
+        slug: publishedArticles.slug,
+        neutralHeadline: publishedArticles.neutralHeadline,
+        publishedAt: publishedArticles.publishedAt,
+      })
+      .from(publishedArticles)
+      .where(eq(publishedArticles.id, story.publishedArticleId))
+      .limit(1);
+    if (pubRows.length > 0 && pubRows[0].publishedAt) {
+      published = { slug: pubRows[0].slug, neutralHeadline: pubRows[0].neutralHeadline };
+    }
+  }
+
+  return { story, items, published };
 }
 
 export async function generateMetadata({
@@ -84,7 +103,7 @@ export default async function StoryPage({
 
   const t = await getTranslations({ locale, namespace: "radar" });
   const dateLocale = locale === "de" ? de : enUS;
-  const { story, items } = data;
+  const { story, items, published } = data;
   const voteCount = await countVotesToday(story.id);
 
   // Group articles by lean, in LEAN_ORDER. Filter empty leans into the
@@ -113,6 +132,20 @@ export default async function StoryPage({
           </p>
           <VoteButton storyId={story.id} initialCount={voteCount} />
         </div>
+
+        {published ? (
+          <Link
+            href={`/artikel/${published.slug}`}
+            className="mt-6 block rounded-md border border-brand/40 bg-brand/5 px-4 py-3 transition-colors hover:bg-brand/10"
+          >
+            <div className="font-mono text-[11px] text-brand uppercase tracking-[0.12em]">
+              {t("published_rewrite_label")}
+            </div>
+            <div className="mt-1 font-display text-base text-ink">
+              {published.neutralHeadline} →
+            </div>
+          </Link>
+        ) : null}
       </header>
 
       <div className="space-y-12">
