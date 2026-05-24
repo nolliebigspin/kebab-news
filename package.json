@@ -17,6 +17,8 @@
     "rewrite:spike": "bun scripts/rewrite-spike.ts",
     "rewrite:run": "bun scripts/rewrite-run.ts",
     "rewrite:publish": "bun scripts/rewrite-publish.ts",
+    "db:reset": "bun scripts/db-reset.ts",
+    "seed:outlets": "bun scripts/seed-outlets.ts",
     "check:lint": "biome lint --write ./",
     "check:format": "biome format --write ./",
     "check:imports": "biome check --formatter-enabled=false --linter-enabled=false --write ./",
