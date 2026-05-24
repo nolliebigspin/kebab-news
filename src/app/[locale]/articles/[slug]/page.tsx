@@ -90,7 +90,7 @@ export async function generateStaticParams() {
   return rows.map((r) => ({ slug: r.slug }));
 }
 
-export default async function ArtikelDetailPage({
+export default async function ArticleDetailPage({
   params,
 }: {
   params: Promise<{ locale: string; slug: string }>;
@@ -99,7 +99,7 @@ export default async function ArtikelDetailPage({
   const data = await loadArticle(slug);
   if (!data) notFound();
 
-  const t = await getTranslations({ locale, namespace: "artikel" });
+  const t = await getTranslations({ locale, namespace: "articles" });
   const tRadar = await getTranslations({ locale, namespace: "radar" });
   const dateLocale = locale === "de" ? de : enUS;
   const { article, story, sources } = data;
@@ -113,7 +113,7 @@ export default async function ArtikelDetailPage({
     <article className="mx-auto max-w-3xl px-6 py-12">
       <div className="mb-8">
         <Link
-          href="/artikel"
+          href="/articles"
           className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em] hover:text-brand"
         >
           ← {t("back_to_index")}
@@ -121,7 +121,7 @@ export default async function ArtikelDetailPage({
       </div>
 
       {/*
-        CLAUDE.md §VI rule 7: this disclaimer is MANDATORY on every /artikel
+        CLAUDE.md §VI rule 7: this disclaimer is MANDATORY on every /articles
         page. Removing it requires editing the rule first.
       */}
       <aside

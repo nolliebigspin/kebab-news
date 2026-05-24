@@ -15,10 +15,10 @@ export const Header = () => {
         <Wordmark />
         <div className="flex items-center gap-4 md:gap-8">
           <Link
-            href="/artikel"
+            href="/articles"
             className="font-mono text-ink-soft text-xs uppercase tracking-[0.12em] hover:text-brand"
           >
-            {t("artikel")}
+            {t("articles")}
           </Link>
           <Link
             href="/radar"

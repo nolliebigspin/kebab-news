@@ -13,7 +13,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "artikel" });
+  const t = await getTranslations({ locale, namespace: "articles" });
   return { title: `${t("page_title")} — kebab.news`, description: t("page_subtitle") };
 }
 
@@ -32,13 +32,13 @@ async function loadPublished() {
     .limit(50);
 }
 
-export default async function ArtikelIndexPage({
+export default async function ArticlesIndexPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "artikel" });
+  const t = await getTranslations({ locale, namespace: "articles" });
   const dateLocale = locale === "de" ? de : enUS;
   const items = await loadPublished();
 
@@ -57,7 +57,7 @@ export default async function ArtikelIndexPage({
         <ul className="divide-y divide-line-soft border-line-soft border-y">
           {items.map((item) => (
             <li key={item.id} className="py-6">
-              <Link href={`/artikel/${item.slug}`} className="group block">
+              <Link href={`/articles/${item.slug}`} className="group block">
                 <h2 className="font-display text-xl leading-snug transition-colors group-hover:text-brand sm:text-2xl">
                   {item.neutralHeadline}
                 </h2>

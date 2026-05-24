@@ -2,7 +2,7 @@
   "header": {
     "github": "GitHub",
     "radar": "Radar",
-    "artikel": "Articles"
+    "articles": "Articles"
   },
   "hero": {
     "badge": "Still building, join us",
@@ -49,7 +49,7 @@
       "error": "Error — try again"
     }
   },
-  "artikel": {
+  "articles": {
     "page_title": "Articles",
     "page_subtitle": "AI-generated neutral versions of selected stories. The original sources are linked below every article.",
     "empty": "No published articles yet.",

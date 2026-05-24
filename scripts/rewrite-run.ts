@@ -7,7 +7,7 @@
  *
  * The draft / publish split is deliberate: it gives the operator one chance
  * to read the rewrite (in db:studio or the eventual admin UI) before it
- * appears at /artikel/[slug] under the disclaimer.
+ * appears at /articles/[slug] under the disclaimer.
  *
  * Usage:
  *   mise exec -- bun scripts/rewrite-run.ts --story <story-slug>

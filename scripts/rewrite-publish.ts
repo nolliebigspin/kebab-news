@@ -64,7 +64,7 @@ async function main() {
 
   await db.update(stories).set({ publishedArticleId: draft.id }).where(eq(stories.id, story.id));
 
-  console.log(`✓ Published: /artikel/${draft.slug}`);
+  console.log(`✓ Published: /articles/${draft.slug}`);
   console.log(`  story:  ${storySlug}`);
   console.log(`  at:     ${now.toISOString()}`);
 }

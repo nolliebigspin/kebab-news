@@ -107,7 +107,7 @@ export const votes = pgTable(
  * AI-rewritten neutral version of a story. Created as a draft (published_at
  * NULL) by `bun rewrite:run`, flipped to live (published_at = now()) by
  * `bun rewrite:publish`. The source article bodies are NOT stored — only the
- * rewrite itself plus per-source slugs for receipts on /artikel/[slug].
+ * rewrite itself plus per-source slugs for receipts on /articles/[slug].
  *
  * `model` + `promptVersion` are stamped on every row so we can identify
  * outputs that came from an older prompt and re-run them if needed.

@@ -2,7 +2,7 @@
   "header": {
     "github": "GitHub",
     "radar": "Radar",
-    "artikel": "Artikel"
+    "articles": "Artikel"
   },
   "hero": {
     "badge": "Noch am Aufbau, mach mit",
@@ -49,7 +49,7 @@
       "error": "Fehler — erneut versuchen"
     }
   },
-  "artikel": {
+  "articles": {
     "page_title": "Artikel",
     "page_subtitle": "KI-generierte neutrale Fassungen ausgewählter Geschichten. Die Originalquellen sind unter jedem Artikel verlinkt.",
     "empty": "Noch keine veröffentlichten Artikel.",
