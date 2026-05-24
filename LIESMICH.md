@@ -30,7 +30,7 @@ Die KI markiert geladene Begriffe, emotionale Trigger, vorausgesetzte Annahmen, 
 Das Radar zeigt die wichtigsten Cluster des Tages. Lesende stimmen ab, welche Geschichte eine vollständige neutrale Fassung bekommen soll. Eine Stimme pro IP pro Tag pro Geschichte. Die Geschichte mit den meisten Stimmen wird ausgewählt.
 
 ### 4. Wir schreiben den Gewinner neutral um
-Für die ausgewählte Geschichte holen wir Schlagzeilen + Teaser + Artikeltexte aller Outlets, die darüber berichtet haben, schicken sie durch Claude mit einem strikten Prompt für neutrales Deutsch und erzeugen eine Schlagzeile und einen Text von etwa 200–400 Wörtern. Das Ergebnis wird unter `/artikel/[slug]` veröffentlicht.
+Für die ausgewählte Geschichte holen wir die Schlagzeilen + Teaser aller Outlets, die darüber berichtet haben, schicken sie durch Claude mit einem strikten Prompt für neutrales Deutsch und erzeugen eine Schlagzeile und einen Text von etwa 200–400 Wörtern. Das Ergebnis wird unter `/articles/[slug]` veröffentlicht. Artikeltexte scrapen wir bewusst nicht — selbes Muster wie Ground News.
 
 ### 5. Quellen bleiben sichtbar
 Jeder veröffentlichte Artikel hat unterhalb der Umschreibung einen „Quellen"-Bereich — jeder Originalartikel der Outlets, sein Lean-Label, seine Framing-Markierungen und ein Link nach außen. Wenn unsere Fassung schräg klingt, kannst du das prüfen.
@@ -67,6 +67,9 @@ Operator-Befehle (v1 ist absichtlich manuell):
 mise exec -- bun ingest:run                        # Feeds holen, clustern, annotieren
 mise exec -- bun rewrite:run --story SLUG          # neutralen Entwurf erzeugen
 mise exec -- bun rewrite:publish --story SLUG      # Entwurf live schalten
+mise exec -- bun rewrite:spike                     # echte Umschreibungen nach tmp/ für Review
+mise exec -- bun seed:outlets                      # idempotenter Upsert der 8 Outlets
+mise exec -- bun db:reset                          # ingestete Daten löschen (verweigert Nicht-Dev-DBs)
 ```
 
 Bevor eine Änderung als fertig gilt:

@@ -16,7 +16,7 @@ kebab.news is a **deutschsprachiger AI-Nachrichten-Editor**, not a publication r
 
 **Why now:** Ground.news solved aggregation + bias labeling for English. Nobody is doing AI-rewritten neutral coverage in German. The gap is "ein KI-redigierter Newsroom für den deutschsprachigen Raum, der sichtbar bleibt."
 
-**The product flow in one sentence:** outlets publish → we cluster → readers vote on which clusters matter → AI rewrites the winners → we publish to `/artikel` with source links underneath.
+**The product flow in one sentence:** outlets publish → we cluster → readers vote on which clusters matter → AI rewrites the winners → we publish to `/articles` with source links underneath.
 
 ---
 
@@ -48,15 +48,17 @@ Selection in v1 is **manual**: you (the operator) pick the winning story by runn
 ### Piece 3 — Rewrite + publish (the product)
 
 For the selected story:
-1. Scrape the full article body from each outlet that covered it (subject to the legal hold — see §VII).
-2. Feed headlines + teasers + bodies into Claude with a strict neutral-German rewrite prompt.
+1. Load all articles in the cluster (RSS-derived: headline + teaser per outlet).
+2. Feed headlines + teasers into Claude with a strict neutral-German rewrite prompt.
 3. Output: one neutral headline + one neutral 200–400-word body in plain German.
 4. Insert into `published_articles` as a draft.
 5. Operator publishes via `bun rewrite:publish --story <slug>`.
 
-The published article lives at `/artikel/[slug]` and carries a prominent disclaimer: *"KI-generierte Zusammenfassung. Ungeprüft."* Original outlet articles are linked in a "Quellen" section beneath the rewrite, with their lean labels and framing annotations preserved.
+We deliberately do **not** scrape article bodies. Same pattern as Ground News: headlines + teasers carry most of the framing signal, and skipping body scraping removes the open DE legal question around derivative works while keeping paywalled outlets (NZZ, FAZ) in the spectrum. See §VII.
 
-`/artikel` is the accumulating archive of published rewrites, newest first. **This is the actual product** — the radar is the funnel.
+The published article lives at `/articles/[slug]` and carries a prominent disclaimer: *"KI-generierte Zusammenfassung. Ungeprüft."* Original outlet articles are linked in a "Quellen" section beneath the rewrite, with their lean labels and framing annotations preserved.
+
+`/articles` is the accumulating archive of published rewrites, newest first. **This is the actual product** — the radar is the funnel.
 
 ### Out of scope for now
 
@@ -88,19 +90,18 @@ Claude annotates spans on each outlet headline and teaser. Output schema: `{ sta
 ### 4. Rewrite (Piece 3)
 
 `bun rewrite:run --story <slug>` runs:
-1. Load all articles in the cluster.
-2. Scrape each article's body (where legally and technically possible — see §VI rule 9).
-3. Build a structured input: per-outlet headline + teaser + (optional) body, plus the outlet's political lean.
-4. Call Claude with the neutral-German rewrite prompt (versioned in `src/lib/constants.ts` as `REWRITE_SYSTEM_PROMPT`, with a `REWRITE_PROMPT_VERSION` tag stored on every output).
-5. Validate the structured output with Zod (`{ neutral_headline, neutral_body }`). On parse failure, log and exit non-zero.
-6. Insert into `published_articles` as `published_at = NULL` (draft).
+1. Load all articles in the cluster (headline + teaser from RSS — no body scraping).
+2. Build a structured input: per-outlet headline + teaser + political lean, ordered left → public via `LEAN_ORDER`.
+3. Call Claude with the neutral-German rewrite prompt (versioned in `src/lib/constants.ts` as `REWRITE_SYSTEM_PROMPT`, with a `REWRITE_PROMPT_VERSION` tag stored on every output).
+4. Validate the structured output with Zod (`{ neutral_headline, neutral_body }`). On parse failure, log and exit non-zero — never persist partial output.
+5. Insert into `published_articles` as `published_at = NULL` (draft).
 
-`bun rewrite:publish --story <slug>` flips `published_at = now()` on the latest draft and makes it visible at `/artikel/[slug]`.
+`bun rewrite:publish --story <slug>` flips `published_at = now()` on the latest draft and back-links `stories.published_article_id`, making it visible at `/articles/[slug]`.
 
 ### 5. Article surface (Piece 3)
 
-- `/artikel` — list of published rewrites, newest first.
-- `/artikel/[slug]` — disclaimer banner at top, then neutral headline as h1, neutral body as markdown, then "Quellen" section with each source outlet's original headline (with framing annotations still highlighted), lean label, link out.
+- `/articles` — list of published rewrites (those with `published_at NOT NULL`), newest first.
+- `/articles/[slug]` — disclaimer banner at top, then neutral headline as h1, neutral body as paragraphs, then "Quellen" section with each source outlet's original headline (with framing annotations still highlighted), lean label, link out.
 
 ---
 
@@ -115,7 +116,6 @@ Versions are pinned in `mise.toml`, `package.json`, and `bun.lock`. Do not write
 - **Scheduled jobs:** Vercel Cron → route handler. No external queue.
 - **AI — Embeddings:** Voyage AI (`voyage-3-lite`, 512 dims, direct HTTP).
 - **AI — Framing annotation + neutral rewrite:** Claude (Anthropic API, `claude-opus-4-7`).
-- **Body scraping:** TBD per outlet — `@mozilla/readability` is the likely default. Paywall outlets (NZZ, FAZ) skipped gracefully.
 - **Hosting:** Vercel.
 - **Quality:** Biome (lint + format), Vitest (tests).
 
@@ -149,9 +149,9 @@ These are non-negotiable. Violating them is the most common mistake — see Sect
 4. **DB migrations are generated, never hand-edited.** Run `mise exec -- bun db:generate` after schema changes, then `mise exec -- bun db:migrate`. Do not edit the generated SQL files in `drizzle/` by hand. The metadata snapshots in `drizzle/meta/` are also generated; the only time you touch them is to repair a known-broken chain (see §IX).
 5. **No AI calls in user-request handlers.** All AI work runs from cron routes or explicit operator-triggered commands (`bun ingest:run`, `bun rewrite:run`). Never in the path of a page render or a `POST /api/vote`.
 6. **Rewrite output is structured.** Claude is called with `output_config.format: { type: "json_schema", ... }`. The output is Zod-validated before persistence. On parse failure, the rewrite is aborted and logged — never saved as partial garbage.
-7. **Disclaimer is mandatory.** Every `/artikel/[slug]` page renders the *"KI-generierte Zusammenfassung. Ungeprüft."* banner above the rewritten content. Removing it requires editing this rule first.
+7. **Disclaimer is mandatory.** Every `/articles/[slug]` page renders the *"KI-generierte Zusammenfassung. Ungeprüft."* banner above the rewritten content. Removing it requires editing this rule first.
 8. **Original sources are always visible.** Every published article has a "Quellen" section listing every outlet that fed the rewrite, with link-outs. No rewrite ships without sources.
-9. **Article bodies are not stored.** The scraper pulls bodies into memory for the Claude call and discards them. Only the AI-rewritten output is persisted. This minimizes copyright surface.
+9. **No body scraping.** v1 uses only RSS headlines + teasers — for the rewrite input, for the radar UI, for everything. Same pattern as Ground News. Removing this constraint requires editing this rule and reopening the DE press-law question in §VII first.
 10. **German first.** New user-facing strings go into `messages/de.json` first, then `en.json`. Default examples and UX copy in German.
 11. **Design aesthetic:** professional, scientific, slate-blue/white. Clarity over clutter. No "news site" chrome (no breaking-news red, no urgency framing). The rewrite UI reads more like a research paper than like a newspaper.
 
@@ -163,11 +163,10 @@ The agent should flag these before merging anything that touches them. **The leg
 
 - **We are now a publisher.** Publishing AI-rewritten coverage of named persons and organizations triggers Presserecht / Sorgfaltspflicht. We are not insured. The operator has accepted this risk personally.
 - **Disclaimer alone does not eliminate liability.** "KI-generierte Zusammenfassung. Ungeprüft." is required honesty but it does not get us off the hook for factually wrong statements about identifiable people.
-- **Article-body scraping has open legal questions in DE.** RSS headlines + teasers are syndication-fine. Article bodies are copyrighted — we don't store or republish them, but we do use them as transient input for a derivative work (the rewrite). Whether the derivative is sufficiently distinct is a media-lawyer question. **The operator must clear this before `/artikel/[slug]` is publicly deployed.** Local-only builds are fine.
+- **We don't scrape article bodies.** RSS headlines + teasers only. This removes the open DE derivative-work question, keeps paywalled outlets (NZZ, FAZ) in the spectrum, and matches Ground News' pattern. If body scraping is ever reintroduced, the legal question reopens and requires media-lawyer review before any `/articles/[slug]` is publicly deployed.
 - **DSA / NetzDG:** named human moderation contact required if and when comments ship. Not required for the read-only article surface.
 - **DSGVO:** vote IPs are hashed with a daily-rotating salt before storage; raw IPs never persist. Vercel Analytics is in use — keep it cookie-less. No email collection in v1 (no accounts).
 - **Impressum + privacy page** required from day one.
-- **Robots.txt + 1s/host delay** on the scraper. Identify as `kebab.news/1.0 (+https://kebab.news/impressum)`. Respect outlet `robots.txt`.
 
 ---
 
@@ -179,6 +178,9 @@ The agent should flag these before merging anything that touches them. **The leg
   - `bun ingest:run` — fetch + cluster + annotate the radar.
   - `bun rewrite:run --story <slug>` — generate a draft rewrite for one story.
   - `bun rewrite:publish --story <slug>` — flip the latest draft to live.
+  - `bun rewrite:spike` — eval-only: dumps real Claude rewrites to `tmp/rewrite-spike-*.md` for human review. Used as the go/no-go gate before publishing.
+  - `bun seed:outlets` — idempotent upsert of the 8 outlets (re-run after `db:reset --full`).
+  - `bun db:reset` — wipe ingested data (articles, stories, votes, published_articles). Refuses non-dev DBs without `--force` and demands typed confirmation. `--full` also wipes outlets.
 - **Before reporting a task done:** run `mise exec -- bun check:all` and (for UI work) verify the change in a browser.
 
 ---
@@ -189,7 +191,9 @@ Append-only. When the user corrects me, **I ask** whether to add a lesson here. 
 
 <!-- LESSONS:START -->
 
-- **Pivoted from "annotate, never rewrite" (Product A) to "AI-rewritten neutral German news" (Product B).** Reason: the operator explicitly chose Product B after seeing Product A built and after seeing a Ground News screenshot showing Ground News *does not* do AI rewrites. Accepted: bias-substitution risk (Claude's neutral is its training-data neutral), Presserecht risk (disclaimer-only, personal liability), and the legal hold on the body scraper until media-lawyer review. The old "AI annotates framing, AI does not rewrite" lesson is **deliberately reversed** by this decision.
+- **No body scraping in v1 — RSS headlines + teasers only, like Ground News.** Reason: the operator confirmed after a second Ground News check that they also don't ingest bodies. Removes the open DE derivative-work question entirely, keeps paywalled outlets (NZZ, FAZ) in the spectrum, and skips per-outlet scraper maintenance. If the rewrite quality feels thin in practice, bodies become the upgrade path — but we need evidence first, not speculation.
+- **English URL routes; localized UI labels.** Reason: `/articles` is the route everywhere; the Header link reads "Artikel" in DE and "Articles" in EN via i18n. Don't German-ify the URL just because the default locale is German — the i18n value is the right place for that.
+- **Pivoted from "annotate, never rewrite" (Product A) to "AI-rewritten neutral German news" (Product B).** Reason: the operator explicitly chose Product B after seeing Product A built and after seeing a Ground News screenshot showing Ground News *does not* do AI rewrites. Accepted: bias-substitution risk (Claude's neutral is its training-data neutral) and Presserecht risk (disclaimer-only, personal liability). The old "AI annotates framing, AI does not rewrite" lesson is **deliberately reversed** by this decision.
 - **Run bun via mise, not bare.** Reason: Bun version is pinned in `mise.toml`; bare `bun` may resolve to a different installed version.
 - **Don't write version numbers into CLAUDE.md.** Reason: they rot. The lockfiles and `mise.toml` are the source of truth.
 - **Run `mise exec -- bun check:all` before declaring a step done.** Reason: this is the project's definition of "ready".

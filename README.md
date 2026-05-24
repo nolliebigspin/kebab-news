@@ -30,7 +30,7 @@ AI flags loaded language, emotional triggers, presuppositions, euphemisms, and o
 The radar shows the day's top clusters. Readers vote on which stories deserve a full neutral rewrite. One vote per IP per day per story. The winning story of the day becomes the target.
 
 ### 4. We rewrite the winner, neutrally
-For the selected story, we take headlines + teasers + article bodies from every outlet that covered it, feed them through Claude with a strict neutral-German rewrite prompt, and produce one headline + one ~200–400-word body. The output is published at `/artikel/[slug]`.
+For the selected story, we take the headlines + teasers from every outlet that covered it, feed them through Claude with a strict neutral-German rewrite prompt, and produce one headline + one ~200–400-word body. The output is published at `/articles/[slug]`. We deliberately don't scrape article bodies — same pattern as Ground News.
 
 ### 5. Sources stay visible
 Every published article has a "Quellen" section underneath the rewrite — every original outlet article, its lean label, its framing annotations, and a link out. If our rewrite seems off, you can check.
@@ -64,9 +64,12 @@ mise exec -- bun dev            # starts the dev server
 Operator commands (v1 is manual on purpose):
 
 ```bash
-mise exec -- bun ingest:run                # pull feeds, cluster, annotate
-mise exec -- bun rewrite:run --story SLUG  # generate a neutral rewrite draft
+mise exec -- bun ingest:run                    # pull feeds, cluster, annotate
+mise exec -- bun rewrite:run --story SLUG      # generate a neutral rewrite draft
 mise exec -- bun rewrite:publish --story SLUG  # flip the draft to live
+mise exec -- bun rewrite:spike                 # dump real rewrites to tmp/ for human review
+mise exec -- bun seed:outlets                  # idempotent upsert of the 8 outlets
+mise exec -- bun db:reset                      # wipe ingested data (refuses non-dev DBs)
 ```
 
 Before declaring any change done:
