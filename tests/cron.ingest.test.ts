@@ -1,7 +1,15 @@
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { articles, db, EMBEDDING_DIMENSIONS, type NewOutlet, outlets, stories } from "@/lib/db";
+import {
+  articles,
+  db,
+  EMBEDDING_DIMENSIONS,
+  type NewOutlet,
+  outlets,
+  publishedArticles,
+  stories,
+} from "@/lib/db";
 
 const TEST_OUTLET_SLUG = "__cron_test_outlet__";
 
@@ -48,7 +56,10 @@ beforeEach(async () => {
   // deterministic, snapshot the existing outlets (seeded data) out, run the
   // test against ONE outlet, then restore the originals in afterEach.
   savedOutlets = await db.select().from(outlets);
-  await db.delete(articles); // FKs depend on outlets → must clear first
+  // Order matters: published_articles → stories (RESTRICT), articles → outlets
+  // (cascade). published_articles must go first or the stories delete blocks.
+  await db.delete(publishedArticles);
+  await db.delete(articles);
   await db.delete(stories);
   await db.delete(outlets);
 
@@ -71,6 +82,7 @@ beforeEach(async () => {
 
 afterEach(async () => {
   // Clear everything created in this test, then restore the snapshotted outlets.
+  await db.delete(publishedArticles);
   await db.delete(articles);
   await db.delete(stories);
   await db.delete(outlets);

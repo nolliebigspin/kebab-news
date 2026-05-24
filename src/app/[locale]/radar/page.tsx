@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 
 import { VoteButton } from "@/components/VoteButton";
 import { Link } from "@/i18n/routing";
+import { RADAR_MIN_OUTLETS } from "@/lib/constants";
 import { articles, db, type OutletLean, outlets, stories } from "@/lib/db";
 import { LEAN_ORDER } from "@/lib/lean";
 import { getStoryVoteCounts } from "@/lib/vote";
@@ -28,6 +29,9 @@ type StoryCard = {
 };
 
 async function loadStories(): Promise<StoryCard[]> {
+  // Filter by DISTINCT outlets, not articleCount — one chatty outlet
+  // publishing 5 updates of the same story is still only 1 outlet for the
+  // "spectrum coverage" framing the radar is meant to surface.
   const rows = await db
     .select({
       id: stories.id,
@@ -41,6 +45,7 @@ async function loadStories(): Promise<StoryCard[]> {
     .innerJoin(articles, sql`${articles.storyId} = ${stories.id}`)
     .innerJoin(outlets, sql`${outlets.id} = ${articles.outletId}`)
     .groupBy(stories.id)
+    .having(sql`count(DISTINCT ${articles.outletId}) >= ${RADAR_MIN_OUTLETS}`)
     .orderBy(desc(stories.lastSeenAt))
     .limit(50);
 

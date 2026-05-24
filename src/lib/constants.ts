@@ -33,6 +33,17 @@ export const MAX_NEW_ARTICLES_PER_OUTLET = 5;
  */
 export const DEFAULT_CLUSTER_THRESHOLD = 0.78;
 
+/**
+ * A story only shows on the /radar list once at least this many DISTINCT
+ * outlets (not articles) have covered it. The whole point of the radar is
+ * "the same story across the spectrum"; one outlet on its own isn't a
+ * spectrum, so we hide solo-coverage stories until others catch up.
+ *
+ * The detail page (/radar/[slug]) is always reachable via direct URL —
+ * the filter only hides them from the list.
+ */
+export const RADAR_MIN_OUTLETS = 5;
+
 // ============================================================================
 // Radar — embeddings (Voyage AI)
 // ============================================================================
