@@ -47,6 +47,11 @@ export const stories = pgTable(
     lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
     centroid: vector("centroid", { dimensions: EMBEDDING_DIMENSIONS }).notNull(),
     articleCount: integer("article_count").notNull().default(0),
+    // Back-pointer to the currently-published rewrite, if any. Nullable —
+    // most stories never get a rewrite. Updated by `bun rewrite:publish`.
+    // Typed as uuid here; the FK is declared inline on publishedArticles to
+    // avoid a circular dependency, and enforced via a separate migration.
+    publishedArticleId: uuid("published_article_id"),
   },
   (t) => [index("stories_last_seen_at_idx").on(t.lastSeenAt.desc())]
 );
@@ -98,6 +103,40 @@ export const votes = pgTable(
   ]
 );
 
+/**
+ * AI-rewritten neutral version of a story. Created as a draft (published_at
+ * NULL) by `bun rewrite:run`, flipped to live (published_at = now()) by
+ * `bun rewrite:publish`. The source article bodies are NOT stored — only the
+ * rewrite itself plus per-source slugs for receipts on /artikel/[slug].
+ *
+ * `model` + `promptVersion` are stamped on every row so we can identify
+ * outputs that came from an older prompt and re-run them if needed.
+ */
+export const publishedArticles = pgTable(
+  "published_articles",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    // RESTRICT: never silently drop a published rewrite when its source
+    // story is deleted. Operator must clean up the rewrite first.
+    storyId: uuid("story_id")
+      .notNull()
+      .references(() => stories.id, { onDelete: "restrict" }),
+    slug: text("slug").notNull().unique(),
+    neutralHeadline: text("neutral_headline").notNull(),
+    neutralBody: text("neutral_body").notNull(),
+    sourceCount: integer("source_count").notNull(),
+    sourceOutletSlugs: text("source_outlet_slugs").array().notNull(),
+    model: text("model").notNull(),
+    promptVersion: text("prompt_version").notNull(),
+    rewrittenAt: timestamp("rewritten_at", { withTimezone: true }).notNull().defaultNow(),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+  },
+  (t) => [
+    index("published_articles_published_at_idx").on(t.publishedAt.desc()),
+    index("published_articles_story_id_idx").on(t.storyId),
+  ]
+);
+
 export type Outlet = typeof outlets.$inferSelect;
 export type NewOutlet = typeof outlets.$inferInsert;
 export type Story = typeof stories.$inferSelect;
@@ -106,3 +145,5 @@ export type Article = typeof articles.$inferSelect;
 export type NewArticle = typeof articles.$inferInsert;
 export type Vote = typeof votes.$inferSelect;
 export type NewVote = typeof votes.$inferInsert;
+export type PublishedArticle = typeof publishedArticles.$inferSelect;
+export type NewPublishedArticle = typeof publishedArticles.$inferInsert;
