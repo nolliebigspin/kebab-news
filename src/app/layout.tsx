@@ -1,12 +1,10 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Inter } from "next/font/google";
-import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
-import { routing } from "@/i18n/routing";
 import { BASE_URL } from "@/lib/constants";
 import "./globals.css";
 
@@ -23,41 +21,25 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-type Props = {
-  children: React.ReactNode;
-  params: Promise<{ locale: string }>;
-};
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "hero" });
-  const url = locale === "de" ? BASE_URL : `${BASE_URL}/${locale}`;
-  const ogLocale = locale === "de" ? "de_DE" : "en_US";
-  const ogAltLocale = locale === "de" ? "en_US" : "de_DE";
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("hero");
 
   const title = `kebab.news — ${t("tagline")}`;
   const description = `${t("tagline")} ${t("tagline_accent")}`;
-  const ogDescription = description;
 
   return {
     title,
     description,
     metadataBase: new URL(BASE_URL),
     alternates: {
-      canonical: url,
-      languages: {
-        de: BASE_URL,
-        en: `${BASE_URL}/en`,
-        "x-default": BASE_URL,
-      },
+      canonical: BASE_URL,
     },
     openGraph: {
       title,
-      description: ogDescription,
-      url,
+      description,
+      url: BASE_URL,
       siteName: "kebab.news",
-      locale: ogLocale,
-      alternateLocale: ogAltLocale,
+      locale: "de_DE",
       type: "website",
       images: [
         {
@@ -71,7 +53,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
       title,
-      description: ogDescription,
+      description,
       images: ["/kebab-news-logo.png"],
     },
     robots: {
@@ -88,17 +70,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function LocaleLayout({ children, params }: Props) {
-  const { locale } = await params;
-
-  if (!routing.locales.includes(locale as "de" | "en")) {
-    notFound();
-  }
-
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${inter.variable} ${ibmPlexMono.variable}`}>
+    <html lang="de" className={`${inter.variable} ${ibmPlexMono.variable}`}>
       <body
         className="flex min-h-screen flex-col antialiased"
         style={{ background: "var(--bg)", color: "var(--ink)" }}

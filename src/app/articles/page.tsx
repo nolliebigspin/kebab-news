@@ -1,19 +1,14 @@
 import { format } from "date-fns";
-import { de, enUS } from "date-fns/locale";
+import { de } from "date-fns/locale";
 import { desc, isNotNull } from "drizzle-orm";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
-import { Link } from "@/i18n/routing";
 import { db, publishedArticles } from "@/lib/db";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "articles" });
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("articles");
   return { title: `${t("page_title")} — kebab.news`, description: t("page_subtitle") };
 }
 
@@ -32,14 +27,8 @@ async function loadPublished() {
     .limit(50);
 }
 
-export default async function ArticlesIndexPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "articles" });
-  const dateLocale = locale === "de" ? de : enUS;
+export default async function ArticlesIndexPage() {
+  const t = await getTranslations("articles");
   const items = await loadPublished();
 
   return (
@@ -64,7 +53,7 @@ export default async function ArticlesIndexPage({
                 <div className="mt-3 flex flex-wrap items-center gap-4 font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]">
                   {item.publishedAt ? (
                     <time dateTime={item.publishedAt.toISOString()}>
-                      {format(item.publishedAt, "d. MMM yyyy", { locale: dateLocale })}
+                      {format(item.publishedAt, "d. MMM yyyy", { locale: de })}
                     </time>
                   ) : null}
                   <span>·</span>

@@ -1,21 +1,16 @@
 import { desc, sql } from "drizzle-orm";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import { VoteButton } from "@/components/VoteButton";
-import { Link } from "@/i18n/routing";
 import { RADAR_MIN_OUTLETS } from "@/lib/constants";
 import { articles, db, type OutletLean, outlets, stories } from "@/lib/db";
 import { LEAN_ORDER } from "@/lib/lean";
 import { getStoryVoteCounts } from "@/lib/vote";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "radar" });
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("radar");
   return { title: `${t("page_title")} — kebab.news`, description: t("page_subtitle") };
 }
 
@@ -52,9 +47,8 @@ async function loadStories(): Promise<StoryCard[]> {
   return rows.map((r) => ({ ...r, leans: r.leans ?? [] }));
 }
 
-export default async function RadarPage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "radar" });
+export default async function RadarPage() {
+  const t = await getTranslations("radar");
   const stories_ = await loadStories();
   const voteCounts = await getStoryVoteCounts(stories_.map((s) => s.id));
 

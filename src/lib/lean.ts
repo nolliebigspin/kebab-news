@@ -11,14 +11,8 @@ export const LEAN_ORDER: OutletLean[] = [
   "public",
 ];
 
-/**
- * i18n key suffix per lean — combined with the `radar.lean` namespace at
- * call sites. e.g. `t(`lean.${leanI18nKey(lean)}`)`.
- *
- * Hyphens in enum values are valid i18n keys (next-intl supports them), so
- * the mapping is identity. Kept as a function to allow future renaming
- * without touching callers.
- */
+// i18n key suffix per lean — combined with the `radar.lean` namespace.
+// Identity mapping; wrapped in a function to centralize future renames.
 export function leanI18nKey(lean: OutletLean): string {
   return lean;
 }

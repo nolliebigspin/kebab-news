@@ -8,24 +8,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 1,
-      alternates: {
-        languages: {
-          de: BASE_URL,
-          en: `${BASE_URL}/en`,
-        },
-      },
     },
     {
-      url: `${BASE_URL}/en`,
+      url: `${BASE_URL}/articles`,
       lastModified: new Date(),
-      changeFrequency: "weekly",
+      changeFrequency: "daily",
       priority: 0.9,
-      alternates: {
-        languages: {
-          de: BASE_URL,
-          en: `${BASE_URL}/en`,
-        },
-      },
+    },
+    {
+      url: `${BASE_URL}/radar`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.9,
     },
   ];
 }

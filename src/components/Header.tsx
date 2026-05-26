@@ -1,9 +1,8 @@
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { FaGithub } from "react-icons/fa6";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/Wordmark";
-import { Link } from "@/i18n/routing";
 import { GITHUB_URL } from "@/lib/constants";
 
 export const Header = () => {
@@ -26,7 +25,6 @@ export const Header = () => {
           >
             {t("radar")}
           </Link>
-          <LanguageSwitcher />
           <Button
             variant="outline"
             size="sm"

@@ -1,12 +1,12 @@
 import { format } from "date-fns";
-import { de, enUS } from "date-fns/locale";
+import { de } from "date-fns/locale";
 import { eq, isNotNull, sql } from "drizzle-orm";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { AnnotatedText } from "@/components/AnnotatedText";
-import { Link } from "@/i18n/routing";
 import { type Annotation, AnnotationsSchema } from "@/lib/annotate";
 import { articles, db, type OutletLean, outlets, publishedArticles, stories } from "@/lib/db";
 import { leanI18nKey } from "@/lib/lean";
@@ -68,7 +68,7 @@ async function loadArticle(slug: string) {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string; slug: string }>;
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
   const data = await loadArticle(slug);
@@ -90,18 +90,13 @@ export async function generateStaticParams() {
   return rows.map((r) => ({ slug: r.slug }));
 }
 
-export default async function ArticleDetailPage({
-  params,
-}: {
-  params: Promise<{ locale: string; slug: string }>;
-}) {
-  const { locale, slug } = await params;
+export default async function ArticleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const data = await loadArticle(slug);
   if (!data) notFound();
 
-  const t = await getTranslations({ locale, namespace: "articles" });
-  const tRadar = await getTranslations({ locale, namespace: "radar" });
-  const dateLocale = locale === "de" ? de : enUS;
+  const t = await getTranslations("articles");
+  const tRadar = await getTranslations("radar");
   const { article, story, sources } = data;
 
   const paragraphs = article.neutralBody
@@ -138,7 +133,7 @@ export default async function ArticleDetailPage({
         <div className="mt-3 flex flex-wrap items-center gap-3 font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]">
           {article.publishedAt ? (
             <time dateTime={article.publishedAt.toISOString()}>
-              {format(article.publishedAt, "d. MMM yyyy, HH:mm", { locale: dateLocale })}
+              {format(article.publishedAt, "d. MMM yyyy, HH:mm", { locale: de })}
             </time>
           ) : null}
           <span>·</span>
@@ -170,7 +165,7 @@ export default async function ArticleDetailPage({
                   <span>{tRadar(`lean.${leanI18nKey(s.outletLean)}`)}</span>
                   <span>·</span>
                   <time dateTime={s.publishedAt.toISOString()}>
-                    {format(s.publishedAt, "d. MMM yyyy", { locale: dateLocale })}
+                    {format(s.publishedAt, "d. MMM yyyy", { locale: de })}
                   </time>
                   <span>·</span>
                   <span className="text-brand group-hover:underline">

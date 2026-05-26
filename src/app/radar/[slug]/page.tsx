@@ -1,13 +1,13 @@
 import { format } from "date-fns";
-import { de, enUS } from "date-fns/locale";
+import { de } from "date-fns/locale";
 import { eq, sql } from "drizzle-orm";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { AnnotatedText } from "@/components/AnnotatedText";
 import { VoteButton } from "@/components/VoteButton";
-import { Link } from "@/i18n/routing";
 import { type Annotation, AnnotationsSchema } from "@/lib/annotate";
 import { articles, db, type OutletLean, outlets, publishedArticles, stories } from "@/lib/db";
 import { LEAN_ORDER, leanI18nKey } from "@/lib/lean";
@@ -84,7 +84,7 @@ async function loadStory(slug: string) {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string; slug: string }>;
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
   const data = await loadStory(slug);
@@ -92,17 +92,12 @@ export async function generateMetadata({
   return { title: `${data.story.label} — kebab.news` };
 }
 
-export default async function StoryPage({
-  params,
-}: {
-  params: Promise<{ locale: string; slug: string }>;
-}) {
-  const { locale, slug } = await params;
+export default async function StoryPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const data = await loadStory(slug);
   if (!data) notFound();
 
-  const t = await getTranslations({ locale, namespace: "radar" });
-  const dateLocale = locale === "de" ? de : enUS;
+  const t = await getTranslations("radar");
   const { story, items, published } = data;
   const voteCount = await countVotesToday(story.id);
 
@@ -185,7 +180,7 @@ export default async function StoryPage({
                         <span>·</span>
                         <time dateTime={article.publishedAt.toISOString()}>
                           {format(article.publishedAt, "d. MMM yyyy, HH:mm", {
-                            locale: dateLocale,
+                            locale: de,
                           })}
                         </time>
                         <span>·</span>

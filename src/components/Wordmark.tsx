@@ -1,6 +1,5 @@
 import Image from "next/image";
-
-import { Link } from "@/i18n/routing";
+import Link from "next/link";
 
 export const Wordmark = () => {
   return (
@@ -10,12 +9,12 @@ export const Wordmark = () => {
       className="flex select-none items-center gap-2.5 rounded-sm transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-4"
     >
       <Image
-        src="/kebab-news-logo.png"
-        alt=""
-        width={28}
-        height={28}
+        src="/kebab-news-logo-small.png"
+        alt="Kebab.news logo"
+        width={286}
+        height={750}
         priority
-        className="h-7 w-7"
+        className="h-10 w-auto"
       />
       <div className="flex items-baseline gap-0.5">
         <span className="font-display text-ink text-xl">kebab</span>
