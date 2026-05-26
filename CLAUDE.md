@@ -77,7 +77,9 @@ The published article lives at `/articles/[slug]` and carries a prominent discla
 
 `bun ingest:run` → fetch RSS feeds → for each new article: embed (Voyage `voyage-3-lite`, 512 dims) + annotate framing (Claude Opus 4.7) → cluster into stories by cosine similarity ≥ `DEFAULT_CLUSTER_THRESHOLD` within a `STORY_WINDOW_HOURS` window. Hard cap of `MAX_NEW_ARTICLES_PER_OUTLET` new articles per outlet per run, so cost is bounded.
 
-All tunables live in `src/lib/constants.ts`. The route is `GET /api/cron/ingest` with `Authorization: Bearer ${CRON_SECRET}`. Vercel-Cron schedules it `*/30 * * * *` but is gated by `AUTOMATIC_CRON=true|false`. Manual `bun ingest:run` always works regardless of the gate.
+All tunables live in `src/lib/constants.ts`. The route is `GET /api/cron/ingest` with `Authorization: Bearer ${CRON_SECRET}`. Vercel-Cron schedules it `0 6,12,18 * * *` UTC (07/13/19 CET, 08/14/20 CEST — we accept the 1h DST drift rather than running double crons) but is gated by `AUTOMATIC_CRON=true|false`. Manual `bun ingest:run` always works regardless of the gate.
+
+Cross-run story matching is built into the same cron path: when a new article is embedded, the handler loads every story with `last_seen_at > now() - STORY_WINDOW_HOURS` as cluster candidates (not just stories from the current run) and either attaches via running-mean centroid update or opens a new story. A late outlet joining a story already in the window is the same code path as a first-run cluster.
 
 ### 2. Framing annotation (existing)
 
