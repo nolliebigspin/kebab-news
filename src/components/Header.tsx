@@ -14,16 +14,16 @@ export const Header = () => {
         <Wordmark />
         <div className="flex items-center gap-4 md:gap-8">
           <Link
-            href="/articles"
-            className="font-mono text-ink-soft text-xs uppercase tracking-[0.12em] hover:text-brand"
-          >
-            {t("articles")}
-          </Link>
-          <Link
             href="/radar"
             className="font-mono text-ink-soft text-xs uppercase tracking-[0.12em] hover:text-brand"
           >
             {t("radar")}
+          </Link>
+          <Link
+            href="/vision"
+            className="font-mono text-ink-soft text-xs uppercase tracking-[0.12em] hover:text-brand"
+          >
+            {t("vision")}
           </Link>
           <Button
             variant="outline"

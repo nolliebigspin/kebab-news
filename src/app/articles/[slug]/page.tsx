@@ -108,7 +108,7 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
     <article className="mx-auto max-w-3xl px-6 py-12">
       <div className="mb-8">
         <Link
-          href="/articles"
+          href="/"
           className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em] hover:text-brand"
         >
           ← {t("back_to_index")}

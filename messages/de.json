@@ -2,10 +2,9 @@
   "header": {
     "github": "GitHub",
     "radar": "Radar",
-    "articles": "Artikel"
+    "vision": "Vision"
   },
   "hero": {
-    "badge": "Noch am Aufbau, mach mit",
     "tagline": "Nachrichten ohne Scheuklappen.",
     "tagline_accent": "Verschiedene Blickwinkel. Belegte Fakten. Deine Meinung.",
     "stance": "Wir behaupten keine Neutralität. Wir zeigen, wie über ein Thema berichtet wird, und du entscheidest selbst.",

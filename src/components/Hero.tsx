@@ -8,16 +8,6 @@ export const Hero = () => {
 
   return (
     <section className="mx-auto flex min-h-[calc(100vh-var(--header-h,64px)-var(--footer-h,72px))] max-w-5xl flex-col items-start justify-center px-6 py-24">
-      <div className="hairline mb-8 inline-flex items-center gap-2 rounded-full border px-3 py-1">
-        <span className="relative flex h-1.5 w-1.5">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75" />
-          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand" />
-        </span>
-        <span className="font-mono text-[11px] text-brand-ink uppercase tracking-[0.12em]">
-          {t("badge")}
-        </span>
-      </div>
-
       <h1
         className="mb-6 max-w-3xl font-display text-5xl leading-[1.05] sm:text-6xl"
         style={{ textWrap: "balance" } as React.CSSProperties}
