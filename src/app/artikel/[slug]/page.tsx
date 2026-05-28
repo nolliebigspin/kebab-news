@@ -116,7 +116,7 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
       </div>
 
       {/*
-        CLAUDE.md §VI rule 7: this disclaimer is MANDATORY on every /articles
+        CLAUDE.md §VI rule 7: this disclaimer is MANDATORY on every /artikel
         page. Removing it requires editing the rule first.
       */}
       <aside

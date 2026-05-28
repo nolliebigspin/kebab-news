@@ -59,7 +59,7 @@ async function loadStory(slug: string) {
     teaserAnnotations: parseAnnotations(r.teaserAnnotations),
   }));
 
-  // Look up the live published rewrite (if any) so we can link to /articles.
+  // Look up the live published rewrite (if any) so we can link to /artikel.
   // We don't follow stories.publishedArticleId — that pointer can be stale
   // if a draft was deleted. Source of truth is publishedArticles.publishedAt.
   let published: { slug: string; neutralHeadline: string } | null = null;
@@ -130,7 +130,7 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
 
         {published ? (
           <Link
-            href={`/articles/${published.slug}`}
+            href={`/artikel/${published.slug}`}
             className="mt-6 block rounded-md border border-brand/40 bg-brand/5 px-4 py-3 transition-colors hover:bg-brand/10"
           >
             <div className="font-mono text-[11px] text-brand uppercase tracking-[0.12em]">

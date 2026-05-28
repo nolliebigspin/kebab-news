@@ -20,6 +20,12 @@ export const Header = () => {
             {t("radar")}
           </Link>
           <Link
+            href="/artikel"
+            className="font-mono text-ink-soft text-xs uppercase tracking-[0.12em] hover:text-brand"
+          >
+            {t("articles")}
+          </Link>
+          <Link
             href="/vision"
             className="font-mono text-ink-soft text-xs uppercase tracking-[0.12em] hover:text-brand"
           >
