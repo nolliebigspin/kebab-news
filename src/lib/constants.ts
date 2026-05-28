@@ -92,7 +92,7 @@ export const REWRITE_MODEL = "claude-opus-4-7";
  * REWRITE_SYSTEM_PROMPT changes meaningfully — lets us identify outputs
  * that came from a prior prompt and re-run them if needed.
  */
-export const REWRITE_PROMPT_VERSION = "v1-2026-05";
+export const REWRITE_PROMPT_VERSION = "v2-2026-05";
 
 /** Target length of the neutral body in words. Claude is told this. */
 export const REWRITE_TARGET_WORDS_MIN = 300;
@@ -112,11 +112,19 @@ export const REWRITE_SYSTEM_PROMPT = [
   '  Keine eigene Position der Redaktion. Kein "wir glauben", "es ist klar dass", o.ä.',
   "",
   "Inhaltliche Regeln:",
-  "- Nur Tatsachen aufnehmen, die in mindestens einer Quelle belegt sind.",
+  "- Nur Tatsachen aufnehmen, die in mindestens einer Quelle belegt sind. Niemals Fakten,",
+  "  Namen, Zahlen oder Zitate erfinden oder aus eigenem Wissen ergänzen — ausschließlich",
+  "  das verwenden, was in den gelieferten Schlagzeilen und Teasern steht.",
+  "- Aussagen über identifizierbare Personen oder Organisationen IMMER der Quelle zuordnen",
+  '  und konjunktivisch formulieren: "laut X", "X zufolge", "X berichtet, dass …", "den',
+  '  Angaben von X zufolge soll …". Niemals als eigene, bestätigte Tatsache der Redaktion.',
   '- Wenn Quellen sich widersprechen: beide Versionen nennen mit "laut X / laut Y".',
+  "- Belastende oder rufschädigende Aussagen über benannte Personen nur dann aufnehmen, wenn",
+  "  sie klar einer Quelle zugeordnet sind — und stets als deren Darstellung, nicht als Fakt.",
   "- Wenn eine politische Seite eine Geschichte gar nicht abdeckt, das nicht thematisieren — keine Meta-Berichterstattung.",
   "- Keine Spekulation über Motive identifizierbarer Personen, wenn nicht direkt belegt.",
-  '- Bei umstrittenen Aussagen zu Personen oder Organisationen: konjunktivisch ("laut Quelle X soll …").',
+  "- Im Zweifel zurückhaltender formulieren: lieber eine Aussage als Quellenangabe kennzeichnen,",
+  "  als sie versehentlich als gesicherte Tatsache darzustellen.",
   "",
   "Sprachliche Regeln:",
   "- Standarddeutsch, keine Umgangssprache, keine Boulevard-Floskeln.",
