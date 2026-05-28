@@ -6,9 +6,9 @@ This file is read by Claude Code on every session. It is the source of truth for
 
 ## I. Vision (the why)
 
-kebab.news is a **deutschsprachiger AI-Nachrichten-Editor**, not a publication run by people. The product: take the day's most important German news stories, look at how every outlet covered them, and produce **one neutral, AI-rewritten version per story** — with the original outlet coverage shown as receipts underneath.
+kebab.news is positioned as a **deutschsprachiges Informations-Werkzeug** that makes framing and bias visible — explicitly *not* a news portal or a publication run by people. The tool: take the day's most important German news stories, look at how every outlet covered them, annotate the framing, and produce **one neutral, AI-rewritten version per story** — with the original outlet coverage shown as receipts underneath. The "tool, not portal" framing is deliberate (operator decision): it keeps the centre of gravity on *showing how others report* rather than on asserting facts ourselves. (Legal note: German press/personality law attaches to what the tool actually does, not to the label — see §VII.)
 
-**Stance:** *Neutralität durch Rewriting, Transparenz durch Quellenangabe.* We do not claim to be the truth. We claim to be one consistent, neutrally-worded entry point into stories that the German press covers with very different framing. The original sources stay visible and linkable below every rewrite.
+**Stance:** *Neutralität durch Rewriting, Transparenz durch Quellenangabe.* We do not claim to be the truth. We are one consistent, neutrally-worded entry point into stories that the German press covers with very different framing. The original sources stay visible and linkable below every rewrite.
 
 **Motto:** "Eine Geschichte. Eine neutrale Fassung. Alle Quellen sichtbar."
 
@@ -163,12 +163,15 @@ These are non-negotiable. Violating them is the most common mistake — see Sect
 
 The agent should flag these before merging anything that touches them. **The legal posture changed materially with the Product B pivot — read this section carefully.**
 
-- **We are now a publisher.** Publishing AI-rewritten coverage of named persons and organizations triggers Presserecht / Sorgfaltspflicht. We are not insured. The operator has accepted this risk personally.
+- **"Tool, not portal" is a positioning choice, not a legal shield.** We present kebab.news as an information tool, but Presserecht / Persönlichkeitsrecht attach to what the tool *does* — publishing statements about named persons — not to the label. Don't oversell the framing as if it removed the obligations.
+- **The real exposure is wrong AI statements about identifiable people.** Generating coverage of named persons/organizations triggers Sorgfaltspflicht. Mitigation in the product: the rewrite prompt (`REWRITE_SYSTEM_PROMPT`, `REWRITE_PROMPT_VERSION` v2+) requires source-attributed, subjunctive phrasing ("laut X") for any claim about a person and forbids inventing facts. Keep this constraint when editing the prompt.
 - **Disclaimer alone does not eliminate liability.** "KI-generierte Zusammenfassung. Ungeprüft." is required honesty but it does not get us off the hook for factually wrong statements about identifiable people.
+- **Run it through a company, not personally.** The intent is to operate the platform via the operator's company (e.g. UG/GmbH) so press-law liability and finances sit with the legal entity rather than the operator privately. Until that's set up, the Impressum still names a private operator and personal liability stands — flag this before public livegang.
 - **We don't scrape article bodies.** RSS headlines + teasers only. This removes the open DE derivative-work question, keeps paywalled outlets (NZZ, FAZ) in the spectrum, and matches Ground News' pattern. If body scraping is ever reintroduced, the legal question reopens and requires media-lawyer review before any `/artikel/[slug]` is publicly deployed.
+- **Press snippet right (§ 87f ff. UrhG / Art. 15 DSM).** Headlines are generally unprotected; full RSS teasers may exceed "sehr kurze Auszüge". Ground News sits outside the EU regime — we can't copy it 1:1. If a verlag complains, the lever is to shorten or stop displaying teasers (teasers can stay internal for clustering/AI without being shown).
 - **DSA / NetzDG:** named human moderation contact required if and when comments ship. Not required for the read-only article surface.
 - **DSGVO:** vote IPs are hashed with a daily-rotating salt before storage; raw IPs never persist. Vercel Analytics is in use — keep it cookie-less. No email collection in v1 (no accounts).
-- **Impressum + privacy page** required from day one.
+- **Impressum + Datenschutz pages exist** (`/impressum`, `/datenschutz`) but ship with placeholder operator data and a visible "fill before livegang" notice. They MUST be completed (and the Datenschutzerklärung legally reviewed) before public deployment. Don't market the project as "gemeinnützig" — that's a Finanzamt status, not a self-label; the footer says "unabhängig".
 
 ---
 
