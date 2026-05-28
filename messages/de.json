@@ -6,15 +6,15 @@
     "vision": "Vision"
   },
   "hero": {
-    "tagline": "Nachrichten ohne Scheuklappen.",
-    "tagline_accent": "Verschiedene Blickwinkel. Belegte Fakten. Deine Meinung.",
-    "stance": "Wir behaupten keine Neutralität. Wir zeigen, wie über ein Thema berichtet wird, und du entscheidest selbst.",
-    "description_before": "Klassische Nachrichtenportale filtern, vereinfachen und polarisieren, oft ohne es selbst zu merken. kebab.news macht das anders. Inspiriert von ",
-    "description_after": ", aber mit Fokus auf den deutschsprachigen Raum. Wir stellen dieselbe Geschichte aus dem politischen Spektrum nebeneinander, machen unterschiedliche Rahmungen sichtbar und verlinken, wo möglich, direkt auf Primärquellen. Später soll die Community mitbestimmen, welche Themen tiefer recherchiert werden.",
+    "tagline": "Ein Werkzeug gegen Scheuklappen.",
+    "tagline_accent": "Framing sichtbar machen. Quellen vergleichen. Selbst entscheiden.",
+    "stance": "kebab.news ist kein Nachrichtenportal. Es ist ein Informations-Werkzeug, das zeigt, wie über ein Thema berichtet wird – und dazu eine neutrale Fassung bereitstellt. Wir behaupten keine Wahrheit; du entscheidest selbst.",
+    "description_before": "Klassische Nachrichtenportale filtern, vereinfachen und polarisieren, oft ohne es selbst zu merken. kebab.news macht etwas anderes: Es ist ein Werkzeug, das auf Framing und Bias aufmerksam macht. Inspiriert von ",
+    "description_after": ", aber mit Fokus auf den deutschsprachigen Raum. Das Werkzeug stellt dieselbe Geschichte aus dem politischen Spektrum nebeneinander, markiert unterschiedliche Rahmungen direkt an den Schlagzeilen und verlinkt, wo möglich, direkt auf die Originalquellen. Später soll die Community mitbestimmen, welche Themen eine neutrale Fassung bekommen.",
     "cta_github": "Auf GitHub ansehen"
   },
   "footer": {
-    "nonprofit": "gemeinnützig · werbefrei · open source",
+    "nonprofit": "unabhängig · werbefrei · open source",
     "impressum": "Impressum",
     "datenschutz": "Datenschutz"
   },
@@ -53,11 +53,11 @@
   },
   "articles": {
     "page_title": "Artikel",
-    "page_subtitle": "KI-generierte neutrale Fassungen ausgewählter Geschichten. Die Originalquellen sind unter jedem Artikel verlinkt.",
+    "page_subtitle": "Automatisch erstellte neutrale Fassungen ausgewählter Geschichten. kebab.news ist ein Informations-Werkzeug, keine Redaktion. Die Originalquellen sind unter jedem Artikel verlinkt.",
     "empty": "Noch keine veröffentlichten Artikel.",
     "source_count": "{count, plural, one {# Quelle} other {# Quellen}}",
     "disclaimer_title": "KI-generierte Zusammenfassung.",
-    "disclaimer_body": "Ungeprüft. Auf Basis der unten verlinkten Originalquellen automatisch in neutraler Sprache umgeschrieben. Faktenprüfung erfolgt nicht durch die Redaktion.",
+    "disclaimer_body": "Ungeprüft. Von einem Werkzeug automatisch aus den unten verlinkten Originalquellen in neutraler Sprache erstellt. Keine redaktionelle Recherche, keine eigene Faktenprüfung. Maßgeblich sind die verlinkten Originalquellen.",
     "sources_heading": "Quellen",
     "sources_subheading": "Diese Outlets haben über die Geschichte berichtet. Klicke, um die Originalfassung zu lesen — Framing-Markierungen sind auf den Schlagzeilen sichtbar.",
     "back_to_index": "Zurück zu allen Artikeln",
