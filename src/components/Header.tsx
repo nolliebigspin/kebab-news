@@ -25,12 +25,6 @@ export const Header = () => {
           >
             {t("articles")}
           </Link>
-          <Link
-            href="/vision"
-            className="font-mono text-ink-soft text-xs uppercase tracking-[0.12em] hover:text-brand"
-          >
-            {t("vision")}
-          </Link>
           <Button
             variant="outline"
             size="sm"
