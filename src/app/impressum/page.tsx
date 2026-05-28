@@ -13,41 +13,34 @@ export default async function ImpressumPage() {
     <article className="mx-auto max-w-3xl px-6 py-12">
       <h1 className="mb-8 font-display text-3xl leading-tight sm:text-4xl">{t("page_title")}</h1>
 
-      <aside
-        className="mb-8 rounded-md border border-line bg-bg-warm px-4 py-3 text-ink-soft text-sm"
-        role="note"
-      >
-        {t("placeholder_notice")}
-      </aside>
-
       <div className="space-y-8 text-base text-ink leading-relaxed">
         <section>
           <h2 className="mb-2 font-display text-lg">{t("tmg_heading")}</h2>
           <p className="text-ink-soft">
-            [Name des Betreibers]
+            {t("operator_name")} ({t("operator_form")})
             <br />
-            [Straße und Hausnummer]
+            {t("operator_street")}
             <br />
-            [PLZ und Ort]
+            {t("operator_city")}
+            <br />
+            {t("operator_country")}
           </p>
         </section>
 
         <section>
           <h2 className="mb-2 font-display text-lg">{t("contact_heading")}</h2>
           <p className="text-ink-soft">
-            E-Mail: [kontakt@kebab.news]
-            <br />
-            Telefon: [optional]
+            {t("contact_email_label")}:{" "}
+            <a href={`mailto:${t("contact_email")}`} className="text-brand hover:underline">
+              {t("contact_email")}
+            </a>
           </p>
+          <p className="mt-2 text-ink-mute text-sm">{t("vat_note")}</p>
         </section>
 
         <section>
           <h2 className="mb-2 font-display text-lg">{t("responsible_heading")}</h2>
-          <p className="text-ink-soft">
-            [Name]
-            <br />
-            [Anschrift wie oben]
-          </p>
+          <p className="text-ink-soft">{t("responsible_body")}</p>
         </section>
 
         <section>

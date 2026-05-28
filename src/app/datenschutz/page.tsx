@@ -11,7 +11,9 @@ export default async function DatenschutzPage() {
 
   const sections = [
     { heading: t("intro_heading"), body: t("intro_body") },
+    { heading: t("controller_heading"), body: t("controller_body") },
     { heading: t("hosting_heading"), body: t("hosting_body") },
+    { heading: t("database_heading"), body: t("database_body") },
     { heading: t("analytics_heading"), body: t("analytics_body") },
     { heading: t("voting_heading"), body: t("voting_body") },
     { heading: t("rights_heading"), body: t("rights_body") },
@@ -20,13 +22,6 @@ export default async function DatenschutzPage() {
   return (
     <article className="mx-auto max-w-3xl px-6 py-12">
       <h1 className="mb-8 font-display text-3xl leading-tight sm:text-4xl">{t("page_title")}</h1>
-
-      <aside
-        className="mb-8 rounded-md border border-line bg-bg-warm px-4 py-3 text-ink-soft text-sm"
-        role="note"
-      >
-        {t("placeholder_notice")}
-      </aside>
 
       <div className="space-y-8 text-base text-ink leading-relaxed">
         {sections.map((s) => (

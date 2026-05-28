@@ -66,24 +66,35 @@
   "impressum": {
     "page_title": "Impressum",
     "tmg_heading": "Angaben gemäß § 5 DDG",
+    "operator_name": "Alec Winter",
+    "operator_form": "Einzelunternehmen",
+    "operator_street": "Blumenau 89",
+    "operator_city": "22089 Hamburg",
+    "operator_country": "Deutschland",
     "contact_heading": "Kontakt",
+    "contact_email_label": "E-Mail",
+    "contact_email": "contact@awinter.dev",
+    "vat_note": "Kleinunternehmer im Sinne von § 19 UStG – es wird keine Umsatzsteuer ausgewiesen.",
     "responsible_heading": "Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV",
+    "responsible_body": "Alec Winter, Anschrift wie oben.",
     "ai_heading": "Hinweis zu KI-generierten Inhalten",
-    "ai_body": "Die unter /articles veröffentlichten Fassungen werden automatisiert von einem KI-System auf Basis öffentlich zugänglicher Quellen-Schlagzeilen und -Teaser erstellt und neutral umformuliert. Sie sind ungeprüft und ersetzen keine redaktionelle Recherche. Die jeweiligen Originalquellen sind unter jedem Artikel verlinkt.",
-    "placeholder_notice": "Diese Angaben sind Platzhalter und müssen vor dem öffentlichen Livegang durch die echten Betreiberdaten ersetzt werden."
+    "ai_body": "Die unter /artikel veröffentlichten Fassungen werden automatisiert von einem KI-System auf Basis öffentlich zugänglicher Quellen-Schlagzeilen und -Teaser erstellt und neutral umformuliert. Sie sind ungeprüft und ersetzen keine redaktionelle Recherche. Die jeweiligen Originalquellen sind unter jedem Artikel verlinkt."
   },
   "datenschutz": {
     "page_title": "Datenschutzerklärung",
     "intro_heading": "Überblick",
-    "intro_body": "Diese Website verarbeitet so wenig personenbezogene Daten wie möglich. Es gibt keine Nutzerkonten, kein Tracking über Cookies und keine Werbung.",
-    "hosting_heading": "Hosting",
-    "hosting_body": "Die Website wird bei Vercel gehostet. Beim Aufruf werden technisch notwendige Server-Logs (u. a. IP-Adresse, Zeitpunkt, abgerufene Ressource) verarbeitet, um den Betrieb sicherzustellen.",
-    "analytics_heading": "Reichweitenmessung",
-    "analytics_body": "Wir nutzen Vercel Analytics in der cookielosen Variante. Es werden keine geräteübergreifenden Profile gebildet und keine Cookies gesetzt.",
+    "intro_body": "Diese Website verarbeitet so wenig personenbezogene Daten wie möglich. Es gibt keine Nutzerkonten, kein Tracking über Cookies und keine Werbung. Alle eingesetzten Dienste verarbeiten die Daten innerhalb der Europäischen Union.",
+    "controller_heading": "Verantwortlicher",
+    "controller_body": "Verantwortlich für die Datenverarbeitung auf dieser Website ist Alec Winter, Blumenau 89, 22089 Hamburg, Deutschland. Kontakt: contact@awinter.dev. Die vollständigen Angaben finden sich im Impressum.",
+    "hosting_heading": "Hosting (Vercel)",
+    "hosting_body": "Die Website wird bei der Vercel Inc. gehostet, mit Datenverarbeitung in der Europäischen Union. Beim Aufruf werden technisch notwendige Server-Logs (u. a. IP-Adresse, Zeitpunkt der Anfrage, abgerufene Ressource, übermittelte Datenmenge, Referrer und User-Agent) verarbeitet, um den Betrieb, die Sicherheit und die Stabilität der Website zu gewährleisten. Rechtsgrundlage ist das berechtigte Interesse an einem sicheren und funktionsfähigen Betrieb (Art. 6 Abs. 1 lit. f DSGVO). Mit Vercel besteht ein Vertrag zur Auftragsverarbeitung.",
+    "database_heading": "Datenbank (Neon)",
+    "database_body": "Inhaltsdaten der Anwendung werden in einer Postgres-Datenbank des Anbieters Neon gespeichert, mit Datenverarbeitung in der Europäischen Union. Personenbezug entsteht hier nur in Form der unten beschriebenen Abstimmungs-Hashes. Auch mit Neon besteht ein Vertrag zur Auftragsverarbeitung.",
+    "analytics_heading": "Reichweitenmessung (Vercel Analytics)",
+    "analytics_body": "Zur Reichweitenmessung nutzen wir Vercel Analytics in der cookielosen Variante. Es werden keine Cookies gesetzt und keine geräteübergreifenden Profile gebildet; die Auswertung erfolgt aggregiert. Rechtsgrundlage ist das berechtigte Interesse an einer datensparsamen Reichweitenmessung (Art. 6 Abs. 1 lit. f DSGVO).",
     "voting_heading": "Abstimmungen",
-    "voting_body": "Beim Abstimmen über eine Geschichte wird deine IP-Adresse nicht im Klartext gespeichert. Sie wird mit einem täglich wechselnden Geheimnis zu einem nicht umkehrbaren Hash verrechnet, der ausschließlich dazu dient, eine Stimme pro IP pro Geschichte pro Tag sicherzustellen. Aus dem gespeicherten Hash lässt sich die ursprüngliche IP nicht rekonstruieren.",
+    "voting_body": "Beim Abstimmen über eine Geschichte wird deine IP-Adresse nicht im Klartext gespeichert. Sie wird mit einem täglich wechselnden Geheimnis zu einem nicht umkehrbaren Hash verrechnet, der ausschließlich dazu dient, eine Stimme pro IP pro Geschichte pro Tag sicherzustellen. Aus dem gespeicherten Hash lässt sich die ursprüngliche IP-Adresse nicht rekonstruieren. Rechtsgrundlage ist das berechtigte Interesse an einer missbrauchssicheren Abstimmung (Art. 6 Abs. 1 lit. f DSGVO).",
     "rights_heading": "Deine Rechte",
-    "rights_body": "Du hast das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung sowie ein Beschwerderecht bei einer Aufsichtsbehörde. Wende dich dafür an die im Impressum genannte Kontaktadresse.",
-    "placeholder_notice": "Diese Datenschutzerklärung ist eine Vorlage und muss vor dem öffentlichen Livegang rechtlich geprüft und durch die echten Betreiberdaten ergänzt werden."
+    "rights_body": "Du hast das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung, ein Widerspruchsrecht gegen Verarbeitungen auf Grundlage berechtigten Interesses sowie ein Recht auf Datenübertragbarkeit. Außerdem steht dir ein Beschwerderecht bei einer Datenschutz-Aufsichtsbehörde zu. Wende dich für die Wahrnehmung deiner Rechte an die im Impressum genannte Kontaktadresse."
   }
 }

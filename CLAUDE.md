@@ -171,7 +171,7 @@ The agent should flag these before merging anything that touches them. **The leg
 - **Press snippet right (§ 87f ff. UrhG / Art. 15 DSM).** Headlines are generally unprotected; full RSS teasers may exceed "sehr kurze Auszüge". Ground News sits outside the EU regime — we can't copy it 1:1. If a verlag complains, the lever is to shorten or stop displaying teasers (teasers can stay internal for clustering/AI without being shown).
 - **DSA / NetzDG:** named human moderation contact required if and when comments ship. Not required for the read-only article surface.
 - **DSGVO:** vote IPs are hashed with a daily-rotating salt before storage; raw IPs never persist. Vercel Analytics is in use — keep it cookie-less. No email collection in v1 (no accounts).
-- **Impressum + Datenschutz pages exist** (`/impressum`, `/datenschutz`) but ship with placeholder operator data and a visible "fill before livegang" notice. They MUST be completed (and the Datenschutzerklärung legally reviewed) before public deployment. Don't market the project as "gemeinnützig" — that's a Finanzamt status, not a self-label; the footer says "unabhängig".
+- **Impressum + Datenschutz pages exist and carry real operator data** (`/impressum`, `/datenschutz`): Einzelunternehmen Alec Winter, Hamburg, Kleinunternehmer § 19 UStG; Datenschutz names Vercel (hosting + cookieless Analytics, EU), Neon (DB, EU) and the vote-IP hashing, all on Art. 6(1)(f). A media-lawyer review before public livegang is still advisable, but the pages are no longer placeholders. Don't market the project as "gemeinnützig" — that's a Finanzamt status, not a self-label; the footer says "unabhängig".
 
 ---
 
