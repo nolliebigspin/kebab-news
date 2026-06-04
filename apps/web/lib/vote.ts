@@ -98,3 +98,24 @@ export async function getStoryVoteCounts(storyIds: string[]): Promise<Map<string
     .groupBy(votes.storyId);
   return new Map(rows.map((r) => [r.storyId, r.count]));
 }
+
+/**
+ * Cumulative (all-time) vote counts per story, keyed by storyId. This is the
+ * tally that the rewrite threshold (REWRITE_VOTE_THRESHOLD) is measured
+ * against and what the radar shows as "votes so far" — votes accumulate
+ * across days until a story qualifies, rather than resetting daily. The
+ * per-day bucket still governs dedup on the write path; here we sum across
+ * all buckets. Stories with zero votes are absent — callers default to 0.
+ */
+export async function getCumulativeVoteCounts(storyIds: string[]): Promise<Map<string, number>> {
+  if (storyIds.length === 0) return new Map();
+  const rows = await db
+    .select({
+      storyId: votes.storyId,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(votes)
+    .where(inArray(votes.storyId, storyIds))
+    .groupBy(votes.storyId);
+  return new Map(rows.map((r) => [r.storyId, r.count]));
+}

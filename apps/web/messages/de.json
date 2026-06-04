@@ -3,7 +3,8 @@
     "github": "GitHub",
     "radar": "Radar",
     "articles": "Artikel",
-    "vision": "Vision"
+    "vision": "Vision",
+    "how_to": "How-to"
   },
   "hero": {
     "tagline": "Ein Werkzeug gegen Scheuklappen.",
@@ -48,7 +49,9 @@
       "cta": "Abstimmen",
       "voted": "Stimme gezählt",
       "already_voted": "Heute schon abgestimmt",
-      "error": "Fehler — erneut versuchen"
+      "error": "Fehler — erneut versuchen",
+      "threshold_progress": "{count}/{threshold} bis zur Fassung",
+      "threshold_reached": "Schwelle erreicht — Fassung folgt"
     }
   },
   "articles": {
@@ -62,6 +65,28 @@
     "sources_subheading": "Diese Outlets haben über die Geschichte berichtet. Klicke, um die Originalfassung zu lesen — Framing-Markierungen sind auf den Schlagzeilen sichtbar.",
     "back_to_index": "Zurück zu allen Artikeln",
     "see_on_radar": "Diese Geschichte im Radar"
+  },
+  "how_to": {
+    "page_title": "How-to",
+    "page_subtitle": "Wie kebab.news funktioniert — von der Quelle bis zur neutralen Fassung.",
+    "intro": "kebab.news ist ein Werkzeug, kein Nachrichtenportal. Es nimmt die Berichterstattung deutschsprachiger Medien zu einem Thema, macht ihre Rahmung sichtbar und erstellt auf Wunsch der Leserschaft eine neutrale, KI-geschriebene Fassung. So läuft das ab:",
+    "step1_title": "1 · Quellen werden eingesammelt",
+    "step1_body": "Mehrmals täglich liest das Werkzeug die RSS-Feeds deutschsprachiger Medien quer durch das politische Spektrum (links bis öffentlich-rechtlich). Schlagzeile und Teaser jedes neuen Artikels werden eingelesen — Artikeltexte werden bewusst nicht gespeichert.",
+    "step2_title": "2 · Geschichten werden gebündelt",
+    "step2_body": "Berichten mehrere Medien über dasselbe Ereignis, werden ihre Beiträge automatisch zu einer Geschichte gruppiert. Im Radar siehst du diese Bündel mit den Original-Schlagzeilen nebeneinander, die Rahmung direkt an den Schlagzeilen markiert.",
+    "step3_title": "3 · Du stimmst ab",
+    "step3_body_before": "Pro Tag kannst du für jede Geschichte einmal abstimmen. Sobald eine Geschichte insgesamt mindestens ",
+    "step3_body_after": " Stimmen gesammelt hat, qualifiziert sie sich für eine neutrale Fassung. Die Stimmen sammeln sich über mehrere Tage hinweg an — sie werden nicht täglich zurückgesetzt.",
+    "step4_title": "4 · Die neutrale Fassung entsteht",
+    "step4_body": "Hat eine Geschichte die Schwelle erreicht, schreibt eine KI beim nächsten Lauf aus allen Quell-Schlagzeilen und -Teasern eine einzige, neutral formulierte Fassung. Sie erscheint unter /artikel — mit dem Hinweis „KI-generierte Zusammenfassung. Ungeprüft.\" und allen Originalquellen darunter verlinkt.",
+    "schedule_title": "Wann werden neue Quellen geladen?",
+    "schedule_body": "Das Werkzeug läuft täglich um 07:00, 13:00 und 19:00 Uhr (Mitteleuropäische Zeit; im Sommer 08:00, 14:00 und 20:00). Bei jedem Lauf werden neue Quellen eingesammelt und qualifizierte Geschichten zu einer neutralen Fassung verarbeitet.",
+    "countdown_label": "Nächster Lauf in",
+    "countdown_days": "T",
+    "countdown_hours": "Std",
+    "countdown_minutes": "Min",
+    "countdown_seconds": "Sek",
+    "threshold_note": "Schwelle für die neutrale Fassung: {threshold} Stimmen pro Geschichte."
   },
   "impressum": {
     "page_title": "Impressum",

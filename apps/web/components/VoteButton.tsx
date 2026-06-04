@@ -6,11 +6,13 @@ import { useState, useTransition } from "react";
 type Props = {
   storyId: string;
   initialCount: number;
+  /** Cumulative votes needed before the story qualifies for a rewrite. */
+  threshold?: number;
 };
 
 type Status = "idle" | "voted" | "duplicate" | "error";
 
-export function VoteButton({ storyId, initialCount }: Props) {
+export function VoteButton({ storyId, initialCount, threshold }: Props) {
   const t = useTranslations("radar");
   const [count, setCount] = useState(initialCount);
   const [status, setStatus] = useState<Status>("idle");
@@ -20,12 +22,9 @@ export function VoteButton({ storyId, initialCount }: Props) {
   // — re-clicking would just re-trigger a "duplicate" round-trip.
   const locked = status === "voted" || status === "duplicate";
 
-  function onClick(e: React.MouseEvent) {
-    // The button sits inside a parent <Link> on the radar list. Without this
-    // the click bubbles up and navigates instead of voting.
-    e.preventDefault();
-    e.stopPropagation();
+  const reached = threshold !== undefined && count >= threshold;
 
+  function onClick() {
     startTransition(async () => {
       try {
         const res = await fetch("/api/vote", {
@@ -59,16 +58,25 @@ export function VoteButton({ storyId, initialCount }: Props) {
           : t("vote.cta");
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={pending || locked}
-      aria-busy={pending}
-      className="inline-flex items-center gap-2 rounded-full border border-line bg-bg-warm px-3 py-1 font-mono text-[11px] text-ink uppercase tracking-[0.12em] transition-colors hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-line disabled:hover:text-ink"
-    >
-      <span aria-hidden>▲</span>
-      <span>{label}</span>
-      <span className="font-mono tabular-nums">{count}</span>
-    </button>
+    <div className="flex flex-col items-end gap-1">
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={pending || locked}
+        aria-busy={pending}
+        className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-line bg-bg-warm px-3 py-1 font-mono text-[11px] text-ink uppercase tracking-[0.12em] transition-colors hover:border-brand hover:bg-brand hover:text-white disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-line disabled:hover:bg-bg-warm disabled:hover:text-ink"
+      >
+        <span aria-hidden>▲</span>
+        <span>{label}</span>
+        <span className="font-mono tabular-nums">{count}</span>
+      </button>
+      {threshold !== undefined && (
+        <span className="font-mono text-[10px] text-ink-mute uppercase tracking-[0.12em]">
+          {reached
+            ? t("vote.threshold_reached")
+            : t("vote.threshold_progress", { count, threshold })}
+        </span>
+      )}
+    </div>
   );
 }

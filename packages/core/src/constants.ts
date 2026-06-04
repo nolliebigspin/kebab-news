@@ -45,6 +45,18 @@ export const DEFAULT_CLUSTER_THRESHOLD = 0.78;
 export const RADAR_MIN_OUTLETS = 3;
 
 // ============================================================================
+// Voting / rewrite trigger
+// ============================================================================
+
+/**
+ * Minimum number of (cumulative, all-time) upvotes a radar story needs before
+ * it qualifies for an automatic neutral rewrite. Once a story crosses this
+ * threshold and has no rewrite yet, the next worker run picks it up and
+ * generates a draft. Surfaced in the UI (vote progress) and on /how-to.
+ */
+export const REWRITE_VOTE_THRESHOLD = 5;
+
+// ============================================================================
 // Radar — embeddings (Voyage AI)
 // ============================================================================
 

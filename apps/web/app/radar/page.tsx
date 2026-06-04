@@ -1,11 +1,11 @@
-import { LEAN_ORDER, RADAR_MIN_OUTLETS } from "@kebab/core";
+import { LEAN_ORDER, RADAR_MIN_OUTLETS, REWRITE_VOTE_THRESHOLD } from "@kebab/core";
 import { articles, db, type OutletLean, outlets, stories } from "@kebab/db";
 import { desc, sql } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { VoteButton } from "@/components/VoteButton";
-import { getStoryVoteCounts } from "@/lib/vote";
+import { getCumulativeVoteCounts } from "@/lib/vote";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("radar");
@@ -48,7 +48,7 @@ async function loadStories(): Promise<StoryCard[]> {
 export default async function RadarPage() {
   const t = await getTranslations("radar");
   const stories_ = await loadStories();
-  const voteCounts = await getStoryVoteCounts(stories_.map((s) => s.id));
+  const voteCounts = await getCumulativeVoteCounts(stories_.map((s) => s.id));
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-12">
@@ -64,8 +64,10 @@ export default async function RadarPage() {
       ) : (
         <ul className="divide-y divide-line-soft border-line-soft border-y">
           {stories_.map((story) => (
-            <li key={story.id} className="py-6">
-              <Link href={`/radar/${story.slug}`} className="group block">
+            <li key={story.id} className="flex flex-wrap items-start justify-between gap-4 py-6">
+              {/* Vote lives OUTSIDE the Link so its own hover state is isolated
+                  from the headline's row-hover and clicking it never navigates. */}
+              <Link href={`/radar/${story.slug}`} className="group min-w-0 flex-1">
                 <h2 className="font-display text-xl leading-snug transition-colors group-hover:text-brand sm:text-2xl">
                   {story.label}
                 </h2>
@@ -74,9 +76,13 @@ export default async function RadarPage() {
                     {t("article_count", { count: story.articleCount })}
                   </span>
                   <SpectrumStrip covered={story.leans} />
-                  <VoteButton storyId={story.id} initialCount={voteCounts.get(story.id) ?? 0} />
                 </div>
               </Link>
+              <VoteButton
+                storyId={story.id}
+                initialCount={voteCounts.get(story.id) ?? 0}
+                threshold={REWRITE_VOTE_THRESHOLD}
+              />
             </li>
           ))}
         </ul>

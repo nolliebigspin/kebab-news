@@ -8,9 +8,9 @@ import "@kebab/env/load";
  * The schedule mirrors the previous Vercel cron (`0 6,12,18 * * *` UTC →
  * 07/13/19 CET, 08/14/20 CEST). RUN_HOURS_UTC is the single knob.
  */
+import { nextRunDate, RUN_HOURS_UTC } from "@kebab/core";
 import { runIngest } from "./ingest";
-
-const RUN_HOURS_UTC = [6, 12, 18];
+import { runAutoRewrites } from "./rewrite";
 
 function log(event: string, fields: Record<string, unknown> = {}) {
   console.log(JSON.stringify({ ts: new Date().toISOString(), event, ...fields }));
@@ -18,17 +18,7 @@ function log(event: string, fields: Record<string, unknown> = {}) {
 
 /** Milliseconds from `now` until the next scheduled UTC hour. */
 function msUntilNextRun(now: Date): { ms: number; at: Date } {
-  const candidates: Date[] = [];
-  for (const dayOffset of [0, 1]) {
-    for (const hour of RUN_HOURS_UTC) {
-      const d = new Date(now);
-      d.setUTCDate(d.getUTCDate() + dayOffset);
-      d.setUTCHours(hour, 0, 0, 0);
-      if (d.getTime() > now.getTime()) candidates.push(d);
-    }
-  }
-  candidates.sort((a, b) => a.getTime() - b.getTime());
-  const at = candidates[0];
+  const at = nextRunDate(now);
   return { ms: at.getTime() - now.getTime(), at };
 }
 
@@ -42,6 +32,12 @@ async function safeRun(reason: string): Promise<void> {
       newStories: result.newStories,
       durationMs: result.durationMs,
     });
+
+    // After ingest, pick up any story that has crossed the vote threshold and
+    // has no rewrite yet. Votes are recorded by the web app; the AI rewrite
+    // runs only here (CLAUDE.md rule #5).
+    const auto = await runAutoRewrites(log);
+    if (auto.triggered > 0) log("worker.auto_rewrites_done", auto);
   } catch (err) {
     // Never let one failed pass kill the scheduler loop.
     log("worker.run_error", { error: err instanceof Error ? err.message : String(err) });
