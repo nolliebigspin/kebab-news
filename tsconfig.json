@@ -1,33 +1,26 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
     "jsx": "react-jsx",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "allowJs": true,
+    "plugins": [{ "name": "next" }],
+    "types": ["node"],
     "paths": {
-      "@/*": ["./src/*"]
+      "@kebab/env": ["./packages/env/src/index.ts"],
+      "@kebab/db": ["./packages/db/src/index.ts"],
+      "@kebab/core": ["./packages/core/src/index.ts"],
+      "@/*": ["./apps/web/*"]
     }
   },
   "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    "packages/*/src/**/*.ts",
+    "packages/*/drizzle.config.ts",
+    "apps/web/**/*.ts",
+    "apps/web/**/*.tsx",
+    "apps/worker/**/*.ts",
+    "tests/**/*.ts",
+    "apps/web/.next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "**/node_modules", "**/.next"]
 }

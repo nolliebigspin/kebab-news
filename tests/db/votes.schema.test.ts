@@ -1,8 +1,7 @@
+import { articles, db, outlets, stories, votes } from "@kebab/db";
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-
-import { articles, db, outlets, stories, votes } from "@/lib/db";
-import { countVotesToday, recordVote, todayBucket } from "@/lib/vote";
+import { countVotesToday, recordVote, todayBucket } from "../../apps/web/lib/vote";
 
 const TEST_OUTLET_SLUG = "__votes_test_outlet__";
 const TEST_STORY_SLUG = "__votes_test_story__";

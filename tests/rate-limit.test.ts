@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { _resetRateLimit, rateLimit } from "@/lib/rate-limit";
+import { _resetRateLimit, rateLimit } from "../apps/web/lib/rate-limit";
 
 beforeEach(() => {
   _resetRateLimit();

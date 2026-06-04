@@ -1,6 +1,5 @@
+import { buildUserMessage, RewriteSchema, sortSourcesByLean } from "@kebab/core";
 import { describe, expect, it } from "vitest";
-
-import { buildUserMessage, RewriteSchema, sortSourcesByLean } from "@/lib/rewrite";
 
 const SOURCES = [
   {

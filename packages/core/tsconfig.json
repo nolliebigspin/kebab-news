@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "paths": {
+      "@kebab/env": ["../env/src/index.ts"],
+      "@kebab/db": ["../db/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

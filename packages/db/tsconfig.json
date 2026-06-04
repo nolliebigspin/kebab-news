@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "paths": {
+      "@kebab/env": ["../env/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "drizzle.config.ts"]
+}

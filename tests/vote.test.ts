@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { extractClientIp, hashIp, todayBucket } from "@/lib/vote";
+import { extractClientIp, hashIp, todayBucket } from "../apps/web/lib/vote";
 
 describe("extractClientIp", () => {
   it("uses the leftmost entry of x-forwarded-for", () => {

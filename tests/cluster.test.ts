@@ -1,12 +1,11 @@
-import { describe, expect, it } from "vitest";
-
 import {
   assignStory,
   type ClusterCandidate,
   cosineSimilarity,
   DEFAULT_CLUSTER_THRESHOLD,
   updateCentroid,
-} from "@/lib/cluster";
+} from "@kebab/core";
+import { describe, expect, it } from "vitest";
 
 describe("cosineSimilarity", () => {
   it("returns 1 for identical unit vectors", () => {

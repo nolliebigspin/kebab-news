@@ -50,7 +50,7 @@ Selection in v1 is **manual**: you (the operator) pick the winning story by runn
 For the selected story:
 1. Load all articles in the cluster (RSS-derived: headline + teaser per outlet).
 2. Feed headlines + teasers into Claude with a strict neutral-German rewrite prompt.
-3. Output: one neutral headline + one neutral body in plain German (target length set by `REWRITE_TARGET_WORDS_MIN/MAX` in `src/lib/constants.ts`).
+3. Output: one neutral headline + one neutral body in plain German (target length set by `REWRITE_TARGET_WORDS_MIN/MAX` in `packages/core/src/constants.ts`).
 4. Insert into `published_articles` as a draft.
 5. Operator publishes via `bun rewrite:publish --story <slug>`.
 
@@ -77,9 +77,9 @@ The published article lives at `/artikel/[slug]` and carries a prominent disclai
 
 `bun ingest:run` → fetch RSS feeds → for each new article: embed (Voyage `voyage-3-lite`, 512 dims) + annotate framing (Claude Opus 4.7) → cluster into stories by cosine similarity ≥ `DEFAULT_CLUSTER_THRESHOLD` within a `STORY_WINDOW_HOURS` window. Hard cap of `MAX_NEW_ARTICLES_PER_OUTLET` new articles per outlet per run, so cost is bounded.
 
-All tunables live in `src/lib/constants.ts`. The route is `GET /api/cron/ingest` with `Authorization: Bearer ${CRON_SECRET}`. Vercel-Cron schedules it `0 6,12,18 * * *` UTC — three times a day (07/13/19 CET, 08/14/20 CEST — we accept the 1h DST drift rather than running double crons) but is gated by `AUTOMATIC_CRON=true|false`. Manual `bun ingest:run` always works regardless of the gate.
+All tunables live in `packages/core/src/constants.ts`. The ingest pipeline lives in `apps/worker/src/ingest.ts` (`runIngest()`), driven by the long-running worker's in-process scheduler (`apps/worker/src/index.ts`, `RUN_HOURS_UTC = [6,12,18]` — 07/13/19 CET, 08/14/20 CEST; we accept the 1h DST drift). There is no HTTP route and no Vercel-Cron anymore — the worker process *is* the trigger. `bun ingest:run` (→ `@kebab/worker ingest:once`) runs one pass manually against the same DB.
 
-Cross-run story matching is built into the same cron path: when a new article is embedded, the handler loads every story with `last_seen_at > now() - STORY_WINDOW_HOURS` as cluster candidates (not just stories from the current run) and either attaches via running-mean centroid update or opens a new story. A late outlet joining a story already in the window is the same code path as a first-run cluster.
+Cross-run story matching is built into the same ingest pass: when a new article is embedded, `runIngest` loads every story with `last_seen_at > now() - STORY_WINDOW_HOURS` as cluster candidates (not just stories from the current run) and either attaches via running-mean centroid update or opens a new story. A late outlet joining a story already in the window is the same code path as a first-run cluster.
 
 ### 2. Framing annotation (existing)
 
@@ -94,7 +94,7 @@ Claude annotates spans on each outlet headline and teaser. Output schema: `{ sta
 `bun rewrite:run --story <slug>` runs:
 1. Load all articles in the cluster (headline + teaser from RSS — no body scraping).
 2. Build a structured input: per-outlet headline + teaser + political lean, ordered left → public via `LEAN_ORDER`.
-3. Call Claude with the neutral-German rewrite prompt (versioned in `src/lib/constants.ts` as `REWRITE_SYSTEM_PROMPT`, with a `REWRITE_PROMPT_VERSION` tag stored on every output).
+3. Call Claude with the neutral-German rewrite prompt (versioned in `packages/core/src/constants.ts` as `REWRITE_SYSTEM_PROMPT`, with a `REWRITE_PROMPT_VERSION` tag stored on every output).
 4. Validate the structured output with Zod (`{ neutral_headline, neutral_body }`). On parse failure, log and exit non-zero — never persist partial output.
 5. Insert into `published_articles` as `published_at = NULL` (draft).
 
@@ -112,13 +112,14 @@ Claude annotates spans on each outlet headline and teaser. Output schema: `{ sta
 Versions are pinned in `mise.toml`, `package.json`, and `bun.lock`. Do not write versions into this document — read them from those files when needed.
 
 - **Runtime / Package Manager:** Bun (managed via mise).
+- **Monorepo:** Bun workspaces. `packages/env` (`@kebab/env`, pure Zod env validation via `@t3-oss/env-core`; `@kebab/env/load` is the side-effect dotenv loader for non-Next entrypoints), `packages/db` (`@kebab/db`, Drizzle schema + client + migrations), `packages/core` (`@kebab/core`, framework-agnostic cluster/embeddings/annotate/rewrite/constants), `apps/web` (`@kebab/web`, Next.js), `apps/worker` (`@kebab/worker`, ingest worker). `@kebab/*` imports replace the old `@/lib/*` aliases across packages; `@/*` still resolves within `apps/web`.
 - **Framework:** Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui.
-- **i18n:** next-intl, kept in place so other languages can be added later. For now German is the only shipped locale — English content was removed to focus on the German-speaking market. Strings live in `messages/de.json`; the request config currently resolves to `de`.
-- **Database:** Neon (Serverless Postgres) + Drizzle ORM + `pgvector` (semantic clustering).
-- **Scheduled jobs:** Vercel Cron → route handler. No external queue.
+- **i18n:** next-intl, kept in place so other languages can be added later. For now German is the only shipped locale — English content was removed to focus on the German-speaking market. Strings live in `apps/web/messages/de.json`; the request config currently resolves to `de`.
+- **Database:** Postgres + Drizzle ORM + `pgvector` (semantic clustering). Driver is `postgres-js` (standard wire protocol), so it runs against Neon today and any self-hosted Postgres later — switching providers is a `DATABASE_URL` change. The driver is encapsulated in `packages/db`; nothing else knows it.
+- **Scheduled jobs:** long-running ingest worker (`apps/worker`) with an in-process scheduler (`RUN_HOURS_UTC`), deployed as a container (Dokploy). No HTTP route, no Vercel-Cron, no external queue.
 - **AI — Embeddings:** Voyage AI (`voyage-3-lite`, 512 dims, direct HTTP).
 - **AI — Framing annotation + neutral rewrite:** Claude (Anthropic API, `claude-opus-4-7`).
-- **Hosting:** Vercel.
+- **Hosting:** Vercel (web app, root dir `apps/web`) + Dokploy (ingest worker container).
 - **Quality:** Biome (lint + format), Vitest (tests).
 
 Deferred until the product earns it: user accounts, Magic Link, persistent vote weighting, external job queues.
@@ -127,7 +128,7 @@ Deferred until the product earns it: user accounts, Magic Link, persistent vote 
 
 ## V. Data Contract (Drizzle)
 
-Current tables (in `src/lib/db/schema.ts`):
+Current tables (in `packages/db/src/schema.ts`):
 
 - `outlets` — id, slug, name, political_lean (enum), feed_url, homepage_url, created_at.
 - `stories` — id, slug, label (= first article's headline, used as fallback before rewrite exists), first_seen_at, last_seen_at, centroid (vector 512), article_count.
@@ -148,8 +149,8 @@ These are non-negotiable. Violating them is the most common mistake — see Sect
 1. **Bun runs through mise, always.** Never invoke bare `bun`, `npm`, `pnpm`, or `yarn`. Always `mise exec -- bun ...` or `mise run ...`. The version is pinned in `mise.toml`.
 2. **No other package managers.** This is a Bun project. No `npm install`, no `pnpm`, no `yarn`.
 3. **Finishing a step requires `mise exec -- bun check:all`.** Before declaring any coding step complete, run it. Fix what it reports.
-4. **DB migrations are generated, never hand-edited.** Run `mise exec -- bun db:generate` after schema changes, then `mise exec -- bun db:migrate`. Do not edit the generated SQL files in `drizzle/` by hand. The metadata snapshots in `drizzle/meta/` are also generated; the only time you touch them is to repair a known-broken chain (see §IX).
-5. **No AI calls in user-request handlers.** All AI work runs from cron routes or explicit operator-triggered commands (`bun ingest:run`, `bun rewrite:run`). Never in the path of a page render or a `POST /api/vote`.
+4. **DB migrations are generated, never hand-edited.** Run `mise exec -- bun db:generate` after schema changes, then `mise exec -- bun db:migrate`. Do not edit the generated SQL files in `packages/db/drizzle/` by hand. The metadata snapshots in `packages/db/drizzle/meta/` are also generated; the only time you touch them is to repair a known-broken chain (see §IX).
+5. **No AI calls in the web app.** All AI work runs in the ingest worker (`apps/worker`) or operator-triggered commands (`bun ingest:run`, `bun rewrite:run`). Never in the path of a page render or a `POST /api/vote`. The web app reads from the DB and writes votes only.
 6. **Rewrite output is structured.** Claude is called with `output_config.format: { type: "json_schema", ... }`. The output is Zod-validated before persistence. On parse failure, the rewrite is aborted and logged — never saved as partial garbage.
 7. **Disclaimer is mandatory.** Every `/artikel/[slug]` page renders the *"KI-generierte Zusammenfassung. Ungeprüft."* banner above the rewritten content. Removing it requires editing this rule first.
 8. **Original sources are always visible.** Every published article has a "Quellen" section listing every outlet that fed the rewrite, with link-outs. No rewrite ships without sources.
@@ -179,14 +180,15 @@ The agent should flag these before merging anything that touches them. **The leg
 
 - **Branching:** `develop` is the integration branch; `main` is release. Feature work via descriptive branches.
 - **Commits:** scoped prefixes (`feat(rewrite): ...`, `feat(vote): ...`, `feat(radar): ...`, `fix(...)`, `docs(...)`). One logical change per commit.
-- **Manual operator commands** are the v1 trigger model:
-  - `bun ingest:run` — fetch + cluster + annotate the radar.
+- **Root scripts delegate into workspaces** via `bun --filter`. Run them from the repo root (`mise exec -- bun <script>`); the underlying script lives in `apps/worker` or `packages/db`.
+  - `bun ingest:run` — one manual ingest pass (→ `@kebab/worker ingest:once`). Automatic ingest is the long-running worker (`bun worker`, or the deployed container).
   - `bun rewrite:run --story <slug>` — generate a draft rewrite for one story.
   - `bun rewrite:publish --story <slug>` — flip the latest draft to live.
   - `bun rewrite:spike` — eval-only: dumps real Claude rewrites to `tmp/rewrite-spike-*.md` for human review. Used as the go/no-go gate before publishing.
-  - `bun seed:outlets` — idempotent upsert of the outlet set (currently 25, spanning left → public; the canonical list lives in `scripts/seed-outlets.ts`). Re-run after `db:reset --full`.
+  - `bun seed:outlets` — idempotent upsert of the outlet set (currently 25, spanning left → public; the canonical list lives in `apps/worker/scripts/seed-outlets.ts`). Re-run after `db:reset --full`.
   - `bun db:reset` — wipe ingested data (articles, stories, votes, published_articles). Refuses non-dev DBs without `--force` and demands typed confirmation. `--full` also wipes outlets.
-- **Before reporting a task done:** run `mise exec -- bun check:all` and (for UI work) verify the change in a browser.
+  - `bun worker` — start the long-running ingest worker (in-process scheduler). `RUN_ON_BOOT=true` runs one pass immediately on start.
+- **Before reporting a task done:** run `mise exec -- bun check:all` (root, runs across all workspaces) and (for UI work) verify the change in a browser.
 
 ---
 
@@ -196,6 +198,8 @@ Append-only. When the user corrects me, **I ask** whether to add a lesson here. 
 
 <!-- LESSONS:START -->
 
+- **Env-loading must not be a side-effect of `@kebab/env` (Next bundler chokes).** Reason: `new URL("../../../", import.meta.url)` / a filesystem `dotenv` call inside the env module breaks Turbopack ("Module not found: '../../../'"). Keep `@kebab/env` pure validation; load `.env` from non-Next entrypoints via `import "@kebab/env/load"`, and from web via `dotenv` in `apps/web/next.config.ts` (Next's project root is `apps/web`, so it won't auto-find the repo-root `.env`).
+- **Monorepo (Bun workspaces) + long-running ingest worker replaced Vercel-Cron.** Reason: the whole ingest (25 outlets × ≤5 articles × 3 AI calls) ran synchronously in one Vercel function and only stayed under the timeout because of `MAX_NEW_ARTICLES_PER_OUTLET`. The pipeline moved to `apps/worker` (in-process scheduler, deployed as a Dokploy container); web (`apps/web`) only reads the DB + writes votes. Shared logic lives in `packages/{env,db,core}`. The DB driver switched neon-http → `postgres-js` so the provider is a `DATABASE_URL` change, not a rewrite. Merge/split clustering improvements were deliberately deferred to a follow-up.
 - **Tests run via `mise exec -- bun run test` (vitest), never `bun test`.** Reason: `bun test` invokes Bun's native test runner, which lacks `vi.resetModules` and other Vitest APIs the suite uses — it reports false failures. The `test` script in `package.json` is the contract; always go through it.
 - **German content only, but next-intl stays — English was removed to focus on the German-speaking market.** Reason: operator decision (commit 91c1a12). Only `messages/de.json` ships and the locale resolves to `de`, but the next-intl plumbing is kept intentionally so other languages can be added later. New strings go into `messages/de.json`.
 - **No body scraping in v1 — RSS headlines + teasers only, like Ground News.** Reason: the operator confirmed after a second Ground News check that they also don't ingest bodies. Removes the open DE derivative-work question entirely, keeps paywalled outlets (NZZ, FAZ) in the spectrum, and skips per-outlet scraper maintenance. If the rewrite quality feels thin in practice, bodies become the upgrade path — but we need evidence first, not speculation.
@@ -206,7 +210,7 @@ Append-only. When the user corrects me, **I ask** whether to add a lesson here. 
 - **Run `mise exec -- bun check:all` before declaring a step done.** Reason: this is the project's definition of "ready".
 - **Drizzle-kit metadata snapshots can need hand-fixes for parent-id collisions.** Reason: a previous hand-rolled 0000 migration had a zero-UUID `id`, which collided with the 0001 snapshot's `prevId`. The fix is metadata only (snapshot JSON), not the generated SQL — never hand-edit the SQL.
 - **The voyageai Node SDK ESM build is broken under Next.js bundling.** Reason: directory imports without extensions throw at page-data collection. Use direct fetch against `https://api.voyageai.com/v1/embeddings` instead.
-- **Cap per-outlet article ingest tightly.** Reason: each article triggers 3 sequential AI calls (1 Voyage + 2 Claude). Without a per-run cap, ingest exceeds Vercel function timeouts on cold DBs. `MAX_NEW_ARTICLES_PER_OUTLET` in `src/lib/constants.ts` is the lever.
+- **Cap per-outlet article ingest tightly.** Reason: each article triggers 3 sequential AI calls (1 Voyage + 2 Claude). Without a per-run cap, ingest exceeds Vercel function timeouts on cold DBs. `MAX_NEW_ARTICLES_PER_OUTLET` in `packages/core/src/constants.ts` is the lever.
 
 <!-- LESSONS:END -->
 

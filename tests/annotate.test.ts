@@ -1,6 +1,5 @@
+import { AnnotationSchema, AnnotationsSchema } from "@kebab/core";
 import { describe, expect, it } from "vitest";
-
-import { AnnotationSchema, AnnotationsSchema } from "@/lib/annotate";
 
 describe("AnnotationSchema", () => {
   it("accepts a well-formed annotation", () => {

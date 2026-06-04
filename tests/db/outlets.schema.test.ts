@@ -1,7 +1,6 @@
+import { db, outlets } from "@kebab/db";
 import { eq, or } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-
-import { db, outlets } from "@/lib/db";
 
 const TEST_SLUG = "__test_outlet_schema__";
 const BOGUS_SLUG = "__bogus__";

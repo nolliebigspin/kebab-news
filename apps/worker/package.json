@@ -1,0 +1,25 @@
+{
+  "name": "@kebab/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "dev": "RUN_ON_BOOT=true bun run src/index.ts",
+    "ingest:once": "bun run scripts/ingest-once.ts",
+    "rewrite:spike": "bun run scripts/rewrite-spike.ts",
+    "rewrite:run": "bun run scripts/rewrite-run.ts",
+    "rewrite:publish": "bun run scripts/rewrite-publish.ts",
+    "db:reset": "bun run scripts/db-reset.ts",
+    "seed:outlets": "bun run scripts/seed-outlets.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.97.0",
+    "@kebab/core": "workspace:*",
+    "@kebab/db": "workspace:*",
+    "@kebab/env": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "rss-parser": "^3.13.0",
+    "zod": "^4.3.6"
+  }
+}
