@@ -25,6 +25,12 @@ export const AnnotationSchema = z
 export const AnnotationsSchema = z.array(AnnotationSchema).max(MAX_ANNOTATION_SPANS);
 export type Annotation = z.infer<typeof AnnotationSchema>;
 
+// NOTE: Anthropic's output_config JSON-schema validator rejects validation
+// keywords like `maxItems`/`minimum` ("For 'array' type, property 'maxItems'
+// is not supported"). We therefore keep this schema purely structural — the
+// span cap (MAX_ANNOTATION_SPANS) and bounds (start >= 0, end >= 1, start <
+// end) are enforced by the system prompt and re-validated by Zod
+// (AnnotationsSchema) after the call, so dropping them here is safe.
 const JSON_SCHEMA = {
   type: "object",
   additionalProperties: false,
@@ -32,14 +38,13 @@ const JSON_SCHEMA = {
   properties: {
     annotations: {
       type: "array",
-      maxItems: MAX_ANNOTATION_SPANS,
       items: {
         type: "object",
         additionalProperties: false,
         required: ["start", "end", "type", "note"],
         properties: {
-          start: { type: "integer", minimum: 0 },
-          end: { type: "integer", minimum: 1 },
+          start: { type: "integer" },
+          end: { type: "integer" },
           type: {
             type: "string",
             enum: annotationTypeValues as unknown as string[],
