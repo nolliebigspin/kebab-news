@@ -2,6 +2,7 @@ import { REWRITE_VOTE_THRESHOLD } from "@kebab/core";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { NextRunCountdown } from "@/components/NextRunCountdown";
+import { PageHero } from "@/components/PageHero";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("how_to");
@@ -29,10 +30,7 @@ export default async function HowToPage() {
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-12">
-      <header className="mb-10">
-        <h1 className="font-display text-3xl leading-tight sm:text-4xl">{t("page_title")}</h1>
-        <p className="mt-3 text-base text-ink-soft leading-relaxed">{t("page_subtitle")}</p>
-      </header>
+      <PageHero title={t("page_title")} subtitle={t("page_subtitle")} />
 
       <p className="mb-10 text-base text-ink leading-relaxed">{t("intro")}</p>
 

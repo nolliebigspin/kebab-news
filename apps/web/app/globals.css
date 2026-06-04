@@ -95,6 +95,7 @@ html,
 body {
   background: var(--bg);
   color: var(--ink);
+  scrollbar-gutter: stable;
 }
 
 body {

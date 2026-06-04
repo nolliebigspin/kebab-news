@@ -4,6 +4,7 @@ import { desc, sql } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { PageHero } from "@/components/PageHero";
 import { VoteButton } from "@/components/VoteButton";
 import { getCumulativeVoteCounts } from "@/lib/vote";
 
@@ -52,12 +53,7 @@ export default async function RadarPage() {
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-12">
-      <header className="mb-10">
-        <h1 className="font-display text-4xl leading-tight sm:text-5xl">{t("page_title")}</h1>
-        <p className="mt-3 max-w-2xl text-base text-ink-soft leading-relaxed">
-          {t("page_subtitle")}
-        </p>
-      </header>
+      <PageHero title={t("page_title")} subtitle={t("page_subtitle")} />
 
       {stories_.length === 0 ? (
         <p className="text-ink-mute">{t("empty")}</p>
