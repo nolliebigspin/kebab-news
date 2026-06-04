@@ -1,8 +1,11 @@
 # Ingest worker — long-running Bun process.
-# Build context is the REPO ROOT (the worker depends on workspace packages):
-#   docker build -f apps/worker/Dockerfile -t kebab-worker .
-# In Dokploy, set the build context to the repo root and the Dockerfile path
-# to apps/worker/Dockerfile.
+# This Dockerfile lives at the REPO ROOT on purpose: the worker depends on the
+# workspace packages (packages/*), so the build context must be the repo root.
+# Keeping the Dockerfile at the root makes every Docker-build front-end (incl.
+# Dokploy) use the root as context automatically, regardless of context-path
+# settings.
+#   docker build -t kebab-worker .
+# In Dokploy: Build Type = Dockerfile, Docker File = Dockerfile, Context = .
 FROM oven/bun:1.3.11 AS base
 WORKDIR /app
 
