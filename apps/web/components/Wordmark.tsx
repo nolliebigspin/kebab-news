@@ -16,7 +16,8 @@ export const Wordmark = () => {
         priority
         className="h-10 w-auto"
       />
-      <div className="flex items-baseline gap-0.5">
+      {/* Wordmark text is hidden on mobile — the logo image stands alone there. */}
+      <div className="hidden items-baseline gap-0.5 md:flex">
         <span className="font-display text-ink text-xl">kebab</span>
         <span className="font-display text-brand text-xl">.news</span>
       </div>

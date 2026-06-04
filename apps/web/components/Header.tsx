@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/Wordmark";
 
 const NAV_LINK =
-  "font-display text-lg text-ink-soft tracking-[-0.01em] transition-colors hover:text-brand";
+  "font-mono text-ink-soft text-xs uppercase tracking-[0.12em] transition-colors hover:text-brand";
 
 export const Header = () => {
   const t = useTranslations("header");
