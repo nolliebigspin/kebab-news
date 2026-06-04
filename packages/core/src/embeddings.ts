@@ -20,6 +20,9 @@ type VoyageResponse = {
  * endpoint — direct fetch is cleaner.
  */
 export async function embedText(text: string): Promise<number[]> {
+  if (!env.VOYAGE_API_KEY) {
+    throw new Error("VOYAGE_API_KEY is required to call embedText()");
+  }
   const response = await fetch(VOYAGE_URL, {
     method: "POST",
     headers: {

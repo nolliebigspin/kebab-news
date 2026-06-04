@@ -11,8 +11,12 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.string().url().min(1),
 
-    ANTHROPIC_API_KEY: z.string().min(1),
-    VOYAGE_API_KEY: z.string().min(1),
+    // AI keys are only needed by the worker (annotate/embeddings/rewrite),
+    // never by the web app. They are optional here so the web build doesn't
+    // fail without them; the AI modules validate presence when they build
+    // their client (and throw a clear error there if missing).
+    ANTHROPIC_API_KEY: z.string().min(1).optional(),
+    VOYAGE_API_KEY: z.string().min(1).optional(),
     CRON_SECRET: z.string().min(16),
 
     // Daily-rotating salt for hashing voter IPs before they hit the DB.

@@ -60,6 +60,9 @@ let cachedClient: Anthropic | null = null;
 
 function getClient(): Anthropic {
   if (!cachedClient) {
+    if (!env.ANTHROPIC_API_KEY) {
+      throw new Error("ANTHROPIC_API_KEY is required to call annotateText()");
+    }
     cachedClient = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
   }
   return cachedClient;
