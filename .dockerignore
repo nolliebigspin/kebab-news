@@ -1,7 +1,12 @@
 node_modules
 **/node_modules
-apps/web
 .next
 **/.next
 .git
 tmp
+
+# Exclude the web app's source from the worker image, but keep its
+# package.json — bun.lock is workspace-wide and a frozen install needs every
+# member manifest present.
+apps/web/*
+!apps/web/package.json
