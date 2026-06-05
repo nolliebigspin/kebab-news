@@ -13,6 +13,7 @@ export default defineConfig({
       "@kebab/env": r("./packages/env/src/index.ts"),
       "@kebab/db": r("./packages/db/src/index.ts"),
       "@kebab/core": r("./packages/core/src/index.ts"),
+      "@kebab/auth": r("./packages/auth/src/index.ts"),
       "@": r("./apps/web"),
     },
     // The worker has a nested node_modules symlink for rss-parser; without

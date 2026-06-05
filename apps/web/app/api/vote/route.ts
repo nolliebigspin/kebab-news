@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { rateLimit } from "@/lib/rate-limit";
-import { countVotesToday, extractClientIp, recordVote } from "@/lib/vote";
+import { getSession } from "@/lib/session";
+import { countVotes, recordVote } from "@/lib/vote";
 
 const VOTE_RATE_LIMIT = 10;
 const VOTE_RATE_WINDOW_MS = 60_000;
@@ -12,8 +13,14 @@ const BodySchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const ip = extractClientIp(request);
-  const limit = rateLimit(`vote:${ip}`, VOTE_RATE_LIMIT, VOTE_RATE_WINDOW_MS);
+  // Voting requires a logged-in account — one vote per user per story.
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
+  }
+  const userId = session.user.id;
+
+  const limit = rateLimit(`vote:${userId}`, VOTE_RATE_LIMIT, VOTE_RATE_WINDOW_MS);
   if (!limit.ok) {
     return NextResponse.json(
       { ok: false, error: "rate_limited" },
@@ -40,7 +47,7 @@ export async function POST(request: Request) {
 
   let result: Awaited<ReturnType<typeof recordVote>>;
   try {
-    result = await recordVote(storyId, ip);
+    result = await recordVote(storyId, userId);
   } catch (err) {
     // Most likely: storyId is a valid UUID but no such row exists, so the
     // FK constraint fires. Treat as 404 to keep the client UX clean.
@@ -48,6 +55,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "story_not_found" }, { status: 404 });
   }
 
-  const count = await countVotesToday(storyId);
+  const count = await countVotes(storyId);
   return NextResponse.json({ ok: true, kind: result.kind, count });
 }

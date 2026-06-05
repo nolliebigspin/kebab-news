@@ -29,6 +29,20 @@
       "when": 1779627837022,
       "tag": "0003_tough_vampiro",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1780652022219,
+      "tag": "0004_loose_network",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1780653886259,
+      "tag": "0005_votes_user_id",
+      "breakpoints": true
     }
   ]
 }

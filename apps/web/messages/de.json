@@ -4,7 +4,24 @@
     "radar": "Radar",
     "articles": "Artikel",
     "vision": "Vision",
-    "how_to": "How-to"
+    "how_to": "How-to",
+    "login": "Anmelden",
+    "logout": "Abmelden"
+  },
+  "auth": {
+    "page_title": "Anmelden",
+    "page_subtitle": "Melde dich mit deiner E-Mail-Adresse an, um über Geschichten abzustimmen. Wir schicken dir einen Anmeldelink — kein Passwort nötig.",
+    "email_label": "E-Mail-Adresse",
+    "email_placeholder": "du@beispiel.de",
+    "send_link": "Anmeldelink senden",
+    "sending": "Wird gesendet …",
+    "link_sent_title": "Prüfe dein Postfach",
+    "link_sent_body": "Wir haben dir einen Anmeldelink an {email} geschickt. Öffne ihn auf diesem Gerät, um angemeldet zu werden. Der Link ist nur kurze Zeit gültig.",
+    "error": "Das hat nicht geklappt. Bitte prüfe die Adresse und versuche es erneut.",
+    "consent": "Mit dem Anmelden stimmst du zu, dass wir deine E-Mail-Adresse zur Verwaltung deines Kontos speichern. Details in der Datenschutzerklärung.",
+    "account_title": "Konto",
+    "account_email_label": "Angemeldet als",
+    "logout": "Abmelden"
   },
   "hero": {
     "tagline": "Ein Werkzeug gegen Scheuklappen.",
@@ -48,8 +65,9 @@
     "vote": {
       "cta": "Abstimmen",
       "voted": "Stimme gezählt",
-      "already_voted": "Heute schon abgestimmt",
+      "already_voted": "Bereits abgestimmt",
       "error": "Fehler — erneut versuchen",
+      "login_cta": "Anmelden zum Abstimmen",
       "threshold_progress": "{count}/{threshold} bis zur Fassung",
       "threshold_reached": "Schwelle erreicht — Fassung folgt"
     }
@@ -75,8 +93,8 @@
     "step2_title": "2 · Geschichten werden gebündelt",
     "step2_body": "Berichten mehrere Medien über dasselbe Ereignis, werden ihre Beiträge automatisch zu einer Geschichte gruppiert. Im Radar siehst du diese Bündel mit den Original-Schlagzeilen nebeneinander, die Rahmung direkt an den Schlagzeilen markiert.",
     "step3_title": "3 · Du stimmst ab",
-    "step3_body_before": "Pro Tag kannst du für jede Geschichte einmal abstimmen. Sobald eine Geschichte insgesamt mindestens ",
-    "step3_body_after": " Stimmen gesammelt hat, qualifiziert sie sich für eine neutrale Fassung. Die Stimmen sammeln sich über mehrere Tage hinweg an — sie werden nicht täglich zurückgesetzt.",
+    "step3_body_before": "Zum Abstimmen meldest du dich einmalig mit deiner E-Mail-Adresse an (per Anmeldelink, ohne Passwort). Pro Konto kannst du für jede Geschichte einmal abstimmen. Sobald eine Geschichte insgesamt mindestens ",
+    "step3_body_after": " Stimmen gesammelt hat, qualifiziert sie sich für eine neutrale Fassung. Die Stimmen sammeln sich über mehrere Tage hinweg an — sie werden nicht zurückgesetzt.",
     "step4_title": "4 · Die neutrale Fassung entsteht",
     "step4_body": "Hat eine Geschichte die Schwelle erreicht, schreibt eine KI beim nächsten Lauf aus allen Quell-Schlagzeilen und -Teasern eine einzige, neutral formulierte Fassung. Sie erscheint unter /artikel — mit dem Hinweis „KI-generierte Zusammenfassung. Ungeprüft.\" und allen Originalquellen darunter verlinkt.",
     "schedule_title": "Wann werden neue Quellen geladen?",
@@ -108,17 +126,19 @@
   "datenschutz": {
     "page_title": "Datenschutzerklärung",
     "intro_heading": "Überblick",
-    "intro_body": "Diese Website verarbeitet so wenig personenbezogene Daten wie möglich. Es gibt keine Nutzerkonten, kein Tracking über Cookies und keine Werbung. Alle eingesetzten Dienste verarbeiten die Daten innerhalb der Europäischen Union.",
+    "intro_body": "Diese Website verarbeitet so wenig personenbezogene Daten wie möglich. Es gibt kein Tracking über Cookies und keine Werbung. Zum Abstimmen kannst du ein Konto mit deiner E-Mail-Adresse anlegen; dabei wird ein technisch notwendiges Sitzungs-Cookie gesetzt. Alle eingesetzten Dienste verarbeiten die Daten innerhalb der Europäischen Union.",
     "controller_heading": "Verantwortlicher",
     "controller_body": "Verantwortlich für die Datenverarbeitung auf dieser Website ist Alec Winter, Blumenau 89, 22089 Hamburg, Deutschland. Kontakt: contact@awinter.dev. Die vollständigen Angaben finden sich im Impressum.",
     "hosting_heading": "Hosting (Vercel)",
     "hosting_body": "Die Website wird bei der Vercel Inc. gehostet, mit Datenverarbeitung in der Europäischen Union. Beim Aufruf werden technisch notwendige Server-Logs (u. a. IP-Adresse, Zeitpunkt der Anfrage, abgerufene Ressource, übermittelte Datenmenge, Referrer und User-Agent) verarbeitet, um den Betrieb, die Sicherheit und die Stabilität der Website zu gewährleisten. Rechtsgrundlage ist das berechtigte Interesse an einem sicheren und funktionsfähigen Betrieb (Art. 6 Abs. 1 lit. f DSGVO). Mit Vercel besteht ein Vertrag zur Auftragsverarbeitung.",
     "database_heading": "Datenbank (Neon)",
-    "database_body": "Inhaltsdaten der Anwendung werden in einer Postgres-Datenbank des Anbieters Neon gespeichert, mit Datenverarbeitung in der Europäischen Union. Personenbezug entsteht hier nur in Form der unten beschriebenen Abstimmungs-Hashes. Auch mit Neon besteht ein Vertrag zur Auftragsverarbeitung.",
+    "database_body": "Inhaltsdaten der Anwendung werden in einer Postgres-Datenbank des Anbieters Neon gespeichert, mit Datenverarbeitung in der Europäischen Union. Personenbezogene Daten entstehen hier in Form der unten beschriebenen Konto- und Abstimmungsdaten (E-Mail-Adresse, Sitzungen, Stimmen). Auch mit Neon besteht ein Vertrag zur Auftragsverarbeitung.",
     "analytics_heading": "Reichweitenmessung (Vercel Analytics)",
     "analytics_body": "Zur Reichweitenmessung nutzen wir Vercel Analytics in der cookielosen Variante. Es werden keine Cookies gesetzt und keine geräteübergreifenden Profile gebildet; die Auswertung erfolgt aggregiert. Rechtsgrundlage ist das berechtigte Interesse an einer datensparsamen Reichweitenmessung (Art. 6 Abs. 1 lit. f DSGVO).",
+    "account_heading": "Konto & Anmeldung",
+    "account_body": "Zum Abstimmen legst du ein Konto mit deiner E-Mail-Adresse an. Die Anmeldung erfolgt passwortlos: Wir senden dir einen einmaligen Anmeldelink per E-Mail. Gespeichert werden deine E-Mail-Adresse sowie technische Anmeldedaten (Sitzungen). Rechtsgrundlage ist die Erfüllung des von dir angeforderten Dienstes – die Abstimmungsfunktion (Art. 6 Abs. 1 lit. b DSGVO). Nach erfolgreicher Anmeldung wird ein technisch notwendiges Sitzungs-Cookie gesetzt, das dich angemeldet hält; es dient ausschließlich der Anmeldung und keiner Reichweitenmessung. Den Versand der Anmeldelinks übernimmt unser E-Mail-Dienstleister als Auftragsverarbeiter; mit ihm besteht ein Vertrag zur Auftragsverarbeitung. Du kannst die Löschung deines Kontos jederzeit über die im Impressum genannte Kontaktadresse verlangen.",
     "voting_heading": "Abstimmungen",
-    "voting_body": "Beim Abstimmen über eine Geschichte wird deine IP-Adresse nicht im Klartext gespeichert. Sie wird mit einem täglich wechselnden Geheimnis zu einem nicht umkehrbaren Hash verrechnet, der ausschließlich dazu dient, eine Stimme pro IP pro Geschichte pro Tag sicherzustellen. Aus dem gespeicherten Hash lässt sich die ursprüngliche IP-Adresse nicht rekonstruieren. Rechtsgrundlage ist das berechtigte Interesse an einer missbrauchssicheren Abstimmung (Art. 6 Abs. 1 lit. f DSGVO).",
+    "voting_body": "Stimmst du über eine Geschichte ab, wird deine Stimme deinem Konto zugeordnet gespeichert, um sicherzustellen, dass pro Konto und Geschichte nur einmal abgestimmt wird. Es werden keine IP-Adressen zur Abstimmung gespeichert. Rechtsgrundlage ist die Erfüllung des von dir angeforderten Dienstes (Art. 6 Abs. 1 lit. b DSGVO).",
     "rights_heading": "Deine Rechte",
     "rights_body": "Du hast das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung, ein Widerspruchsrecht gegen Verarbeitungen auf Grundlage berechtigten Interesses sowie ein Recht auf Datenübertragbarkeit. Außerdem steht dir ein Beschwerderecht bei einer Datenschutz-Aufsichtsbehörde zu. Wende dich für die Wahrnehmung deiner Rechte an die im Impressum genannte Kontaktadresse."
   }

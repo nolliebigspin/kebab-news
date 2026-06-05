@@ -19,10 +19,21 @@ export const env = createEnv({
     VOYAGE_API_KEY: z.string().min(1).optional(),
     CRON_SECRET: z.string().min(16),
 
-    // Daily-rotating salt for hashing voter IPs before they hit the DB.
-    // Stable enough to dedup the same IP across the day, ephemeral enough
-    // that we can't reconstruct yesterday's voters. Rotate manually.
-    VOTE_DAILY_SALT: z.string().min(16),
+    // Auth + email (magic-link login) are only needed by the web app via
+    // @kebab/auth, never by the worker. Optional here for the same reason as
+    // the AI keys: the auth/mailer modules validate presence when they build
+    // their instance and throw a clear error there if missing. This keeps the
+    // worker container from needing SMTP secrets and keeps tests green without
+    // real values.
+    BETTER_AUTH_SECRET: z.string().min(32).optional(),
+    BETTER_AUTH_URL: z.string().url().optional(),
+    SMTP_HOST: z.string().min(1).optional(),
+    // Env values are strings; coerce to a number for nodemailer.
+    SMTP_PORT: z.coerce.number().int().positive().optional(),
+    SMTP_USER: z.string().min(1).optional(),
+    SMTP_PASS: z.string().min(1).optional(),
+    // .min(1) rather than .email() so "Name <addr>" From-headers pass.
+    EMAIL_FROM: z.string().min(1).optional(),
 
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   },

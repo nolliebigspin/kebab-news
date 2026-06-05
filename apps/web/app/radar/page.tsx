@@ -6,6 +6,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { PageHero } from "@/components/PageHero";
 import { VoteButton } from "@/components/VoteButton";
+import { getSession } from "@/lib/session";
 import { getCumulativeVoteCounts } from "@/lib/vote";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -49,7 +50,11 @@ async function loadStories(): Promise<StoryCard[]> {
 export default async function RadarPage() {
   const t = await getTranslations("radar");
   const stories_ = await loadStories();
-  const voteCounts = await getCumulativeVoteCounts(stories_.map((s) => s.id));
+  const [voteCounts, session] = await Promise.all([
+    getCumulativeVoteCounts(stories_.map((s) => s.id)),
+    getSession(),
+  ]);
+  const isAuthenticated = session !== null;
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-12">
@@ -78,6 +83,7 @@ export default async function RadarPage() {
                 storyId={story.id}
                 initialCount={voteCounts.get(story.id) ?? 0}
                 threshold={REWRITE_VOTE_THRESHOLD}
+                isAuthenticated={isAuthenticated}
               />
             </li>
           ))}

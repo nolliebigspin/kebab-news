@@ -9,7 +9,8 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { AnnotatedText } from "@/components/AnnotatedText";
 import { VoteButton } from "@/components/VoteButton";
-import { countVotesToday } from "@/lib/vote";
+import { getSession } from "@/lib/session";
+import { countVotes } from "@/lib/vote";
 
 type StoryArticle = {
   id: string;
@@ -97,7 +98,7 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
 
   const t = await getTranslations("radar");
   const { story, items, published } = data;
-  const voteCount = await countVotesToday(story.id);
+  const [voteCount, session] = await Promise.all([countVotes(story.id), getSession()]);
 
   // Group articles by lean, in LEAN_ORDER. Filter empty leans into the
   // "blind spots" list.
@@ -123,7 +124,11 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
           <p className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]">
             {t("article_count", { count: story.articleCount })}
           </p>
-          <VoteButton storyId={story.id} initialCount={voteCount} />
+          <VoteButton
+            storyId={story.id}
+            initialCount={voteCount}
+            isAuthenticated={session !== null}
+          />
         </div>
 
         {published ? (

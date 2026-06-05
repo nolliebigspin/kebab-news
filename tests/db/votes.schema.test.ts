@@ -1,26 +1,33 @@
-import { articles, db, outlets, stories, votes } from "@kebab/db";
-import { eq } from "drizzle-orm";
+import { articles, db, outlets, stories, user, votes } from "@kebab/db";
+import { eq, inArray } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { countVotesToday, recordVote, todayBucket } from "../../apps/web/lib/vote";
+import { countVotes, recordVote } from "../../apps/web/lib/vote";
 
 const TEST_OUTLET_SLUG = "__votes_test_outlet__";
 const TEST_STORY_SLUG = "__votes_test_story__";
+const TEST_USER_A = "__votes_test_user_a__";
+const TEST_USER_B = "__votes_test_user_b__";
 
 let outletId: string;
 let storyId: string;
 
 async function cleanup() {
-  // Order matters: votes cascade from stories, articles cascade from outlets.
-  // Skip child-table deletes on the first run (before IDs exist); the
-  // parent delete via slug still runs and cascades children.
+  // Order matters: votes FK both stories and user. Delete votes first, then
+  // the parents. Skip child-table deletes on the first run (before IDs exist).
   if (storyId) await db.delete(votes).where(eq(votes.storyId, storyId));
   if (outletId) await db.delete(articles).where(eq(articles.outletId, outletId));
   await db.delete(stories).where(eq(stories.slug, TEST_STORY_SLUG));
   await db.delete(outlets).where(eq(outlets.slug, TEST_OUTLET_SLUG));
+  await db.delete(user).where(inArray(user.id, [TEST_USER_A, TEST_USER_B]));
 }
 
 beforeAll(async () => {
   await cleanup();
+
+  await db.insert(user).values([
+    { id: TEST_USER_A, name: "Voter A", email: `${TEST_USER_A}@votes.test` },
+    { id: TEST_USER_B, name: "Voter B", email: `${TEST_USER_B}@votes.test` },
+  ]);
 
   const insertedOutlet = await db
     .insert(outlets)
@@ -50,27 +57,22 @@ beforeAll(async () => {
 
 afterAll(cleanup);
 
-describe("votes — recordVote / countVotesToday", () => {
+describe("votes — recordVote / countVotes", () => {
   it("records a first vote and reflects it in the count", async () => {
-    const result = await recordVote(storyId, "203.0.113.10");
+    const result = await recordVote(storyId, TEST_USER_A);
     expect(result.kind).toBe("recorded");
-    expect(await countVotesToday(storyId)).toBe(1);
+    expect(await countVotes(storyId)).toBe(1);
   });
 
-  it("dedups a second vote from the same IP on the same day", async () => {
-    const result = await recordVote(storyId, "203.0.113.10");
+  it("dedups a second vote from the same user", async () => {
+    const result = await recordVote(storyId, TEST_USER_A);
     expect(result.kind).toBe("duplicate");
-    expect(await countVotesToday(storyId)).toBe(1);
+    expect(await countVotes(storyId)).toBe(1);
   });
 
-  it("counts a different IP as a separate vote", async () => {
-    const result = await recordVote(storyId, "198.51.100.5");
+  it("counts a different user as a separate vote", async () => {
+    const result = await recordVote(storyId, TEST_USER_B);
     expect(result.kind).toBe("recorded");
-    expect(await countVotesToday(storyId)).toBe(2);
-  });
-
-  it("today's bucket matches today's date in UTC", () => {
-    const expected = new Date().toISOString().slice(0, 10);
-    expect(todayBucket()).toBe(expected);
+    expect(await countVotes(storyId)).toBe(2);
   });
 });

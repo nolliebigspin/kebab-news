@@ -15,6 +15,7 @@ export default async function DatenschutzPage() {
     { heading: t("hosting_heading"), body: t("hosting_body") },
     { heading: t("database_heading"), body: t("database_body") },
     { heading: t("analytics_heading"), body: t("analytics_body") },
+    { heading: t("account_heading"), body: t("account_body") },
     { heading: t("voting_heading"), body: t("voting_body") },
     { heading: t("rights_heading"), body: t("rights_body") },
   ];

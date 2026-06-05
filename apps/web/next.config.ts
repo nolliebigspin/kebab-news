@@ -11,6 +11,17 @@ config({ path: "../../.env", quiet: true });
 
 const withNextIntl = createNextIntlPlugin();
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  // Node-only server libraries kept out of the bundle (required at runtime).
+  //
+  // kysely is here even though we never use it: better-auth's core depends on
+  // @better-auth/kysely-adapter, which lazily (await import) pulls in three
+  // sqlite-dialect modules that import symbols removed in kysely 0.29
+  // (DEFAULT_MIGRATION_TABLE). We use the drizzle adapter on Postgres, so those
+  // sqlite paths never execute — but Turbopack statically traces the lazy
+  // imports and the build fails on the export mismatch. Marking kysely external
+  // stops Turbopack parsing it; at runtime the sqlite branch is never hit.
+  serverExternalPackages: ["nodemailer", "kysely"],
+};
 
 export default withNextIntl(nextConfig);

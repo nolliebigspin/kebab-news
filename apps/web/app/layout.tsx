@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { getSession } from "@/lib/session";
 import "./globals.css";
 
 const inter = Inter({
@@ -71,7 +72,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const messages = await getMessages();
+  const [messages, session] = await Promise.all([getMessages(), getSession()]);
 
   return (
     <html lang="de" className={`${inter.variable} ${ibmPlexMono.variable}`}>
@@ -80,7 +81,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         style={{ background: "var(--bg)", color: "var(--ink)" }}
       >
         <NextIntlClientProvider messages={messages}>
-          <Header />
+          <Header isAuthenticated={session !== null} />
           <main className="flex-1">{children}</main>
           <Footer />
         </NextIntlClientProvider>

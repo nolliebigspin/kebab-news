@@ -36,12 +36,12 @@ The radar is the front end of the curation pipeline, not the product itself.
 
 ### Piece 2 — Voting + selection
 
-Readers vote on radar clusters. The cluster with the most votes for the day becomes the day's rewrite target.
+Readers vote on radar clusters. Votes accumulate (all-time) until a cluster clears `REWRITE_VOTE_THRESHOLD`, which makes it eligible for a neutral rewrite.
 
-v1 voting model (deliberate compromise):
-- One vote per IP per cluster per day, IP hashed with a daily-rotating salt.
-- No accounts. No social login. No magic links.
-- This will get botted if the product gets any traction. Accept that and move on; account-based voting is a later layer when the product earns it.
+Voting model:
+- **Login required.** Voting requires a logged-in account (passwordless magic-link via Better Auth — see §IV). `POST /api/vote` returns 401 without a valid session; the radar UI shows an "Anmelden" CTA to logged-out readers.
+- **One vote per account per cluster**, enforced by a unique `(story_id, user_id)` index — permanent, not daily.
+- No IP-hashing, no daily salt, no anonymous path anymore (this reverses the earlier IP-based compromise — see §IX).
 
 Selection in v1 is **manual**: you (the operator) pick the winning story by running `bun rewrite:run --story <slug>`. Automatic "promote the highest-vote story once a day" is a later addition.
 
@@ -62,7 +62,6 @@ The published article lives at `/artikel/[slug]` and carries a prominent disclai
 
 ### Out of scope for now
 
-- User accounts (Magic Link or otherwise)
 - Comments
 - Per-user vote weighting or trust scores
 - Automatic story selection / publishing
@@ -87,7 +86,7 @@ Claude annotates spans on each outlet headline and teaser. Output schema: `{ sta
 
 ### 3. Voting (Piece 2)
 
-`POST /api/vote { storyId }` reads the request's `x-forwarded-for`, hashes it with the daily-rotating salt (`VOTE_DAILY_SALT` env), and upserts into the `votes` table with a `(story_id, ip_hash, day_bucket)` unique constraint. Rate-limit 10 req/min/IP for spam defense. The radar UI shows the live count per cluster.
+`POST /api/vote { storyId }` reads the Better Auth session (server-side, via `apps/web/lib/session.ts`); no session → 401. With a session it upserts into the `votes` table keyed by `(story_id, user_id)` with a unique constraint, so a re-vote is a no-op `duplicate`. Rate-limit 10 req/min keyed by user id. The radar UI shows the live count per cluster and renders an "Anmelden" CTA (link to `/anmelden`) instead of the vote button when the reader is logged out. Vote logic lives in `apps/web/lib/vote.ts` (`recordVote`, `countVotes`, `getCumulativeVoteCounts`). Auth itself lives in `@kebab/auth` (§IV).
 
 ### 4. Rewrite (Piece 3)
 
@@ -112,17 +111,18 @@ Claude annotates spans on each outlet headline and teaser. Output schema: `{ sta
 Versions are pinned in `mise.toml`, `package.json`, and `bun.lock`. Do not write versions into this document — read them from those files when needed.
 
 - **Runtime / Package Manager:** Bun (managed via mise).
-- **Monorepo:** Bun workspaces. `packages/env` (`@kebab/env`, pure Zod env validation via `@t3-oss/env-core`; `@kebab/env/load` is the side-effect dotenv loader for non-Next entrypoints), `packages/db` (`@kebab/db`, Drizzle schema + client + migrations), `packages/core` (`@kebab/core`, framework-agnostic cluster/embeddings/annotate/rewrite/constants), `apps/web` (`@kebab/web`, Next.js), `apps/worker` (`@kebab/worker`, ingest worker). `@kebab/*` imports replace the old `@/lib/*` aliases across packages; `@/*` still resolves within `apps/web`.
+- **Monorepo:** Bun workspaces. `packages/env` (`@kebab/env`, pure Zod env validation via `@t3-oss/env-core`; `@kebab/env/load` is the side-effect dotenv loader for non-Next entrypoints), `packages/db` (`@kebab/db`, Drizzle schema + client + migrations), `packages/core` (`@kebab/core`, framework-agnostic cluster/embeddings/annotate/rewrite/constants), `packages/auth` (`@kebab/auth`, Better Auth instance + nodemailer mailer + the Next.js auth handler; consumed only by `apps/web`, never the worker), `apps/web` (`@kebab/web`, Next.js), `apps/worker` (`@kebab/worker`, ingest worker). `@kebab/*` imports replace the old `@/lib/*` aliases across packages; `@/*` still resolves within `apps/web`.
 - **Framework:** Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui.
 - **i18n:** next-intl, kept in place so other languages can be added later. For now German is the only shipped locale — English content was removed to focus on the German-speaking market. Strings live in `apps/web/messages/de.json`; the request config currently resolves to `de`.
 - **Database:** Postgres + Drizzle ORM + `pgvector` (semantic clustering). Driver is `postgres-js` (standard wire protocol), so it runs against Neon today and any self-hosted Postgres later — switching providers is a `DATABASE_URL` change. The driver is encapsulated in `packages/db`; nothing else knows it.
 - **Scheduled jobs:** long-running ingest worker (`apps/worker`) with an in-process scheduler (`RUN_HOURS_UTC`), deployed as a container (Dokploy). No HTTP route, no Vercel-Cron, no external queue.
 - **AI — Embeddings:** Voyage AI (`voyage-3-lite`, 512 dims, direct HTTP).
 - **AI — Framing annotation + neutral rewrite:** Claude (Anthropic API, `claude-opus-4-7`).
+- **Auth:** Better Auth (passwordless magic-link), Drizzle adapter on the shared Postgres, email sent via SMTP (`nodemailer`). Encapsulated in `@kebab/auth`. Note: `kysely` is marked `serverExternalPackages` in `apps/web/next.config.ts` — it's a dead transitive dep of better-auth (we use the Drizzle adapter) whose sqlite dialects break Turbopack's build trace; externalizing stops it being parsed (see §IX).
 - **Hosting:** Vercel (web app, root dir `apps/web`) + Dokploy (ingest worker container).
 - **Quality:** Biome (lint + format), Vitest (tests).
 
-Deferred until the product earns it: user accounts, Magic Link, persistent vote weighting, external job queues.
+Deferred until the product earns it: persistent vote weighting, external job queues.
 
 ---
 
@@ -136,9 +136,16 @@ Current tables (in `packages/db/src/schema.ts`):
 
 New tables for Product B:
 
-- `votes` — id, story_id (FK cascade), ip_hash, day_bucket (date), created_at. Unique (story_id, ip_hash, day_bucket). Indexed on (story_id, day_bucket) for hot-path counting.
+- `votes` — id, story_id (FK cascade), user_id (text FK → user, cascade), created_at. Unique (story_id, user_id). Indexed on (story_id) for hot-path counting.
 - `published_articles` — id, story_id (FK restrict), slug (unique), neutral_headline, neutral_body (markdown text), source_count, source_outlet_slugs (text[]), model, prompt_version, rewritten_at, published_at (nullable; NULL = draft, NOT NULL = live).
 - `stories.published_article_id` — nullable FK back-pointer added via migration.
+
+Better Auth tables (canonical shapes, defined in the same `schema.ts` so drizzle-kit stays single-source — note `user.id` is **text**, not uuid):
+
+- `user` — id (text PK), name, email (unique), email_verified (bool), image, created_at, updated_at.
+- `session` — id (text PK), user_id (FK cascade), token (unique), expires_at, ip_address, user_agent, created_at, updated_at.
+- `account` — id (text PK), user_id (FK cascade), account_id, provider_id, OAuth/password columns (unused by magic-link but expected by the adapter), created_at, updated_at.
+- `verification` — id (text PK), identifier, value, expires_at, created_at, updated_at. Reused by the magic-link plugin for its tokens; no extra table.
 
 ---
 
@@ -150,7 +157,7 @@ These are non-negotiable. Violating them is the most common mistake — see Sect
 2. **No other package managers.** This is a Bun project. No `npm install`, no `pnpm`, no `yarn`.
 3. **Finishing a step requires `mise exec -- bun check:all`.** Before declaring any coding step complete, run it. Fix what it reports.
 4. **DB migrations are generated, never hand-edited.** Run `mise exec -- bun db:generate` after schema changes, then `mise exec -- bun db:migrate`. Do not edit the generated SQL files in `packages/db/drizzle/` by hand. The metadata snapshots in `packages/db/drizzle/meta/` are also generated; the only time you touch them is to repair a known-broken chain (see §IX).
-5. **No AI calls in the web app.** All AI work runs in the ingest worker (`apps/worker`) or operator-triggered commands (`bun ingest:run`, `bun rewrite:run`). Never in the path of a page render or a `POST /api/vote`. The web app reads from the DB and writes votes only.
+5. **No AI calls in the web app.** All AI work runs in the ingest worker (`apps/worker`) or operator-triggered commands (`bun ingest:run`, `bun rewrite:run`). Never in the path of a page render or a `POST /api/vote`. The web app reads from the DB, handles auth (Better Auth: sessions, magic-link sign-in, sending login emails via SMTP), and writes votes — but never calls an AI model.
 6. **Rewrite output is structured.** Claude is called with `output_config.format: { type: "json_schema", ... }`. The output is Zod-validated before persistence. On parse failure, the rewrite is aborted and logged — never saved as partial garbage.
 7. **Disclaimer is mandatory.** Every `/artikel/[slug]` page renders the *"KI-generierte Zusammenfassung. Ungeprüft."* banner above the rewritten content. Removing it requires editing this rule first.
 8. **Original sources are always visible.** Every published article has a "Quellen" section listing every outlet that fed the rewrite, with link-outs. No rewrite ships without sources.
@@ -171,8 +178,8 @@ The agent should flag these before merging anything that touches them. **The leg
 - **We don't scrape article bodies.** RSS headlines + teasers only. This removes the open DE derivative-work question, keeps paywalled outlets (NZZ, FAZ) in the spectrum, and matches Ground News' pattern. If body scraping is ever reintroduced, the legal question reopens and requires media-lawyer review before any `/artikel/[slug]` is publicly deployed.
 - **Press snippet right (§ 87f ff. UrhG / Art. 15 DSM).** Headlines are generally unprotected; full RSS teasers may exceed "sehr kurze Auszüge". Ground News sits outside the EU regime — we can't copy it 1:1. If a verlag complains, the lever is to shorten or stop displaying teasers (teasers can stay internal for clustering/AI without being shown).
 - **DSA / NetzDG:** named human moderation contact required if and when comments ship. Not required for the read-only article surface.
-- **DSGVO:** vote IPs are hashed with a daily-rotating salt before storage; raw IPs never persist. Vercel Analytics is in use — keep it cookie-less. No email collection in v1 (no accounts).
-- **Impressum + Datenschutz pages exist and carry real operator data** (`/impressum`, `/datenschutz`): Einzelunternehmen Alec Winter, Hamburg, Kleinunternehmer § 19 UStG; Datenschutz names Vercel (hosting + cookieless Analytics, EU), Neon (DB, EU) and the vote-IP hashing, all on Art. 6(1)(f). A media-lawyer review before public livegang is still advisable, but the pages are no longer placeholders. Don't market the project as "gemeinnützig" — that's a Finanzamt status, not a self-label; the footer says "unabhängig".
+- **DSGVO — email + accounts are now collected (this reversed the v1 "no email" stance).** Voting requires a magic-link account, so we store the user's **email address** plus session records, on Art. 6(1)(b) (the login is a service the user requested). A **technically necessary session cookie** is set on login — Vercel Analytics stays cookieless, but the site is no longer fully cookie-free. The **SMTP provider that sends the login emails is a processor** — an AVV is required and it must be named in the Datenschutz page. No raw vote IPs persist anymore (the IP-hash mechanism was removed entirely). Provide an account-deletion path (Art. 17) via the Impressum contact. **Flag before public livegang:** confirm the chosen SMTP provider is EU/AVV-covered and the Datenschutz wording matches the actual provider.
+- **Impressum + Datenschutz pages exist and carry real operator data** (`/impressum`, `/datenschutz`): Einzelunternehmen Alec Winter, Hamburg, Kleinunternehmer § 19 UStG; Datenschutz names Vercel (hosting + cookieless Analytics, EU), Neon (DB, EU), the email/account + session-cookie processing on Art. 6(1)(b), and the SMTP processor. A media-lawyer review before public livegang is still advisable, but the pages are no longer placeholders. Don't market the project as "gemeinnützig" — that's a Finanzamt status, not a self-label; the footer says "unabhängig".
 
 ---
 
@@ -198,6 +205,9 @@ Append-only. When the user corrects me, **I ask** whether to add a lesson here. 
 
 <!-- LESSONS:START -->
 
+- **Voting now requires a magic-link account (Better Auth); the IP-hash/`VOTE_DAILY_SALT` model was removed.** Reason: operator chose real identity ("eine Person = eine Stimme") over IP-based spam-dampening. Votes are unique `(story_id, user_id)`, permanent (no day bucket). Auth lives in `@kebab/auth` (Better Auth + Drizzle adapter + nodemailer/SMTP). This **deliberately reverses** the §II "no accounts in v1 / accounts come later" stance and the §VII "no email collection" note — email + a session cookie are now collected (see §VII for the DSGVO consequences). `apps/web/lib/session.ts` reads the session; `POST /api/vote` 401s without one.
+- **Better Auth + Drizzle gotchas (so they aren't rediscovered).** Reason: (1) `user.id` is **text**, not uuid → FKs to it (e.g. `votes.user_id`) must be `text`, or you get a runtime "column does not exist". (2) `drizzleAdapter` must be `provider: "pg"`. (3) The magic-link plugin reuses the core `verification` table — no extra table. (4) Auth tables are hand-defined in `packages/db/src/schema.ts` (not via the Better Auth CLI) so drizzle-kit stays the single migration source. (5) `apps/web` imports only `@kebab/auth`, never `better-auth/*` directly (better-auth is a dep of the auth package alone; the Next handler is re-exported as `authGET`/`authPOST`).
+- **`kysely` is in `serverExternalPackages` even though we never use it.** Reason: better-auth's core statically imports from `@better-auth/kysely-adapter`, which lazily pulls three sqlite-dialect modules that import symbols removed in kysely 0.29 (`DEFAULT_MIGRATION_TABLE`). We use the Drizzle adapter on Postgres, so those paths never run — but Turbopack statically traces the lazy imports and the production build fails on the export mismatch. Marking `kysely` external (in `apps/web/next.config.ts`) stops Turbopack parsing it; dev mode was never affected. Do NOT stub the whole adapter (its `createKyselyAdapter`/`getKyselyDatabaseType` are statically imported and must exist).
 - **Env-loading must not be a side-effect of `@kebab/env` (Next bundler chokes).** Reason: `new URL("../../../", import.meta.url)` / a filesystem `dotenv` call inside the env module breaks Turbopack ("Module not found: '../../../'"). Keep `@kebab/env` pure validation; load `.env` from non-Next entrypoints via `import "@kebab/env/load"`, and from web via `dotenv` in `apps/web/next.config.ts` (Next's project root is `apps/web`, so it won't auto-find the repo-root `.env`).
 - **Monorepo (Bun workspaces) + long-running ingest worker replaced Vercel-Cron.** Reason: the whole ingest (25 outlets × ≤5 articles × 3 AI calls) ran synchronously in one Vercel function and only stayed under the timeout because of `MAX_NEW_ARTICLES_PER_OUTLET`. The pipeline moved to `apps/worker` (in-process scheduler, deployed as a Dokploy container); web (`apps/web`) only reads the DB + writes votes. Shared logic lives in `packages/{env,db,core}`. The DB driver switched neon-http → `postgres-js` so the provider is a `DATABASE_URL` change, not a rewrite. Merge/split clustering improvements were deliberately deferred to a follow-up.
 - **Tests run via `mise exec -- bun run test` (vitest), never `bun test`.** Reason: `bun test` invokes Bun's native test runner, which lacks `vi.resetModules` and other Vitest APIs the suite uses — it reports false failures. The `test` script in `package.json` is the contract; always go through it.

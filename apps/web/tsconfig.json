@@ -9,6 +9,7 @@
       "@kebab/env": ["../../packages/env/src/index.ts"],
       "@kebab/db": ["../../packages/db/src/index.ts"],
       "@kebab/core": ["../../packages/core/src/index.ts"],
+      "@kebab/auth": ["../../packages/auth/src/index.ts"],
       "@/*": ["./*"]
     }
   },

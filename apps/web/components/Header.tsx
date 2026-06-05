@@ -2,13 +2,14 @@ import { GITHUB_URL } from "@kebab/core";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { FaGithub } from "react-icons/fa6";
+import { LogoutButton } from "@/components/LogoutButton";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/Wordmark";
 
 const NAV_LINK =
   "font-mono text-ink-soft text-xs uppercase tracking-[0.12em] transition-colors hover:text-brand";
 
-export const Header = () => {
+export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   const t = useTranslations("header");
 
   return (
@@ -36,6 +37,13 @@ export const Header = () => {
           <Link href="/how-to" className={`${NAV_LINK} hidden md:inline`}>
             {t("how_to")}
           </Link>
+          {isAuthenticated ? (
+            <LogoutButton />
+          ) : (
+            <Link href="/anmelden" className={NAV_LINK}>
+              {t("login")}
+            </Link>
+          )}
           <Button
             variant="outline"
             size="sm"

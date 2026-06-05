@@ -9,6 +9,13 @@ describe(".env.example", () => {
       "ANTHROPIC_API_KEY",
       "VOYAGE_API_KEY",
       "CRON_SECRET",
+      "BETTER_AUTH_SECRET",
+      "BETTER_AUTH_URL",
+      "SMTP_HOST",
+      "SMTP_PORT",
+      "SMTP_USER",
+      "SMTP_PASS",
+      "EMAIL_FROM",
       "NEXT_PUBLIC_APP_URL",
     ];
     for (const key of required) {
@@ -20,6 +27,5 @@ describe(".env.example", () => {
     const example = readFileSync(".env.example", "utf-8");
     expect(example).not.toMatch(/^QSTASH_/m);
     expect(example).not.toMatch(/^NEON_AUTH_/m);
-    expect(example).not.toMatch(/^BETTER_AUTH_/m);
   });
 });

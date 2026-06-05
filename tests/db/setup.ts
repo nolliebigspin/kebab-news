@@ -15,4 +15,3 @@ config({ path: ".env", quiet: true });
 if (!process.env.ANTHROPIC_API_KEY) process.env.ANTHROPIC_API_KEY = "test-anthropic-key";
 if (!process.env.VOYAGE_API_KEY) process.env.VOYAGE_API_KEY = "test-voyage-key";
 if (!process.env.CRON_SECRET) process.env.CRON_SECRET = "test-cron-secret-test-cron-secret";
-if (!process.env.VOTE_DAILY_SALT) process.env.VOTE_DAILY_SALT = "test-vote-salt-test-vote-salt";

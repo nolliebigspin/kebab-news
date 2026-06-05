@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
-  date,
+  boolean,
   index,
   integer,
   jsonb,
@@ -81,10 +81,10 @@ export const articles = pgTable(
 );
 
 /**
- * Reader votes on radar stories. One vote per (story, ip_hash, day_bucket) —
- * the unique constraint enforces "one vote per IP per story per day". Raw IPs
- * never land here; we store sha256(ip + VOTE_DAILY_SALT) so the bucket rotates
- * daily and the original IP is unrecoverable for DSGVO compliance.
+ * Reader votes on radar stories. One vote per (story, user) — the unique
+ * constraint enforces "one vote per account per story", permanently (votes
+ * accumulate across days until a story clears REWRITE_VOTE_THRESHOLD). Voting
+ * requires a logged-in account; there is no anonymous/IP path anymore.
  */
 export const votes = pgTable(
   "votes",
@@ -93,13 +93,14 @@ export const votes = pgTable(
     storyId: uuid("story_id")
       .notNull()
       .references(() => stories.id, { onDelete: "cascade" }),
-    ipHash: text("ip_hash").notNull(),
-    dayBucket: date("day_bucket").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
-    uniqueIndex("votes_story_ip_day_unique").on(t.storyId, t.ipHash, t.dayBucket),
-    index("votes_story_day_idx").on(t.storyId, t.dayBucket),
+    uniqueIndex("votes_story_user_unique").on(t.storyId, t.userId),
+    index("votes_story_idx").on(t.storyId),
   ]
 );
 
@@ -137,6 +138,66 @@ export const publishedArticles = pgTable(
   ]
 );
 
+/**
+ * Better Auth core tables. These are the canonical shapes Better Auth's
+ * Drizzle adapter expects (provider: "pg", singular table names, text ids).
+ * They are defined here so the whole schema stays single-source for
+ * drizzle-kit (§VI #4) rather than living in a CLI-generated file.
+ *
+ * The magic-link plugin reuses the `verification` table for its tokens — it
+ * does NOT add its own table. Property keys are camelCase (Better Auth maps
+ * by key); DB columns are snake_case to match the rest of the schema.
+ */
+export const user = pgTable("user", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  emailVerified: boolean("email_verified").notNull().default(false),
+  image: text("image"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const session = pgTable("session", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const account = pgTable("account", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  accountId: text("account_id").notNull(),
+  providerId: text("provider_id").notNull(),
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  idToken: text("id_token"),
+  accessTokenExpiresAt: timestamp("access_token_expires_at", { withTimezone: true }),
+  refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { withTimezone: true }),
+  scope: text("scope"),
+  password: text("password"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const verification = pgTable("verification", {
+  id: text("id").primaryKey(),
+  identifier: text("identifier").notNull(),
+  value: text("value").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type Outlet = typeof outlets.$inferSelect;
 export type NewOutlet = typeof outlets.$inferInsert;
 export type Story = typeof stories.$inferSelect;
@@ -147,3 +208,7 @@ export type Vote = typeof votes.$inferSelect;
 export type NewVote = typeof votes.$inferInsert;
 export type PublishedArticle = typeof publishedArticles.$inferSelect;
 export type NewPublishedArticle = typeof publishedArticles.$inferInsert;
+export type User = typeof user.$inferSelect;
+export type NewUser = typeof user.$inferInsert;
+export type Session = typeof session.$inferSelect;
+export type NewSession = typeof session.$inferInsert;
