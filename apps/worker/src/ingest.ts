@@ -1,15 +1,6 @@
-import {
-  annotateText,
-  assignStory,
-  type ClusterCandidate,
-  embedText,
-  generateStorySlug,
-  MAX_NEW_ARTICLES_PER_OUTLET,
-  PER_OUTLET_FEED_SCAN,
-  STORY_WINDOW_HOURS,
-} from "@kebab/core";
-import { articles, db, type Outlet, outlets, stories } from "@kebab/db";
-import { eq, gt, inArray } from "drizzle-orm";
+import { MAX_NEW_ARTICLES_PER_OUTLET, PER_OUTLET_FEED_SCAN } from "@kebab/core";
+import { articles, db, type Outlet, outlets } from "@kebab/db";
+import { inArray } from "drizzle-orm";
 import Parser from "rss-parser";
 
 const parser = new Parser({
@@ -209,88 +200,90 @@ async function ingestOutlet(outlet: Outlet, runId: string): Promise<OutletResult
     return { slug: outlet.slug, newArticles: 0, newStories: 0 };
   }
 
-  let newStoriesCount = 0;
+  const newStoriesCount = inserted.length;
 
-  for (const article of inserted) {
-    const seed = article.teaser ? `${article.headline}\n\n${article.teaser}` : article.headline;
+  // let newStoriesCount = 0;
 
-    const [embedding, headlineAnnotations, teaserAnnotations] = await Promise.all([
-      embedText(seed),
-      annotateText(article.headline),
-      article.teaser ? annotateText(article.teaser) : Promise.resolve([]),
-    ]);
+  // for (const article of inserted) {
+  //   const seed = article.teaser ? `${article.headline}\n\n${article.teaser}` : article.headline;
 
-    // Load candidate stories within the window.
-    const windowStart = new Date(Date.now() - STORY_WINDOW_HOURS * 3600 * 1000);
-    const candidateRows = await db
-      .select({
-        storyId: stories.id,
-        centroid: stories.centroid,
-        articleCount: stories.articleCount,
-      })
-      .from(stories)
-      .where(gt(stories.lastSeenAt, windowStart));
+  //   const [embedding, headlineAnnotations, teaserAnnotations] = await Promise.all([
+  //     embedText(seed),
+  //     annotateText(article.headline),
+  //     article.teaser ? annotateText(article.teaser) : Promise.resolve([]),
+  //   ]);
 
-    const candidates: ClusterCandidate[] = candidateRows.map((r) => ({
-      storyId: r.storyId,
-      centroid: r.centroid,
-      articleCount: r.articleCount,
-    }));
+  //   // Load candidate stories within the window.
+  //   const windowStart = new Date(Date.now() - STORY_WINDOW_HOURS * 3600 * 1000);
+  //   const candidateRows = await db
+  //     .select({
+  //       storyId: stories.id,
+  //       centroid: stories.centroid,
+  //       articleCount: stories.articleCount,
+  //     })
+  //     .from(stories)
+  //     .where(gt(stories.lastSeenAt, windowStart));
 
-    const assignment = assignStory({ embedding, candidates });
+  //   const candidates: ClusterCandidate[] = candidateRows.map((r) => ({
+  //     storyId: r.storyId,
+  //     centroid: r.centroid,
+  //     articleCount: r.articleCount,
+  //   }));
 
-    let storyId: string;
-    if (assignment.kind === "attach") {
-      storyId = assignment.storyId;
-      await db
-        .update(stories)
-        .set({
-          centroid: assignment.newCentroid,
-          articleCount: assignment.newCount,
-          lastSeenAt: new Date(),
-        })
-        .where(eq(stories.id, storyId));
-      log(runId, "article.clustered", {
-        slug: outlet.slug,
-        articleId: article.id,
-        storyId,
-        action: "attach",
-        headlineSpans: headlineAnnotations.length,
-        teaserSpans: teaserAnnotations.length,
-      });
-    } else {
-      const slug = generateStorySlug(article.headline);
-      const inserted_stories = await db
-        .insert(stories)
-        .values({
-          slug,
-          label: article.headline,
-          centroid: embedding,
-          articleCount: 1,
-        })
-        .returning({ id: stories.id });
-      storyId = inserted_stories[0].id;
-      newStoriesCount += 1;
-      log(runId, "article.clustered", {
-        slug: outlet.slug,
-        articleId: article.id,
-        storyId,
-        action: "new",
-        headlineSpans: headlineAnnotations.length,
-        teaserSpans: teaserAnnotations.length,
-      });
-    }
+  //   const assignment = assignStory({ embedding, candidates });
 
-    await db
-      .update(articles)
-      .set({
-        embedding,
-        headlineAnnotations,
-        teaserAnnotations,
-        storyId,
-      })
-      .where(eq(articles.id, article.id));
-  }
+  //   let storyId: string;
+  //   if (assignment.kind === "attach") {
+  //     storyId = assignment.storyId;
+  //     await db
+  //       .update(stories)
+  //       .set({
+  //         centroid: assignment.newCentroid,
+  //         articleCount: assignment.newCount,
+  //         lastSeenAt: new Date(),
+  //       })
+  //       .where(eq(stories.id, storyId));
+  //     log(runId, "article.clustered", {
+  //       slug: outlet.slug,
+  //       articleId: article.id,
+  //       storyId,
+  //       action: "attach",
+  //       headlineSpans: headlineAnnotations.length,
+  //       teaserSpans: teaserAnnotations.length,
+  //     });
+  //   } else {
+  //     const slug = generateStorySlug(article.headline);
+  //     const inserted_stories = await db
+  //       .insert(stories)
+  //       .values({
+  //         slug,
+  //         label: article.headline,
+  //         centroid: embedding,
+  //         articleCount: 1,
+  //       })
+  //       .returning({ id: stories.id });
+  //     storyId = inserted_stories[0].id;
+  //     newStoriesCount += 1;
+  //     log(runId, "article.clustered", {
+  //       slug: outlet.slug,
+  //       articleId: article.id,
+  //       storyId,
+  //       action: "new",
+  //       headlineSpans: headlineAnnotations.length,
+  //       teaserSpans: teaserAnnotations.length,
+  //     });
+  //   }
+
+  //   await db
+  //     .update(articles)
+  //     .set({
+  //       embedding,
+  //       headlineAnnotations,
+  //       teaserAnnotations,
+  //       storyId,
+  //     })
+  //     .where(eq(articles.id, article.id));
+  // }
 
   return { slug: outlet.slug, newArticles: inserted.length, newStories: newStoriesCount };
 }
