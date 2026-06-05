@@ -69,9 +69,9 @@ beforeEach(async () => {
     .returning({ id: outlets.id });
   outletId = inserted[0].id;
 
-  annotateTextMock.mockResolvedValue([
-    { start: 0, end: 8, type: "loaded-term", note: "Testbegriff" },
-  ]);
+  // Ingest must NOT call annotateText anymore (annotation moved to the rewrite
+  // trigger). Default the mock to []; the test asserts it's never called.
+  annotateTextMock.mockResolvedValue([]);
 });
 
 afterEach(async () => {
@@ -137,9 +137,12 @@ describe("runIngest", () => {
     for (const a of insertedArticles) {
       expect(a.embedding).not.toBeNull();
       expect(a.storyId).not.toBeNull();
-      expect(Array.isArray(a.headlineAnnotations)).toBe(true);
-      expect((a.headlineAnnotations as unknown[]).length).toBeGreaterThan(0);
+      // Ingest no longer annotates — framing annotation is deferred to the
+      // rewrite trigger, so annotations stay at the column default ([]).
+      expect(a.headlineAnnotations).toEqual([]);
+      expect(a.teaserAnnotations).toEqual([]);
     }
+    expect(annotateTextMock).not.toHaveBeenCalled();
 
     const ourStoryIds = new Set(insertedArticles.map((a) => a.storyId));
     expect(ourStoryIds.size).toBe(2); // article 1+2 → one story, article 3 → another

@@ -8,6 +8,7 @@
  */
 
 import {
+  annotateText,
   generateRewrite,
   generateStorySlug,
   REWRITE_MODEL,
@@ -35,6 +36,40 @@ export async function loadSources(storyId: string): Promise<SourceItem[]> {
     .where(eq(articles.storyId, storyId));
 }
 
+/**
+ * Annotate framing language on a winning story's source headlines + teasers.
+ *
+ * Framing annotation used to run on every article during ingest, which burned
+ * a lot of Claude tokens on articles that never get shown with annotations.
+ * It now runs here — once per story, only when the story has earned a rewrite
+ * — so the cost is bounded to the handful of stories that actually surface.
+ * Idempotent: re-running re-annotates (cheap relative to the rewrite itself).
+ *
+ * Never throws into the worker loop: annotateText already swallows AI errors
+ * and returns []. A failure just leaves a source unannotated.
+ */
+export async function annotateStory(storyId: string): Promise<void> {
+  const rows = await db
+    .select({
+      id: articles.id,
+      headline: articles.headline,
+      teaser: articles.teaser,
+    })
+    .from(articles)
+    .where(eq(articles.storyId, storyId));
+
+  for (const row of rows) {
+    const [headlineAnnotations, teaserAnnotations] = await Promise.all([
+      annotateText(row.headline),
+      row.teaser ? annotateText(row.teaser) : Promise.resolve([]),
+    ]);
+    await db
+      .update(articles)
+      .set({ headlineAnnotations, teaserAnnotations })
+      .where(eq(articles.id, row.id));
+  }
+}
+
 export type RewriteOutcome =
   | { kind: "saved"; slug: string; headline: string }
   | { kind: "no-sources" }
@@ -49,6 +84,12 @@ export type RewriteOutcome =
 export async function rewriteStory(story: StoryRow): Promise<RewriteOutcome> {
   const sources = await loadSources(story.id);
   if (sources.length === 0) return { kind: "no-sources" };
+
+  // Annotate the sources now that this story has won — framing markings are
+  // only ever shown for stories that reach a rewrite (radar detail + the
+  // "Quellen" section on /artikel/[slug]), so this is the first time we need
+  // them. Deferred from ingest to keep token cost bounded.
+  await annotateStory(story.id);
 
   const rewrite = await generateRewrite(story.label, sources);
   if (!rewrite) return { kind: "generation-failed" };
