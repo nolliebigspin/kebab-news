@@ -40,7 +40,7 @@ export default async function ArticlesPage() {
   const articles_ = await loadPublished();
 
   return (
-    <section className="mx-auto max-w-3xl px-6 py-12">
+    <section className="mx-auto max-w-5xl px-6 py-12">
       <PageHero title={t("page_title")} subtitle={t("page_subtitle")} />
 
       {articles_.length === 0 ? (

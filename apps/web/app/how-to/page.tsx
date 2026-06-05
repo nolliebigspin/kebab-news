@@ -29,7 +29,7 @@ export default async function HowToPage() {
   ];
 
   return (
-    <article className="mx-auto max-w-3xl px-6 py-12">
+    <article className="mx-auto max-w-5xl px-6 py-12">
       <PageHero title={t("page_title")} subtitle={t("page_subtitle")} />
 
       <p className="mb-10 text-base text-ink leading-relaxed">{t("intro")}</p>
