@@ -31,7 +31,10 @@ export default async function ImpressumPage() {
           <h2 className="mb-2 font-display text-lg">{t("contact_heading")}</h2>
           <p className="text-ink-soft">
             {t("contact_email_label")}:{" "}
-            <a href={`mailto:${t("contact_email")}`} className="text-brand hover:underline">
+            <a
+              href={`mailto:${t("contact_email")}`}
+              className="rounded-sm text-brand-ink underline underline-offset-2 hover:text-ink focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
+            >
               {t("contact_email")}
             </a>
           </p>

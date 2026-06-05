@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { PageHero } from "@/components/PageHero";
+import { Card } from "@/components/ui/card";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("articles");
@@ -46,23 +47,28 @@ export default async function ArticlesPage() {
       {articles_.length === 0 ? (
         <p className="text-ink-mute">{t("empty")}</p>
       ) : (
-        <ul className="divide-y divide-line-soft border-line-soft border-y">
+        <ul className="grid gap-4 sm:grid-cols-2">
           {articles_.map((article) => (
-            <li key={article.slug} className="py-6">
-              <Link href={`/artikel/${article.slug}`} className="group block">
-                <h2 className="font-display text-xl leading-snug transition-colors group-hover:text-brand sm:text-2xl">
-                  {article.neutralHeadline}
-                </h2>
-                <div className="mt-3 flex flex-wrap items-center gap-3 font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]">
-                  {article.publishedAt ? (
-                    <time dateTime={article.publishedAt.toISOString()}>
-                      {format(article.publishedAt, "d. MMM yyyy", { locale: de })}
-                    </time>
-                  ) : null}
-                  <span>·</span>
-                  <span>{t("source_count", { count: article.sourceCount })}</span>
-                </div>
-              </Link>
+            <li key={article.slug}>
+              <Card className="h-full gap-0 py-0 transition-shadow focus-within:ring-2 focus-within:ring-brand/40 hover:ring-foreground/20">
+                <Link
+                  href={`/artikel/${article.slug}`}
+                  className="group flex h-full flex-col gap-3 rounded-xl p-5 outline-none"
+                >
+                  <h2 className="font-display text-lg leading-snug transition-colors group-hover:text-brand-ink group-focus-visible:text-brand-ink sm:text-xl">
+                    {article.neutralHeadline}
+                  </h2>
+                  <div className="mt-auto flex flex-wrap items-center gap-2 font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]">
+                    {article.publishedAt ? (
+                      <time dateTime={article.publishedAt.toISOString()}>
+                        {format(article.publishedAt, "d. MMM yyyy", { locale: de })}
+                      </time>
+                    ) : null}
+                    <span aria-hidden>·</span>
+                    <span>{t("source_count", { count: article.sourceCount })}</span>
+                  </div>
+                </Link>
+              </Card>
             </li>
           ))}
         </ul>

@@ -7,7 +7,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { FiAlertTriangle } from "react-icons/fi";
 import { AnnotatedText } from "@/components/AnnotatedText";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { leanColor } from "@/lib/lean";
 
 type SourceRow = {
   id: string;
@@ -107,7 +111,7 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
       <div className="mb-8">
         <Link
           href="/"
-          className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em] hover:text-brand"
+          className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em] hover:text-brand-ink"
         >
           ← {t("back_to_index")}
         </Link>
@@ -117,12 +121,11 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
         CLAUDE.md §VI rule 7: this disclaimer is MANDATORY on every /artikel
         page. Removing it requires editing the rule first.
       */}
-      <aside
-        className="mb-8 rounded-md border border-line bg-bg-warm px-4 py-3 text-ink-soft text-sm"
-        role="note"
-      >
-        <strong className="font-semibold">{t("disclaimer_title")}</strong> {t("disclaimer_body")}
-      </aside>
+      <Alert className="mb-8 border-warn/40 bg-warn-wash [&>svg]:text-warn">
+        <FiAlertTriangle aria-hidden />
+        <AlertTitle>{t("disclaimer_title")}</AlertTitle>
+        <AlertDescription className="text-ink-soft">{t("disclaimer_body")}</AlertDescription>
+      </Alert>
 
       <header className="mb-10">
         <h1 className="font-display text-3xl leading-tight sm:text-4xl">
@@ -154,19 +157,25 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
           {sources.map((s) => (
             <li key={s.id} className="border-line-soft border-l-2 pl-4">
               <a href={s.url} target="_blank" rel="noopener noreferrer" className="group block">
-                <h3 className="font-display text-lg leading-snug group-hover:text-brand">
+                <h3 className="font-display text-lg leading-snug group-hover:text-brand-ink">
                   <AnnotatedText text={s.headline} annotations={s.headlineAnnotations} />
                 </h3>
-                <div className="mt-2 flex flex-wrap items-center gap-3 text-ink-mute text-xs">
-                  <span className="font-medium">{s.outletName}</span>
-                  <span>·</span>
-                  <span>{tRadar(`lean.${leanI18nKey(s.outletLean)}`)}</span>
-                  <span>·</span>
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-ink-mute text-xs">
+                  <Badge variant="outline" className="gap-1.5 text-ink-soft">
+                    <span
+                      className="dot"
+                      style={{ background: leanColor(s.outletLean) }}
+                      aria-hidden
+                    />
+                    {tRadar(`lean.${leanI18nKey(s.outletLean)}`)}
+                  </Badge>
+                  <span className="font-medium text-ink-soft">{s.outletName}</span>
+                  <span aria-hidden>·</span>
                   <time dateTime={s.publishedAt.toISOString()}>
                     {format(s.publishedAt, "d. MMM yyyy", { locale: de })}
                   </time>
-                  <span>·</span>
-                  <span className="text-brand group-hover:underline">
+                  <span aria-hidden>·</span>
+                  <span className="text-brand-ink group-hover:underline">
                     {tRadar("read_at_source")}
                   </span>
                 </div>
@@ -179,7 +188,7 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
       <div className="mt-12">
         <Link
           href={`/radar/${story.slug}`}
-          className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em] hover:text-brand"
+          className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em] hover:text-brand-ink"
         >
           {t("see_on_radar")} →
         </Link>

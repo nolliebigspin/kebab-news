@@ -32,7 +32,7 @@ export const Hero = () => {
           href="https://ground.news"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-brand hover:underline"
+          className="rounded-sm font-medium text-brand-ink underline underline-offset-2 hover:text-ink focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
         >
           ground.news
         </a>

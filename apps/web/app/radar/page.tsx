@@ -5,7 +5,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { PageHero } from "@/components/PageHero";
+import { Card } from "@/components/ui/card";
 import { VoteButton } from "@/components/VoteButton";
+import { leanColor } from "@/lib/lean";
 import { getSession } from "@/lib/session";
 import { getCumulativeVoteCounts } from "@/lib/vote";
 
@@ -63,28 +65,42 @@ export default async function RadarPage() {
       {stories_.length === 0 ? (
         <p className="text-ink-mute">{t("empty")}</p>
       ) : (
-        <ul className="divide-y divide-line-soft border-line-soft border-y">
+        <ul className="grid gap-4 sm:grid-cols-2">
           {stories_.map((story) => (
-            <li key={story.id} className="flex flex-wrap items-start justify-between gap-4 py-6">
-              {/* Vote lives OUTSIDE the Link so its own hover state is isolated
-                  from the headline's row-hover and clicking it never navigates. */}
-              <Link href={`/radar/${story.slug}`} className="group min-w-0 flex-1">
-                <h2 className="font-display text-xl leading-snug transition-colors group-hover:text-brand sm:text-2xl">
-                  {story.label}
-                </h2>
-                <div className="mt-3 flex flex-wrap items-center gap-4 text-ink-mute text-sm">
-                  <span className="font-mono text-[11px] uppercase tracking-[0.12em]">
-                    {t("article_count", { count: story.articleCount })}
-                  </span>
-                  <SpectrumStrip covered={story.leans} />
+            <li key={story.id}>
+              <Card className="h-full gap-0 py-0 transition-shadow focus-within:ring-2 focus-within:ring-brand/40 hover:ring-foreground/20">
+                <div className="relative flex h-full flex-col gap-4 p-5">
+                  {/* The whole card is clickable via the headline's stretched
+                      link; the vote control sits above it (relative + z) so it
+                      stays independently interactive. */}
+                  <Link
+                    href={`/radar/${story.slug}`}
+                    className="group/headline rounded-sm outline-none after:absolute after:inset-0 focus-visible:[&>h2]:text-brand-ink"
+                  >
+                    <h2 className="font-display text-lg leading-snug transition-colors group-hover/headline:text-brand-ink sm:text-xl">
+                      {story.label}
+                    </h2>
+                  </Link>
+
+                  <div className="mt-auto flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <SpectrumStrip covered={story.leans} t={t} />
+                      <span className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]">
+                        {t("article_count", { count: story.articleCount })}
+                      </span>
+                    </div>
+                    {/* Above the stretched link so it stays clickable. */}
+                    <div className="relative z-10">
+                      <VoteButton
+                        storyId={story.id}
+                        initialCount={voteCounts.get(story.id) ?? 0}
+                        threshold={REWRITE_VOTE_THRESHOLD}
+                        isAuthenticated={isAuthenticated}
+                      />
+                    </div>
+                  </div>
                 </div>
-              </Link>
-              <VoteButton
-                storyId={story.id}
-                initialCount={voteCounts.get(story.id) ?? 0}
-                threshold={REWRITE_VOTE_THRESHOLD}
-                isAuthenticated={isAuthenticated}
-              />
+              </Card>
             </li>
           ))}
         </ul>
@@ -93,10 +109,23 @@ export default async function RadarPage() {
   );
 }
 
-function SpectrumStrip({ covered }: { covered: OutletLean[] }) {
+function SpectrumStrip({
+  covered,
+  t,
+}: {
+  covered: OutletLean[];
+  t: Awaited<ReturnType<typeof getTranslations<"radar">>>;
+}) {
   const set = new Set(covered);
+  const coveredNames = LEAN_ORDER.filter((l) => set.has(l))
+    .map((l) => t(`lean.${l}`))
+    .join(", ");
   return (
-    <span className="inline-flex items-center gap-1.5" aria-hidden>
+    <span
+      className="inline-flex items-center gap-1.5"
+      role="img"
+      aria-label={t("spectrum_label", { leans: coveredNames })}
+    >
       {LEAN_ORDER.map((lean) => (
         <span
           key={lean}
@@ -109,20 +138,4 @@ function SpectrumStrip({ covered }: { covered: OutletLean[] }) {
       ))}
     </span>
   );
-}
-
-function leanColor(lean: OutletLean): string {
-  switch (lean) {
-    case "left":
-    case "center-left":
-      return "var(--left)";
-    case "right":
-    case "center-right":
-    case "right-fringe":
-      return "var(--right)";
-    case "center":
-      return "var(--ink-mute)";
-    case "public":
-      return "var(--brand)";
-  }
 }

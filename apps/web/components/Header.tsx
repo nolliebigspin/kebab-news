@@ -6,8 +6,11 @@ import { LogoutButton } from "@/components/LogoutButton";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/Wordmark";
 
+// Nav links: quiet, uppercase, mono — and a visible focus ring for keyboard
+// users (WCAG 2.4.7). The login action is deliberately NOT styled like these;
+// it's a filled primary button below so it reads as the main call to action.
 const NAV_LINK =
-  "font-mono text-ink-soft text-xs uppercase tracking-[0.12em] transition-colors hover:text-brand";
+  "rounded-sm font-mono text-ink-soft text-xs uppercase tracking-[0.12em] transition-colors hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-4";
 
 export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   const t = useTranslations("header");
@@ -18,8 +21,11 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
         <div className="flex flex-1 items-center gap-6 md:flex-none md:gap-10">
           <Wordmark />
           {/* Primary nav. On narrow screens it wraps to its own full-width row
-              below the wordmark instead of crunching against the GitHub button. */}
-          <nav className="order-last flex w-full items-center gap-6 md:order-0 md:w-auto md:gap-8">
+              below the wordmark instead of crunching against the actions. */}
+          <nav
+            aria-label={t("nav_label")}
+            className="order-last flex w-full items-center gap-6 md:order-0 md:w-auto md:gap-8"
+          >
             <Link href="/radar" className={NAV_LINK}>
               {t("radar")}
             </Link>
@@ -31,30 +37,32 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
             </Link>
           </nav>
         </div>
-        <div className="flex items-center gap-6 md:gap-8">
+        <div className="flex items-center gap-4 md:gap-5">
           {/* On desktop How-to sits on the right; on mobile it lives in the
               wrapped nav row above, so it's hidden here below md. */}
           <Link href="/how-to" className={`${NAV_LINK} hidden md:inline`}>
             {t("how_to")}
           </Link>
-          {isAuthenticated ? (
-            <LogoutButton />
-          ) : (
-            <Link href="/anmelden" className={NAV_LINK}>
-              {t("login")}
-            </Link>
-          )}
           <Button
-            variant="outline"
-            size="sm"
+            variant="ghost"
+            size="icon-sm"
             nativeButton={false}
+            aria-label={t("github_label")}
             render={
               <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
                 <FaGithub />
-                <span className="font-mono text-xs">{t("github")}</span>
               </a>
             }
           />
+          {isAuthenticated ? (
+            <LogoutButton />
+          ) : (
+            <Button
+              size="sm"
+              nativeButton={false}
+              render={<Link href="/anmelden">{t("login")}</Link>}
+            />
+          )}
         </div>
       </div>
     </header>

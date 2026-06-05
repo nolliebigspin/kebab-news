@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { Toaster } from "@/components/ui/sonner";
 import { getSession } from "@/lib/session";
 import "./globals.css";
 
@@ -81,9 +82,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         style={{ background: "var(--bg)", color: "var(--ink)" }}
       >
         <NextIntlClientProvider messages={messages}>
+          {/* Skip link: first focusable element, lets keyboard/AT users jump
+              past the header straight to content (WCAG 2.4.1). */}
+          <a
+            href="#main"
+            className="sr-only fixed top-2 left-2 z-50 -translate-y-full rounded-md bg-brand px-4 py-2 font-medium text-sm text-white transition-transform focus:not-sr-only focus:translate-y-0"
+          >
+            Zum Inhalt springen
+          </a>
           <Header isAuthenticated={session !== null} />
-          <main className="flex-1">{children}</main>
+          <main id="main" className="flex-1">
+            {children}
+          </main>
           <Footer />
+          <Toaster />
         </NextIntlClientProvider>
         <Analytics />
       </body>

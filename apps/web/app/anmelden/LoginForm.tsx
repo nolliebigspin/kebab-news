@@ -1,19 +1,24 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { type FormEvent, useState, useTransition } from "react";
+import { type FormEvent, useId, useState, useTransition } from "react";
+import { FiCheckCircle } from "react-icons/fi";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-
-type Status = "idle" | "sent" | "error";
+import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 
 export function LoginForm() {
   const t = useTranslations("auth");
+  const emailId = useId();
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<Status>("idle");
+  const [errored, setErrored] = useState(false);
+  const [sent, setSent] = useState(false);
   const [pending, startTransition] = useTransition();
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setErrored(false);
     startTransition(async () => {
       try {
         const res = await fetch("/api/auth/sign-in/magic-link", {
@@ -22,52 +27,49 @@ export function LoginForm() {
           // callbackURL is where the magic-link lands after verification.
           body: JSON.stringify({ email, callbackURL: "/radar" }),
         });
-        setStatus(res.ok ? "sent" : "error");
+        if (res.ok) setSent(true);
+        else setErrored(true);
       } catch {
-        setStatus("error");
+        setErrored(true);
       }
     });
   }
 
-  if (status === "sent") {
+  if (sent) {
     return (
-      <div className="rounded-md border border-brand/40 bg-brand/5 px-4 py-5">
-        <h2 className="font-display text-ink text-lg">{t("link_sent_title")}</h2>
-        <p className="mt-2 text-ink-soft text-sm leading-relaxed">
-          {t("link_sent_body", { email })}
-        </p>
-      </div>
+      <Alert>
+        <FiCheckCircle aria-hidden />
+        <AlertTitle>{t("link_sent_title")}</AlertTitle>
+        <AlertDescription>{t("link_sent_body", { email })}</AlertDescription>
+      </Alert>
     );
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      <div className="space-y-1.5">
-        <label
-          htmlFor="email"
-          className="block font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]"
-        >
-          {t("email_label")}
-        </label>
-        <input
-          id="email"
+    <form onSubmit={onSubmit} noValidate className="space-y-5">
+      <Field data-invalid={errored || undefined}>
+        <FieldLabel htmlFor={emailId}>{t("email_label")}</FieldLabel>
+        <Input
+          id={emailId}
           type="email"
           required
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t("email_placeholder")}
-          className="w-full rounded-md border border-line bg-bg-warm px-3 py-2 text-base text-ink outline-none transition-colors focus:border-brand"
+          aria-invalid={errored || undefined}
+          aria-describedby={errored ? `${emailId}-error` : `${emailId}-consent`}
         />
-      </div>
-
-      {status === "error" && <p className="text-red-600 text-sm">{t("error")}</p>}
+        {errored ? (
+          <FieldError id={`${emailId}-error`}>{t("error")}</FieldError>
+        ) : (
+          <FieldDescription id={`${emailId}-consent`}>{t("consent")}</FieldDescription>
+        )}
+      </Field>
 
       <Button type="submit" disabled={pending} className="w-full">
         {pending ? t("sending") : t("send_link")}
       </Button>
-
-      <p className="text-ink-mute text-xs leading-relaxed">{t("consent")}</p>
     </form>
   );
 }

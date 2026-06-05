@@ -7,8 +7,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { FiArrowRight } from "react-icons/fi";
 import { AnnotatedText } from "@/components/AnnotatedText";
+import { Badge } from "@/components/ui/badge";
 import { VoteButton } from "@/components/VoteButton";
+import { leanColor } from "@/lib/lean";
 import { getSession } from "@/lib/session";
 import { countVotes } from "@/lib/vote";
 
@@ -112,7 +115,7 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
       <div className="mb-8">
         <Link
           href="/radar"
-          className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em] hover:text-brand"
+          className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em] hover:text-brand-ink"
         >
           ← {t("back_to_radar")}
         </Link>
@@ -134,14 +137,20 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
         {published ? (
           <Link
             href={`/artikel/${published.slug}`}
-            className="mt-6 block rounded-md border border-brand/40 bg-brand/5 px-4 py-3 transition-colors hover:bg-brand/10"
+            className="group mt-6 flex items-center gap-3 rounded-lg border border-brand/40 bg-brand-wash/60 px-4 py-3 outline-none transition-colors hover:bg-brand-wash focus-visible:ring-2 focus-visible:ring-brand"
           >
-            <div className="font-mono text-[11px] text-brand uppercase tracking-[0.12em]">
-              {t("published_rewrite_label")}
+            <div className="min-w-0 flex-1">
+              <div className="font-mono text-[11px] text-brand-ink uppercase tracking-[0.12em]">
+                {t("published_rewrite_label")}
+              </div>
+              <div className="mt-1 font-display text-base text-ink">
+                {published.neutralHeadline}
+              </div>
             </div>
-            <div className="mt-1 font-display text-base text-ink">
-              {published.neutralHeadline} →
-            </div>
+            <FiArrowRight
+              aria-hidden
+              className="size-5 shrink-0 text-brand-ink transition-transform group-hover:translate-x-0.5"
+            />
           </Link>
         ) : null}
       </header>
@@ -152,7 +161,8 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
           if (group.length === 0) return null;
           return (
             <section key={lean}>
-              <h2 className="mb-4 font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]">
+              <h2 className="mb-4 flex items-center gap-2 font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]">
+                <span className="dot" style={{ background: leanColor(lean) }} aria-hidden />
                 {t(`lean.${leanI18nKey(lean)}`)}
               </h2>
               <ul className="space-y-6">
@@ -164,7 +174,7 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
                       rel="noopener noreferrer"
                       className="group block"
                     >
-                      <h3 className="font-display text-lg leading-snug group-hover:text-brand sm:text-xl">
+                      <h3 className="font-display text-lg leading-snug group-hover:text-brand-ink sm:text-xl">
                         <AnnotatedText
                           text={article.headline}
                           annotations={article.headlineAnnotations}
@@ -187,7 +197,7 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
                           })}
                         </time>
                         <span>·</span>
-                        <span className="text-brand group-hover:underline">
+                        <span className="text-brand-ink group-hover:underline">
                           {t("read_at_source")}
                         </span>
                       </div>
@@ -207,11 +217,10 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
           </h2>
           <ul className="flex flex-wrap gap-2">
             {blindSpots.map((lean) => (
-              <li
-                key={lean}
-                className="rounded-full border border-line bg-bg-warm px-3 py-1 text-ink-soft text-sm"
-              >
-                {t(`lean.${leanI18nKey(lean)}`)}
+              <li key={lean}>
+                <Badge variant="outline" className="text-ink-soft">
+                  {t(`lean.${leanI18nKey(lean)}`)}
+                </Badge>
               </li>
             ))}
           </ul>

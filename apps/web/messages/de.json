@@ -1,6 +1,8 @@
 {
   "header": {
     "github": "GitHub",
+    "github_label": "Projekt auf GitHub ansehen (öffnet neuen Tab)",
+    "nav_label": "Hauptnavigation",
     "radar": "Radar",
     "articles": "Artikel",
     "vision": "Vision",
@@ -41,6 +43,7 @@
     "page_subtitle": "Dieselbe Geschichte, nebeneinander, über das politische Spektrum hinweg. Rahmung wird an den Schlagzeilen markiert — geschrieben wird nichts um.",
     "empty": "Noch keine Geschichten. Das Radar füllt sich, sobald die ersten Quellen aktualisiert sind.",
     "article_count": "{count, plural, one {# Artikel} other {# Artikel}}",
+    "spectrum_label": "Abgedeckte politische Lager: {leans}",
     "blind_spots_label": "Blindstellen",
     "no_blind_spots": "Keine Blindstellen — alle politischen Lager berichten.",
     "read_at_source": "Beim Outlet lesen →",
@@ -68,6 +71,9 @@
       "already_voted": "Bereits abgestimmt",
       "error": "Fehler — erneut versuchen",
       "login_cta": "Anmelden zum Abstimmen",
+      "toast_recorded": "Stimme gezählt. Danke!",
+      "toast_duplicate": "Du hast für diese Geschichte bereits abgestimmt.",
+      "toast_error": "Abstimmen fehlgeschlagen. Bitte versuche es erneut.",
       "threshold_progress": "{count}/{threshold} bis zur Fassung",
       "threshold_reached": "Schwelle erreicht — Fassung folgt"
     }

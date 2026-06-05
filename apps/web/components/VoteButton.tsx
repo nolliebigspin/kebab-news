@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 
 type Props = {
   storyId: string;
@@ -16,7 +17,7 @@ type Props = {
 type Status = "idle" | "voted" | "duplicate" | "error" | "login";
 
 const PILL_CLASS =
-  "inline-flex cursor-pointer items-center gap-2 rounded-full border border-line bg-bg-warm px-3 py-1 font-mono text-[11px] text-ink uppercase tracking-[0.12em] transition-colors hover:border-brand hover:bg-brand hover:text-white disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-line disabled:hover:bg-bg-warm disabled:hover:text-ink";
+  "inline-flex cursor-pointer items-center gap-2 rounded-full border border-line bg-bg-warm px-3 py-1 font-mono text-[11px] text-ink uppercase tracking-[0.12em] outline-none transition-colors hover:border-brand hover:bg-brand hover:text-white focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-line disabled:hover:bg-bg-warm disabled:hover:text-ink";
 
 export function VoteButton({ storyId, initialCount, threshold, isAuthenticated }: Props) {
   const t = useTranslations("radar");
@@ -49,12 +50,20 @@ export function VoteButton({ storyId, initialCount, threshold, isAuthenticated }
 
         if (!body.ok) {
           setStatus("error");
+          toast.error(t("vote.toast_error"));
           return;
         }
         setCount(body.count);
-        setStatus(body.kind === "recorded" ? "voted" : "duplicate");
+        if (body.kind === "recorded") {
+          setStatus("voted");
+          toast.success(t("vote.toast_recorded"));
+        } else {
+          setStatus("duplicate");
+          toast.info(t("vote.toast_duplicate"));
+        }
       } catch {
         setStatus("error");
+        toast.error(t("vote.toast_error"));
       }
     });
   }
