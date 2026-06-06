@@ -8,7 +8,8 @@
     "vision": "Vision",
     "how_to": "How-to",
     "login": "Anmelden",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "toast_logged_out": "Du wurdest abgemeldet."
   },
   "auth": {
     "page_title": "Anmelden",
@@ -23,7 +24,8 @@
     "consent": "Mit dem Anmelden stimmst du zu, dass wir deine E-Mail-Adresse zur Verwaltung deines Kontos speichern. Details in der Datenschutzerklärung.",
     "account_title": "Konto",
     "account_email_label": "Angemeldet als",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "toast_logged_in": "Erfolgreich angemeldet."
   },
   "hero": {
     "tagline": "Ein Werkzeug gegen Scheuklappen.",

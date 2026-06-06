@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useTransition } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 export function LogoutButton() {
@@ -20,6 +21,8 @@ export function LogoutButton() {
         headers: { "content-type": "application/json" },
         body: "{}",
       });
+      // The Toaster lives in the root layout, so the toast survives the refresh.
+      toast.success(t("toast_logged_out"));
       router.refresh();
     });
   }

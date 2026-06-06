@@ -4,8 +4,10 @@ import type { Metadata } from "next";
 import { IBM_Plex_Mono, Inter } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { LoginToast } from "@/components/LoginToast";
 import { Toaster } from "@/components/ui/sonner";
 import { getSession } from "@/lib/session";
 import "./globals.css";
@@ -96,6 +98,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </main>
           <Footer />
           <Toaster />
+          {/* useSearchParams needs a Suspense boundary to keep the build static. */}
+          <Suspense fallback={null}>
+            <LoginToast />
+          </Suspense>
         </NextIntlClientProvider>
         <Analytics />
       </body>
