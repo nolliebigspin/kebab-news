@@ -14,7 +14,6 @@
     "start": "bun --filter @kebab/web start",
     "worker": "bun --filter @kebab/worker start",
     "ingest:run": "bun --filter @kebab/worker ingest:once",
-    "rewrite:spike": "bun --filter @kebab/worker rewrite:spike",
     "rewrite:run": "bun --filter @kebab/worker rewrite:run",
     "rewrite:publish": "bun --filter @kebab/worker rewrite:publish",
     "db:reset": "bun --filter @kebab/worker db:reset",

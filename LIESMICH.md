@@ -64,10 +64,9 @@ mise exec -- bun dev            # startet den Dev-Server
 Operator-Befehle (v1 ist absichtlich manuell):
 
 ```bash
-mise exec -- bun ingest:run                        # Feeds holen, clustern, annotieren
-mise exec -- bun rewrite:run --story SLUG          # neutralen Entwurf erzeugen
+mise exec -- bun ingest:run                        # Feeds holen, einbetten, clustern
+mise exec -- bun rewrite:run --story SLUG          # neutralen Entwurf erzeugen (+ Quellen annotieren)
 mise exec -- bun rewrite:publish --story SLUG      # Entwurf live schalten
-mise exec -- bun rewrite:spike                     # echte Umschreibungen nach tmp/ für Review
 mise exec -- bun seed:outlets                      # idempotenter Upsert der Outlet-Liste
 mise exec -- bun db:reset                          # ingestete Daten löschen (verweigert Nicht-Dev-DBs)
 ```

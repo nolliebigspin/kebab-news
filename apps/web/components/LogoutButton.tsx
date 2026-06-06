@@ -12,7 +12,14 @@ export function LogoutButton() {
 
   function onClick() {
     startTransition(async () => {
-      await fetch("/api/auth/sign-out", { method: "POST" });
+      // Better Auth's sign-out handler parses the request body as JSON, so an
+      // empty body with a JSON content-type 500s ("Unexpected end of JSON
+      // input"). Send an empty object.
+      await fetch("/api/auth/sign-out", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{}",
+      });
       router.refresh();
     });
   }

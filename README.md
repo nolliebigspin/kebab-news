@@ -64,10 +64,9 @@ mise exec -- bun dev            # starts the dev server
 Operator commands (v1 is manual on purpose):
 
 ```bash
-mise exec -- bun ingest:run                    # pull feeds, cluster, annotate
-mise exec -- bun rewrite:run --story SLUG      # generate a neutral rewrite draft
+mise exec -- bun ingest:run                    # pull feeds, embed, cluster
+mise exec -- bun rewrite:run --story SLUG      # generate a neutral rewrite draft (+ annotate sources)
 mise exec -- bun rewrite:publish --story SLUG  # flip the draft to live
-mise exec -- bun rewrite:spike                 # dump real rewrites to tmp/ for human review
 mise exec -- bun seed:outlets                  # idempotent upsert of the outlet set
 mise exec -- bun db:reset                      # wipe ingested data (refuses non-dev DBs)
 ```

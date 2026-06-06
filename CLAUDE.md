@@ -191,7 +191,6 @@ The agent should flag these before merging anything that touches them. **The leg
   - `bun ingest:run` — one manual ingest pass (→ `@kebab/worker ingest:once`). Automatic ingest is the long-running worker (`bun worker`, or the deployed container).
   - `bun rewrite:run --story <slug>` — generate a draft rewrite for one story.
   - `bun rewrite:publish --story <slug>` — flip the latest draft to live.
-  - `bun rewrite:spike` — eval-only: dumps real Claude rewrites to `tmp/rewrite-spike-*.md` for human review. Used as the go/no-go gate before publishing.
   - `bun seed:outlets` — idempotent upsert of the outlet set (currently 25, spanning left → public; the canonical list lives in `apps/worker/scripts/seed-outlets.ts`). Re-run after `db:reset --full`.
   - `bun db:reset` — wipe ingested data (articles, stories, votes, published_articles). Refuses non-dev DBs without `--force` and demands typed confirmation. `--full` also wipes outlets.
   - `bun worker` — start the long-running ingest worker (in-process scheduler). `RUN_ON_BOOT=true` runs one pass immediately on start.
