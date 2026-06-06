@@ -1,12 +1,17 @@
 import { db, publishedArticles } from "@kebab/db";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
-import { desc, isNotNull } from "drizzle-orm";
+import { and, desc, isNotNull, type SQL, sql } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { ArticleFilters } from "@/components/ArticleFilters";
 import { PageHero } from "@/components/PageHero";
 import { Card } from "@/components/ui/card";
+import {
+  type ArticleFilters as ArticleFilterState,
+  parseArticleFilters,
+} from "@/lib/article-filters";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("articles");
@@ -20,9 +25,27 @@ type ArticleCard = {
   publishedAt: Date | null;
 };
 
-async function loadPublished(): Promise<ArticleCard[]> {
-  // Only live rewrites (published_at NOT NULL), newest first. Drafts never
-  // surface here — same gate as the detail page.
+async function loadPublished(filters: ArticleFilterState): Promise<ArticleCard[]> {
+  // Only live rewrites (published_at NOT NULL). Drafts never surface here —
+  // same gate as the detail page.
+  const where: SQL[] = [isNotNull(publishedArticles.publishedAt)];
+  if (filters.days !== null) {
+    where.push(
+      sql`${publishedArticles.publishedAt} >= now() - make_interval(days => ${filters.days})`
+    );
+  }
+  if (filters.q) {
+    const term = `%${filters.q}%`;
+    where.push(
+      sql`(${publishedArticles.neutralHeadline} ILIKE ${term} OR ${publishedArticles.neutralBody} ILIKE ${term})`
+    );
+  }
+
+  const orderBy =
+    filters.sort === "sources"
+      ? [desc(publishedArticles.sourceCount), desc(publishedArticles.publishedAt)]
+      : [desc(publishedArticles.publishedAt)];
+
   return db
     .select({
       slug: publishedArticles.slug,
@@ -31,21 +54,28 @@ async function loadPublished(): Promise<ArticleCard[]> {
       publishedAt: publishedArticles.publishedAt,
     })
     .from(publishedArticles)
-    .where(isNotNull(publishedArticles.publishedAt))
-    .orderBy(desc(publishedArticles.publishedAt))
+    .where(and(...where))
+    .orderBy(...orderBy)
     .limit(100);
 }
 
-export default async function ArticlesPage() {
+export default async function ArticlesPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const t = await getTranslations("articles");
-  const articles_ = await loadPublished();
+  const filters = parseArticleFilters(await searchParams);
+  const articles_ = await loadPublished(filters);
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-12">
       <PageHero title={t("page_title")} subtitle={t("page_subtitle")} />
 
+      <ArticleFilters filters={filters} />
+
       {articles_.length === 0 ? (
-        <p className="text-ink-mute">{t("empty")}</p>
+        <p className="text-ink-mute">{filters.q ? t("empty_search") : t("empty")}</p>
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2">
           {articles_.map((article) => (

@@ -44,6 +44,37 @@
     "page_title": "Radar",
     "page_subtitle": "Dieselbe Geschichte, nebeneinander, über das politische Spektrum hinweg. Rahmung wird an den Schlagzeilen markiert — geschrieben wird nichts um.",
     "empty": "Noch keine Geschichten. Das Radar füllt sich, sobald die ersten Quellen aktualisiert sind.",
+    "empty_search": "Keine Geschichten für diese Filter. Passe Suche oder Zeitraum an.",
+    "filters": {
+      "search_placeholder": "Geschichten durchsuchen …",
+      "search_label": "Nach Titel oder Beschreibung suchen",
+      "date_label": "Zeitraum",
+      "date_option": {
+        "1": "Letzter Tag",
+        "7": "Letzte 7 Tage",
+        "30": "Letzte 30 Tage",
+        "90": "Letzte 90 Tage",
+        "0": "Gesamter Zeitraum"
+      },
+      "lean_label": "Lager",
+      "lean_any": "Alle Lager",
+      "lean_option": {
+        "left": "Links",
+        "center-left": "Mitte-Links",
+        "center": "Mitte",
+        "center-right": "Mitte-Rechts",
+        "right": "Rechts",
+        "right-fringe": "Rechter Rand",
+        "public": "Öffentlich-Rechtlich"
+      },
+      "sort_label": "Sortierung",
+      "sort_option": {
+        "recent": "Neuste zuerst",
+        "votes": "Meiste Stimmen",
+        "outlets": "Meiste Outlets"
+      },
+      "reset": "Zurücksetzen"
+    },
     "article_count": "{count, plural, one {# Artikel} other {# Artikel}}",
     "spectrum_label": "Abgedeckte politische Lager: {leans}",
     "blind_spots_label": "Blindstellen",
@@ -51,6 +82,7 @@
     "read_at_source": "Beim Outlet lesen →",
     "back_to_radar": "Zurück zum Radar",
     "published_rewrite_label": "Neutrale Fassung verfügbar",
+    "published_rewrite_cta": "Neutrale Fassung lesen →",
     "lean": {
       "left": "Links",
       "center-left": "Mitte-Links",
@@ -84,6 +116,15 @@
     "page_title": "Artikel",
     "page_subtitle": "Automatisch erstellte neutrale Fassungen ausgewählter Geschichten. kebab.news ist ein Informations-Werkzeug, keine Redaktion. Die Originalquellen sind unter jedem Artikel verlinkt.",
     "empty": "Noch keine veröffentlichten Artikel.",
+    "empty_search": "Keine Artikel für diese Filter. Passe Suche oder Zeitraum an.",
+    "filters": {
+      "search_placeholder": "Artikel durchsuchen …",
+      "search_label": "Nach Titel oder Inhalt suchen",
+      "sort_option": {
+        "recent": "Neuste zuerst",
+        "sources": "Meiste Quellen"
+      }
+    },
     "source_count": "{count, plural, one {# Quelle} other {# Quellen}}",
     "disclaimer_title": "KI-generierte Zusammenfassung.",
     "disclaimer_body": "Ungeprüft. Von einem Werkzeug automatisch aus den unten verlinkten Originalquellen in neutraler Sprache erstellt. Keine redaktionelle Recherche, keine eigene Faktenprüfung. Maßgeblich sind die verlinkten Originalquellen.",

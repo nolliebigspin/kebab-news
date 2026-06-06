@@ -1,15 +1,24 @@
 import { LEAN_ORDER, RADAR_MIN_OUTLETS, REWRITE_VOTE_THRESHOLD } from "@kebab/core";
-import { articles, db, type OutletLean, outlets, stories } from "@kebab/db";
-import { desc, sql } from "drizzle-orm";
+import {
+  articles,
+  db,
+  type OutletLean,
+  outlets,
+  publishedArticles,
+  stories,
+  votes,
+} from "@kebab/db";
+import { and, desc, type SQL, sql } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { PageHero } from "@/components/PageHero";
+import { RadarFilters } from "@/components/RadarFilters";
 import { Card } from "@/components/ui/card";
 import { VoteButton } from "@/components/VoteButton";
 import { leanColor } from "@/lib/lean";
+import { parseRadarFilters, type RadarFilters as RadarFilterState } from "@/lib/radar-filters";
 import { getSession } from "@/lib/session";
-import { getCumulativeVoteCounts } from "@/lib/vote";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("radar");
@@ -21,49 +30,116 @@ type StoryCard = {
   slug: string;
   label: string;
   articleCount: number;
+  firstSeenAt: Date;
   lastSeenAt: Date;
+  voteCount: number;
   leans: OutletLean[];
+  /** Live AI rewrite for this story, if one has been published. */
+  publishedSlug: string | null;
 };
 
-async function loadStories(): Promise<StoryCard[]> {
+async function loadStories(filters: RadarFilterState): Promise<StoryCard[]> {
+  // Pre-aggregate votes per story so we can both display the tally and sort by
+  // it in one query. LEFT JOIN keeps zero-vote stories in the result.
+  const voteTally = db
+    .select({
+      storyId: votes.storyId,
+      count: sql<number>`count(*)::int`.as("vote_count"),
+    })
+    .from(votes)
+    .groupBy(votes.storyId)
+    .as("vote_tally");
+
+  // Live published rewrite per story (published_at NOT NULL). Pre-aggregated so
+  // the join stays 1:1 even if a story ever has multiple live rows — we link to
+  // the most recently published one. LEFT JOIN keeps stories without a rewrite.
+  const pubLive = db
+    .select({
+      storyId: publishedArticles.storyId,
+      slug: sql<
+        string | null
+      >`(array_agg(${publishedArticles.slug} ORDER BY ${publishedArticles.publishedAt} DESC))[1]`.as(
+        "published_slug"
+      ),
+    })
+    .from(publishedArticles)
+    .where(sql`${publishedArticles.publishedAt} IS NOT NULL`)
+    .groupBy(publishedArticles.storyId)
+    .as("pub_live");
+
+  // Row-level WHERE filters: date window (by first appearance) + free-text
+  // search across the story label and every article's headline/teaser.
+  const where: SQL[] = [];
+  if (filters.days !== null) {
+    where.push(sql`${stories.firstSeenAt} >= now() - make_interval(days => ${filters.days})`);
+  }
+  if (filters.q) {
+    const term = `%${filters.q}%`;
+    where.push(
+      sql`(${stories.label} ILIKE ${term} OR ${articles.headline} ILIKE ${term} OR ${articles.teaser} ILIKE ${term})`
+    );
+  }
+
   // Filter by DISTINCT outlets, not articleCount — one chatty outlet
   // publishing 5 updates of the same story is still only 1 outlet for the
   // "spectrum coverage" framing the radar is meant to surface.
+  const having: SQL[] = [sql`count(DISTINCT ${articles.outletId}) >= ${RADAR_MIN_OUTLETS}`];
+  if (filters.lean) {
+    // Keep stories where at least one covering outlet has the requested lean.
+    having.push(sql`bool_or(${outlets.politicalLean} = ${filters.lean}::outlet_lean)`);
+  }
+
+  const orderBy =
+    filters.sort === "votes"
+      ? [desc(sql`coalesce(${voteTally.count}, 0)`), desc(stories.firstSeenAt)]
+      : filters.sort === "outlets"
+        ? [desc(sql`count(DISTINCT ${articles.outletId})`), desc(stories.firstSeenAt)]
+        : [desc(stories.firstSeenAt)];
+
   const rows = await db
     .select({
       id: stories.id,
       slug: stories.slug,
       label: stories.label,
       articleCount: stories.articleCount,
+      firstSeenAt: stories.firstSeenAt,
       lastSeenAt: stories.lastSeenAt,
+      voteCount: sql<number>`coalesce(${voteTally.count}, 0)::int`,
       leans: sql<OutletLean[]>`array_agg(DISTINCT ${outlets.politicalLean})`,
+      publishedSlug: pubLive.slug,
     })
     .from(stories)
     .innerJoin(articles, sql`${articles.storyId} = ${stories.id}`)
     .innerJoin(outlets, sql`${outlets.id} = ${articles.outletId}`)
-    .groupBy(stories.id)
-    .having(sql`count(DISTINCT ${articles.outletId}) >= ${RADAR_MIN_OUTLETS}`)
-    .orderBy(desc(stories.lastSeenAt))
+    .leftJoin(voteTally, sql`${voteTally.storyId} = ${stories.id}`)
+    .leftJoin(pubLive, sql`${pubLive.storyId} = ${stories.id}`)
+    .where(where.length > 0 ? and(...where) : undefined)
+    .groupBy(stories.id, voteTally.count, pubLive.slug)
+    .having(and(...having))
+    .orderBy(...orderBy)
     .limit(50);
 
   return rows.map((r) => ({ ...r, leans: r.leans ?? [] }));
 }
 
-export default async function RadarPage() {
+export default async function RadarPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const t = await getTranslations("radar");
-  const stories_ = await loadStories();
-  const [voteCounts, session] = await Promise.all([
-    getCumulativeVoteCounts(stories_.map((s) => s.id)),
-    getSession(),
-  ]);
+  const filters = parseRadarFilters(await searchParams);
+  const [stories_, session] = await Promise.all([loadStories(filters), getSession()]);
   const isAuthenticated = session !== null;
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-12">
       <PageHero title={t("page_title")} subtitle={t("page_subtitle")} />
 
+      <RadarFilters filters={filters} leanOptions={LEAN_ORDER} />
+
       {stories_.length === 0 ? (
-        <p className="text-ink-mute">{t("empty")}</p>
+        <p className="text-ink-mute">{filters.q ? t("empty_search") : t("empty")}</p>
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2">
           {stories_.map((story) => (
@@ -73,14 +149,34 @@ export default async function RadarPage() {
                   {/* The whole card is clickable via the headline's stretched
                       link; the vote control sits above it (relative + z) so it
                       stays independently interactive. */}
-                  <Link
-                    href={`/radar/${story.slug}`}
-                    className="group/headline rounded-sm outline-none after:absolute after:inset-0 focus-visible:[&>h2]:text-brand-ink"
-                  >
-                    <h2 className="font-display text-lg leading-snug transition-colors group-hover/headline:text-brand-ink sm:text-xl">
-                      {story.label}
-                    </h2>
-                  </Link>
+                  <div className="flex flex-col gap-1.5">
+                    <Link
+                      href={`/radar/${story.slug}`}
+                      className="group/headline rounded-sm outline-none after:absolute after:inset-0 focus-visible:[&>h2]:text-brand-ink"
+                    >
+                      <h2 className="font-display text-lg leading-snug transition-colors group-hover/headline:text-brand-ink sm:text-xl">
+                        {story.label}
+                      </h2>
+                    </Link>
+                    <time
+                      dateTime={story.firstSeenAt.toISOString()}
+                      className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]"
+                    >
+                      {formatDate(story.firstSeenAt)}
+                    </time>
+                  </div>
+
+                  {/* When a neutral rewrite is live, surface it right on the
+                      card. Sits above the stretched headline link (z-10) so it
+                      navigates to /artikel rather than the radar detail. */}
+                  {story.publishedSlug ? (
+                    <Link
+                      href={`/artikel/${story.publishedSlug}`}
+                      className="relative z-10 inline-flex w-fit items-center gap-1.5 rounded-full border border-brand/40 bg-brand-wash/60 px-3 py-1 font-mono text-[11px] text-brand-ink uppercase tracking-[0.12em] outline-none transition-colors hover:bg-brand-wash focus-visible:ring-2 focus-visible:ring-brand"
+                    >
+                      {t("published_rewrite_cta")}
+                    </Link>
+                  ) : null}
 
                   <div className="mt-auto flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
@@ -93,7 +189,7 @@ export default async function RadarPage() {
                     <div className="relative z-10">
                       <VoteButton
                         storyId={story.id}
-                        initialCount={voteCounts.get(story.id) ?? 0}
+                        initialCount={story.voteCount}
                         threshold={REWRITE_VOTE_THRESHOLD}
                         isAuthenticated={isAuthenticated}
                       />
@@ -107,6 +203,19 @@ export default async function RadarPage() {
       )}
     </section>
   );
+}
+
+// Fixed de-DE date, no time — "wann die Story zum ersten Mal erschienen ist".
+// Pinned to Europe/Berlin so the day doesn't shift with the render server's TZ.
+const dateFmt = new Intl.DateTimeFormat("de-DE", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  timeZone: "Europe/Berlin",
+});
+
+function formatDate(date: Date): string {
+  return dateFmt.format(date);
 }
 
 function SpectrumStrip({
