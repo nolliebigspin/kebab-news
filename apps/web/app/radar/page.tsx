@@ -1,13 +1,5 @@
-import { LEAN_ORDER, RADAR_MIN_OUTLETS, REWRITE_VOTE_THRESHOLD } from "@kebab/core";
-import {
-  articles,
-  db,
-  type OutletLean,
-  outlets,
-  publishedArticles,
-  stories,
-  votes,
-} from "@kebab/db";
+import { LEAN_ORDER, RADAR_MIN_OUTLETS } from "@kebab/core";
+import { articles, db, type OutletLean, outlets, publishedArticles, stories } from "@kebab/db";
 import { and, desc, type SQL, sql } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -15,10 +7,8 @@ import { getTranslations } from "next-intl/server";
 import { PageHero } from "@/components/PageHero";
 import { RadarFilters } from "@/components/RadarFilters";
 import { Card } from "@/components/ui/card";
-import { VoteButton } from "@/components/VoteButton";
 import { leanColor } from "@/lib/lean";
 import { parseRadarFilters, type RadarFilters as RadarFilterState } from "@/lib/radar-filters";
-import { getSession } from "@/lib/session";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("radar");
@@ -32,24 +22,12 @@ type StoryCard = {
   articleCount: number;
   firstSeenAt: Date;
   lastSeenAt: Date;
-  voteCount: number;
   leans: OutletLean[];
   /** Live AI rewrite for this story, if one has been published. */
   publishedSlug: string | null;
 };
 
 async function loadStories(filters: RadarFilterState): Promise<StoryCard[]> {
-  // Pre-aggregate votes per story so we can both display the tally and sort by
-  // it in one query. LEFT JOIN keeps zero-vote stories in the result.
-  const voteTally = db
-    .select({
-      storyId: votes.storyId,
-      count: sql<number>`count(*)::int`.as("vote_count"),
-    })
-    .from(votes)
-    .groupBy(votes.storyId)
-    .as("vote_tally");
-
   // Live published rewrite per story (published_at NOT NULL). Pre-aggregated so
   // the join stays 1:1 even if a story ever has multiple live rows — we link to
   // the most recently published one. LEFT JOIN keeps stories without a rewrite.
@@ -90,11 +68,9 @@ async function loadStories(filters: RadarFilterState): Promise<StoryCard[]> {
   }
 
   const orderBy =
-    filters.sort === "votes"
-      ? [desc(sql`coalesce(${voteTally.count}, 0)`), desc(stories.firstSeenAt)]
-      : filters.sort === "outlets"
-        ? [desc(sql`count(DISTINCT ${articles.outletId})`), desc(stories.firstSeenAt)]
-        : [desc(stories.firstSeenAt)];
+    filters.sort === "outlets"
+      ? [desc(sql`count(DISTINCT ${articles.outletId})`), desc(stories.firstSeenAt)]
+      : [desc(stories.firstSeenAt)];
 
   const rows = await db
     .select({
@@ -104,17 +80,15 @@ async function loadStories(filters: RadarFilterState): Promise<StoryCard[]> {
       articleCount: stories.articleCount,
       firstSeenAt: stories.firstSeenAt,
       lastSeenAt: stories.lastSeenAt,
-      voteCount: sql<number>`coalesce(${voteTally.count}, 0)::int`,
       leans: sql<OutletLean[]>`array_agg(DISTINCT ${outlets.politicalLean})`,
       publishedSlug: pubLive.slug,
     })
     .from(stories)
     .innerJoin(articles, sql`${articles.storyId} = ${stories.id}`)
     .innerJoin(outlets, sql`${outlets.id} = ${articles.outletId}`)
-    .leftJoin(voteTally, sql`${voteTally.storyId} = ${stories.id}`)
     .leftJoin(pubLive, sql`${pubLive.storyId} = ${stories.id}`)
     .where(where.length > 0 ? and(...where) : undefined)
-    .groupBy(stories.id, voteTally.count, pubLive.slug)
+    .groupBy(stories.id, pubLive.slug)
     .having(and(...having))
     .orderBy(...orderBy)
     .limit(50);
@@ -129,8 +103,7 @@ export default async function RadarPage({
 }) {
   const t = await getTranslations("radar");
   const filters = parseRadarFilters(await searchParams);
-  const [stories_, session] = await Promise.all([loadStories(filters), getSession()]);
-  const isAuthenticated = session !== null;
+  const stories_ = await loadStories(filters);
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-12">
@@ -146,9 +119,7 @@ export default async function RadarPage({
             <li key={story.id}>
               <Card className="h-full gap-0 py-0 transition-shadow focus-within:ring-2 focus-within:ring-brand/40 hover:ring-foreground/20">
                 <div className="relative flex h-full flex-col gap-4 p-5">
-                  {/* The whole card is clickable via the headline's stretched
-                      link; the vote control sits above it (relative + z) so it
-                      stays independently interactive. */}
+                  {/* The whole card is clickable via the headline's stretched link. */}
                   <div className="flex flex-col gap-1.5">
                     <Link
                       href={`/radar/${story.slug}`}
@@ -184,15 +155,6 @@ export default async function RadarPage({
                       <span className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]">
                         {t("article_count", { count: story.articleCount })}
                       </span>
-                    </div>
-                    {/* Above the stretched link so it stays clickable. */}
-                    <div className="relative z-10">
-                      <VoteButton
-                        storyId={story.id}
-                        initialCount={story.voteCount}
-                        threshold={REWRITE_VOTE_THRESHOLD}
-                        isAuthenticated={isAuthenticated}
-                      />
                     </div>
                   </div>
                 </div>

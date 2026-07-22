@@ -29,9 +29,9 @@ const LEAN_SLUGS: readonly OutletLean[] = [
  * pushes new params and the server re-queries. Defaults: the last 7 days,
  * newest first.
  */
-export type RadarSort = "recent" | "votes" | "outlets";
+export type RadarSort = "recent" | "outlets";
 
-export const RADAR_SORTS: readonly RadarSort[] = ["recent", "votes", "outlets"];
+export const RADAR_SORTS: readonly RadarSort[] = ["recent", "outlets"];
 
 export type RadarFilters = {
   /** Free-text search across story label + article headlines/teasers. */

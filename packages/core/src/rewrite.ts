@@ -17,8 +17,9 @@ import { z } from "zod";
 
 import { REWRITE_MODEL, REWRITE_SYSTEM_PROMPT, REWRITE_TARGET_WORDS_MAX } from "./constants";
 import { LEAN_ORDER } from "./lean";
+import { StorySummarySchema } from "./story-summary";
 
-export const RewriteSchema = z.object({
+export const RewriteSchema = StorySummarySchema.extend({
   neutral_headline: z.string().min(1).max(200),
   neutral_body: z.string().max(8000),
 });
@@ -27,10 +28,117 @@ export type Rewrite = z.infer<typeof RewriteSchema>;
 const REWRITE_JSON_SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["neutral_headline", "neutral_body"],
+  required: [
+    "neutral_headline",
+    "neutral_body",
+    "short_summary",
+    "body",
+    "confirmed_facts",
+    "uncertainties",
+    "differences",
+    "annotations",
+  ],
   properties: {
     neutral_headline: { type: "string" },
     neutral_body: { type: "string" },
+    short_summary: { type: "string" },
+    body: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["id", "text"],
+        properties: { id: { type: "string" }, text: { type: "string" } },
+      },
+    },
+    confirmed_facts: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["text", "source_ids", "confidence"],
+        properties: {
+          text: { type: "string" },
+          source_ids: { type: "array", items: { type: "string" } },
+          confidence: { type: "string", enum: ["low", "medium", "high"] },
+        },
+      },
+    },
+    uncertainties: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["text", "source_ids", "status"],
+        properties: {
+          text: { type: "string" },
+          source_ids: { type: "array", items: { type: "string" } },
+          status: {
+            type: "string",
+            enum: ["open", "disputed", "single_source", "unconfirmed"],
+          },
+        },
+      },
+    },
+    differences: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["topic", "explanation", "positions"],
+        properties: {
+          topic: { type: "string" },
+          explanation: { type: "string" },
+          positions: {
+            type: "array",
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["label", "source_ids"],
+              properties: {
+                label: { type: "string" },
+                source_ids: { type: "array", items: { type: "string" } },
+              },
+            },
+          },
+        },
+      },
+    },
+    annotations: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: [
+          "paragraph_id",
+          "quote",
+          "category",
+          "title",
+          "explanation",
+          "possible_effect",
+          "alternatives",
+          "evidence_source_ids",
+          "confidence",
+          "origin",
+          "review_status",
+        ],
+        properties: {
+          paragraph_id: { type: "string" },
+          quote: { type: "string" },
+          prefix: { type: "string" },
+          suffix: { type: "string" },
+          category: { type: "string" },
+          title: { type: "string" },
+          explanation: { type: "string" },
+          possible_effect: { type: "string" },
+          alternatives: { type: "array", items: { type: "string" } },
+          evidence_source_ids: { type: "array", items: { type: "string" } },
+          confidence: { type: "string", enum: ["low", "medium", "high"] },
+          origin: { type: "string", enum: ["automatic", "manual"] },
+          review_status: { type: "string", enum: ["needs_review", "verified", "rejected"] },
+        },
+      },
+    },
   },
 } as const;
 
@@ -48,6 +156,20 @@ export function sortSourcesByLean(sources: SourceItem[]): SourceItem[] {
   return [...sources].sort((a, b) => LEAN_ORDER.indexOf(a.lean) - LEAN_ORDER.indexOf(b.lean));
 }
 
+/** Reject a structurally valid model response that cites a source it never received. */
+export function validateRewriteSources(rewrite: Rewrite, sources: SourceItem[]): boolean {
+  const known = new Set(sources.map((source) => source.outletSlug));
+  const referenced = [
+    ...rewrite.confirmed_facts.flatMap((fact) => fact.source_ids),
+    ...rewrite.uncertainties.flatMap((item) => item.source_ids),
+    ...rewrite.differences.flatMap((difference) =>
+      difference.positions.flatMap((position) => position.source_ids)
+    ),
+    ...rewrite.annotations.flatMap((annotation) => annotation.evidence_source_ids),
+  ];
+  return referenced.every((sourceId) => known.has(sourceId));
+}
+
 export function buildUserMessage(label: string, sources: SourceItem[]): string {
   const lines: string[] = [];
   lines.push("Hier sind die Outlet-Versionen einer einzigen Nachrichtengeschichte.");
@@ -56,15 +178,13 @@ export function buildUserMessage(label: string, sources: SourceItem[]): string {
   lines.push("Quellen:");
   for (const s of sortSourcesByLean(sources)) {
     lines.push("");
-    lines.push(`### ${s.outletName} (${s.lean})`);
+    lines.push(`### ${s.outletName} (${s.lean}, source_id: ${s.outletSlug})`);
     lines.push(`Schlagzeile: ${s.headline}`);
     if (s.teaser) lines.push(`Teaser: ${s.teaser}`);
   }
   lines.push("");
-  lines.push("Schreibe nun die neutrale Fassung gemäß den Output- und Inhalts-Regeln.");
-  lines.push(
-    "Antworte ausschließlich als JSON-Objekt mit den Feldern neutral_headline und neutral_body."
-  );
+  lines.push("Erstelle nun die transparente Zusammenfassung gemäß den Output- und Inhalts-Regeln.");
+  lines.push("Antworte ausschließlich als JSON-Objekt im vorgegebenen strukturierten Format.");
   return lines.join("\n");
 }
 
@@ -130,6 +250,10 @@ export async function generateRewrite(
     const parsed = RewriteSchema.safeParse(raw);
     if (!parsed.success) {
       console.error("[rewrite] schema parse failed:", parsed.error.format());
+      return null;
+    }
+    if (!validateRewriteSources(parsed.data, sources)) {
+      console.error("[rewrite] output references a source_id that was not provided");
       return null;
     }
     return parsed.data;

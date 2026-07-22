@@ -56,7 +56,7 @@ async function main() {
   const now = new Date();
   await db
     .update(publishedArticles)
-    .set({ publishedAt: now })
+    .set({ publishedAt: now, status: "published" })
     .where(eq(publishedArticles.id, draft.id));
 
   await db.update(stories).set({ publishedArticleId: draft.id }).where(eq(stories.id, story.id));

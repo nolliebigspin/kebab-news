@@ -1,4 +1,9 @@
-import { buildUserMessage, RewriteSchema, sortSourcesByLean } from "@kebab/core";
+import {
+  buildUserMessage,
+  RewriteSchema,
+  sortSourcesByLean,
+  validateRewriteSources,
+} from "@kebab/core";
 import { describe, expect, it } from "vitest";
 
 const SOURCES = [
@@ -28,6 +33,15 @@ const SOURCES = [
   },
 ];
 
+const STRUCTURED_SECTIONS = {
+  short_summary: "Die wichtigsten Entwicklungen in Kürze.",
+  body: [{ id: "overview", text: "Der Bundestag hat über den Haushalt beraten." }],
+  confirmed_facts: [{ text: "Die Beratung fand statt.", source_ids: ["taz"], confidence: "high" }],
+  uncertainties: [],
+  differences: [],
+  annotations: [],
+};
+
 describe("sortSourcesByLean", () => {
   it("orders sources by LEAN_ORDER (left → public last)", () => {
     const sorted = sortSourcesByLean(SOURCES);
@@ -49,9 +63,9 @@ describe("buildUserMessage", () => {
 
   it("includes every outlet with its lean tag", () => {
     const msg = buildUserMessage("X", SOURCES);
-    expect(msg).toContain("### Welt (right)");
-    expect(msg).toContain("### taz (left)");
-    expect(msg).toContain("### Tagesschau (public)");
+    expect(msg).toContain("### Welt (right, source_id: welt)");
+    expect(msg).toContain("### taz (left, source_id: taz)");
+    expect(msg).toContain("### Tagesschau (public, source_id: tagesschau)");
   });
 
   it("includes the teaser when present and omits when null", () => {
@@ -73,8 +87,7 @@ describe("buildUserMessage", () => {
   it("asks for JSON output explicitly", () => {
     const msg = buildUserMessage("X", SOURCES);
     expect(msg).toContain("JSON");
-    expect(msg).toContain("neutral_headline");
-    expect(msg).toContain("neutral_body");
+    expect(msg).toContain("strukturierten Format");
   });
 });
 
@@ -83,12 +96,25 @@ describe("RewriteSchema", () => {
     const result = RewriteSchema.safeParse({
       neutral_headline: "Bundestag beschließt Haushalt 2026",
       neutral_body: "Der Bundestag hat …",
+      ...STRUCTURED_SECTIONS,
     });
     expect(result.success).toBe(true);
   });
 
+  it("rejects legacy free text without sourced sections", () => {
+    const result = RewriteSchema.safeParse({
+      neutral_headline: "Bundestag beschließt Haushalt 2026",
+      neutral_body: "Der Bundestag hat …",
+    });
+    expect(result.success).toBe(false);
+  });
+
   it("rejects an empty headline", () => {
-    const result = RewriteSchema.safeParse({ neutral_headline: "", neutral_body: "x" });
+    const result = RewriteSchema.safeParse({
+      neutral_headline: "",
+      neutral_body: "x",
+      ...STRUCTURED_SECTIONS,
+    });
     expect(result.success).toBe(false);
   });
 
@@ -98,6 +124,7 @@ describe("RewriteSchema", () => {
     const result = RewriteSchema.safeParse({
       neutral_headline: "h",
       neutral_body: "b",
+      ...STRUCTURED_SECTIONS,
       extra: "ignored",
     });
     expect(result.success).toBe(true);
@@ -107,7 +134,31 @@ describe("RewriteSchema", () => {
     const result = RewriteSchema.safeParse({
       neutral_headline: "h",
       neutral_body: "x".repeat(8001),
+      ...STRUCTURED_SECTIONS,
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("validateRewriteSources", () => {
+  it("rejects source references that were not provided to the model", () => {
+    const parsed = RewriteSchema.parse({
+      neutral_headline: "h",
+      neutral_body: "b",
+      ...STRUCTURED_SECTIONS,
+      confirmed_facts: [{ text: "Unbelegt", source_ids: ["invented-source"], confidence: "high" }],
+    });
+
+    expect(validateRewriteSources(parsed, SOURCES)).toBe(false);
+  });
+
+  it("accepts references to provided source ids", () => {
+    const parsed = RewriteSchema.parse({
+      neutral_headline: "h",
+      neutral_body: "b",
+      ...STRUCTURED_SECTIONS,
+    });
+
+    expect(validateRewriteSources(parsed, SOURCES)).toBe(true);
   });
 });

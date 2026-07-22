@@ -1,0 +1,1 @@
+ALTER TABLE "summary_ratings" ADD CONSTRAINT "summary_ratings_value_check" CHECK ("summary_ratings"."value" in (-1, 1));

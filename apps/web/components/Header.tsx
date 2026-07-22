@@ -26,22 +26,25 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
             aria-label={t("nav_label")}
             className="order-last flex w-full items-center gap-6 md:order-0 md:w-auto md:gap-8"
           >
-            <Link href="/radar" className={NAV_LINK}>
-              {t("radar")}
+            <Link href="/" className={NAV_LINK}>
+              {t("current")}
             </Link>
             <Link href="/artikel" className={NAV_LINK}>
-              {t("articles")}
+              {t("topics")}
             </Link>
-            <Link href="/how-to" className={`${NAV_LINK} md:hidden`}>
-              {t("how_to")}
+            <Link href="/lernen" className={NAV_LINK}>
+              {t("learn")}
+            </Link>
+            <Link href="/methodik" className={`${NAV_LINK} hidden lg:inline`}>
+              {t("method")}
             </Link>
           </nav>
         </div>
         <div className="flex items-center gap-4 md:gap-5">
           {/* On desktop How-to sits on the right; on mobile it lives in the
               wrapped nav row above, so it's hidden here below md. */}
-          <Link href="/how-to" className={`${NAV_LINK} hidden md:inline`}>
-            {t("how_to")}
+          <Link href="/vision" className={`${NAV_LINK} hidden md:inline`}>
+            {t("about")}
           </Link>
           <Button
             variant="ghost"

@@ -43,6 +43,20 @@
       "when": 1780653886259,
       "tag": "0005_votes_user_id",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784749958762,
+      "tag": "0006_low_skin",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1784751094806,
+      "tag": "0007_square_mandroid",
+      "breakpoints": true
     }
   ]
 }

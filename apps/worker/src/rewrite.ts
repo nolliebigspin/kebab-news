@@ -11,12 +11,12 @@ import {
   annotateText,
   generateRewrite,
   generateStorySlug,
+  RADAR_MIN_OUTLETS,
   REWRITE_MODEL,
   REWRITE_PROMPT_VERSION,
-  REWRITE_VOTE_THRESHOLD,
   type SourceItem,
 } from "@kebab/core";
-import { articles, db, outlets, publishedArticles, stories, votes } from "@kebab/db";
+import { articles, db, outlets, publishedArticles, stories } from "@kebab/db";
 import { desc, eq, isNull, sql } from "drizzle-orm";
 
 export type StoryRow = typeof stories.$inferSelect;
@@ -102,10 +102,17 @@ export async function rewriteStory(story: StoryRow): Promise<RewriteOutcome> {
     slug: draftSlug,
     neutralHeadline: rewrite.neutral_headline,
     neutralBody: rewrite.neutral_body,
+    shortSummary: rewrite.short_summary,
+    bodyParagraphs: rewrite.body,
+    confirmedFacts: rewrite.confirmed_facts,
+    uncertainties: rewrite.uncertainties,
+    sourceDifferences: rewrite.differences,
+    bodyAnnotations: rewrite.annotations,
     sourceCount: sources.length,
     sourceOutletSlugs,
     model: REWRITE_MODEL,
     promptVersion: REWRITE_PROMPT_VERSION,
+    status: "needs_review",
     // publishedAt left NULL — this is a draft. Operator publishes manually.
   });
 
@@ -113,19 +120,19 @@ export async function rewriteStory(story: StoryRow): Promise<RewriteOutcome> {
 }
 
 /**
- * Stories that have crossed the cumulative vote threshold and do NOT yet have
- * any rewrite (draft or published). The LEFT JOIN + isNull filter is how we
- * say "no published_articles row exists for this story".
+ * Source-diverse stories that do not yet have a draft or published summary.
+ * Selection is a system/editorial concern; reader quality ratings never decide
+ * what gets covered.
  */
 export async function findStoriesReadyForRewrite(): Promise<StoryRow[]> {
   const rows = await db
     .select({ story: stories })
     .from(stories)
-    .innerJoin(votes, eq(votes.storyId, stories.id))
+    .innerJoin(articles, eq(articles.storyId, stories.id))
     .leftJoin(publishedArticles, eq(publishedArticles.storyId, stories.id))
     .where(isNull(publishedArticles.id))
     .groupBy(stories.id)
-    .having(sql`count(${votes.id}) >= ${REWRITE_VOTE_THRESHOLD}`)
+    .having(sql`count(DISTINCT ${articles.outletId}) >= ${RADAR_MIN_OUTLETS}`)
     .orderBy(desc(stories.lastSeenAt));
   return rows.map((r) => r.story);
 }

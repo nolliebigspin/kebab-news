@@ -6,65 +6,50 @@ This file is read by Claude Code on every session. It is the source of truth for
 
 ## I. Vision (the why)
 
-kebab.news is positioned as a **deutschsprachiges Informations-Werkzeug** that makes framing and bias visible — explicitly *not* a news portal or a publication run by people. The tool: take the day's most important German news stories, look at how every outlet covered them, annotate the framing, and produce **one neutral, AI-rewritten version per story** — with the original outlet coverage shown as receipts underneath. The "tool, not portal" framing is deliberate (operator decision): it keeps the centre of gravity on *showing how others report* rather than on asserting facts ourselves. (Legal note: German press/personality law attaches to what the tool actually does, not to the label — see §VII.)
+kebab.news is a German-language news platform that clusters multiple reports about one event into a short, readable and transparent summary. It does **not** claim complete neutrality. Trust comes from visible evidence, uncertainties, disagreements, framing choices and version history.
 
-**Stance:** *Neutralität durch Rewriting, Transparenz durch Quellenangabe.* We do not claim to be the truth. We are one consistent, neutrally-worded entry point into stories that the German press covers with very different framing. The original sources stay visible and linkable below every rewrite.
+**Stance:** *Sources first. No fake neutrality.* Facts, interpretation and uncertainty remain semantically distinct. Framing annotations are cautious analyses, never objective ratings of an outlet.
 
-**Motto:** "Eine Geschichte. Eine neutrale Fassung. Alle Quellen sichtbar."
+**Motto:** "Viele Quellen. Eine verständliche Zusammenfassung. Alle Unterschiede transparent." / "We wrapped the news."
 
-**Audience:** German-speaking readers (DE/AT/CH) who want a single, low-framing entry point into the day's news and the option to drill into how each outlet covered it.
+**Audience:** German-speaking readers (DE/AT/CH) who want a quick entry point and the ability to inspect evidence and competing presentations.
 
-**Why now:** Ground.news solved aggregation + bias labeling for English. Nobody is doing AI-rewritten neutral coverage in German. The gap is "ein KI-redigierter Newsroom für den deutschsprachigen Raum, der sichtbar bleibt."
+**Why now:** Aggregators expose many links but rarely connect individual claims to evidence or explain uncertainty and framing in a readable German product.
 
-**The product flow in one sentence:** outlets publish → we cluster → readers vote on which clusters matter → AI rewrites the winners → we publish to `/artikel` with source links underneath.
+**The product flow in one sentence:** outlets publish → we cluster → the system/editorial workflow creates a sourced draft → humans can review → we publish a versioned Story Summary → readers rate its quality and discuss context.
 
 ---
 
 ## II. Product Scope
 
-The product ships in three loosely-coupled pieces. Build them in this order; each earns the next.
+The focused MVP is one vertical Story Summary slice plus supporting discovery and learning surfaces.
 
-### Piece 1 — Radar (the curation surface)
+### Piece 1 — Discovery and source radar
 
 The radar is the day's top clusters of German news. For each cluster:
 - Show the original publisher headlines side-by-side across the political spectrum (taz / SZ / FAZ / Welt / NZZ / Junge Freiheit / Nius / öffentlich-rechtlich).
-- Annotate framing language on the **outlet headlines** — loaded terms, emotional triggers, presuppositions, euphemisms, omissions — so readers can see *why* this story is worth a neutral rewrite.
+- Annotate possible framing language on source headlines and teasers.
 - Show blind spots — which political lean(s) didn't cover it.
-- **Voting button per cluster.** Readers vote on which clusters deserve a full neutral rewrite.
 
-The radar is the front end of the curation pipeline, not the product itself.
+The homepage and `/artikel` are the primary discovery surfaces. Radar is a source-comparison tool.
 
-### Piece 2 — Voting + selection
+### Piece 2 — Versioned Story Summary
 
-Readers vote on radar clusters. Votes accumulate (all-time) until a cluster clears `REWRITE_VOTE_THRESHOLD`, which makes it eligible for a neutral rewrite.
+Each public Story Summary includes a headline, short summary, longer paragraphs, sourced facts, uncertainties, source differences, framing annotations, original sources, quality ratings, sharing, comments and version/correction metadata. Topic selection is system/editorial; there is no community vote deciding coverage.
 
-Voting model:
-- **Login required.** Voting requires a logged-in account (passwordless magic-link via Better Auth — see §IV). `POST /api/vote` returns 401 without a valid session; the radar UI shows an "Anmelden" CTA to logged-out readers.
-- **One vote per account per cluster**, enforced by a unique `(story_id, user_id)` index — permanent, not daily.
-- No IP-hashing, no daily salt, no anonymous path anymore (this reverses the earlier IP-based compromise — see §IX).
+### Piece 3 — Learning and editorial workflow
 
-Selection in v1 is **manual**: you (the operator) pick the winning story by running `bun rewrite:run --story <slug>`. Automatic "promote the highest-vote story once a day" is a later addition.
-
-### Piece 3 — Rewrite + publish (the product)
-
-For the selected story:
-1. Load all articles in the cluster (RSS-derived: headline + teaser per outlet).
-2. Feed headlines + teasers into Claude with a strict neutral-German rewrite prompt.
-3. Output: one neutral headline + one neutral body in plain German (target length set by `REWRITE_TARGET_WORDS_MIN/MAX` in `packages/core/src/constants.ts`).
-4. Insert into `published_articles` as a draft.
-5. Operator publishes via `bun rewrite:publish --story <slug>`.
+The learning area teaches bias, framing and source literacy through concrete examples. `/redaktion` is server-authorized for moderators, editors and admins and starts as a read-only review dashboard.
 
 We deliberately do **not** scrape article bodies. Same pattern as Ground News: headlines + teasers carry most of the framing signal, and skipping body scraping removes the open DE legal question around derivative works while keeping paywalled outlets (NZZ, FAZ) in the spectrum. See §VII.
 
-The published article lives at `/artikel/[slug]` and carries a prominent disclaimer: *"KI-generierte Zusammenfassung. Ungeprüft."* Original outlet articles are linked in a "Quellen" section beneath the rewrite, with their lean labels and framing annotations preserved.
+The published Story Summary lives at `/artikel/[slug]` and carries the mandatory disclosure *"KI-generierte Zusammenfassung. Ungeprüft."* Original sources are always linked.
 
-`/artikel` is the accumulating archive of published rewrites, newest first. **This is the actual product** — the radar is the funnel.
+`/artikel` is the accumulating archive of published summaries, newest first.
 
 ### Out of scope for now
 
-- Comments
 - Per-user vote weighting or trust scores
-- Automatic story selection / publishing
 - Multi-language rewrites (German output only)
 - Mobile app
 
@@ -80,29 +65,29 @@ All tunables live in `packages/core/src/constants.ts`. The ingest pipeline lives
 
 Cross-run story matching is built into the same ingest pass: when a new article is embedded, `runIngest` loads every story with `last_seen_at > now() - STORY_WINDOW_HOURS` as cluster candidates (not just stories from the current run) and either attaches via running-mean centroid update or opens a new story. A late outlet joining a story already in the window is the same code path as a first-run cluster.
 
-### 2. Framing annotation (existing)
+### 2. Framing annotation
 
-Claude annotates spans on each outlet headline and teaser. Output schema: `{ start, end, type, note }` where `type` ∈ `loaded-term | emotional-trigger | presupposition | euphemism | omission`. UTF-16 offsets, capped at 10 spans per text. Used in the radar UI's "Quellen" view and in the spectrum side-by-side. Not used on the AI rewrite itself — the rewrite is neutral by construction.
+Source headline annotations retain the legacy offset format. Story Summary annotations use paragraph id + quote + optional prefix/suffix context so small text edits do not silently move a marker. Every annotation has evidence, confidence, origin and review status.
 
-### 3. Voting (Piece 2)
+### 3. Reader interactions
 
-`POST /api/vote { storyId }` reads the Better Auth session (server-side, via `apps/web/lib/session.ts`); no session → 401. With a session it upserts into the `votes` table keyed by `(story_id, user_id)` with a unique constraint, so a re-vote is a no-op `duplicate`. Rate-limit 10 req/min keyed by user id. The radar UI shows the live count per cluster and renders an "Anmelden" CTA (link to `/anmelden`) instead of the vote button when the reader is logged out. Vote logic lives in `apps/web/lib/vote.ts` (`recordVote`, `countVotes`, `getCumulativeVoteCounts`). Auth itself lives in `@kebab/auth` (§IV).
+`POST /api/summary-rating` sets, changes or removes one quality rating per user and published summary. `POST /api/comments` validates and authorizes comment creation, replies, owner edits/deletes, helpful votes and reports. Comments are readable without login and always rendered as plaintext. The old `/api/vote` and `votes` table are legacy compatibility only and are not a product surface.
 
-### 4. Rewrite (Piece 3)
+### 4. Structured summary generation
 
 `bun rewrite:run --story <slug>` runs:
 1. Load all articles in the cluster (headline + teaser from RSS — no body scraping).
 2. Build a structured input: per-outlet headline + teaser + political lean, ordered left → public via `LEAN_ORDER`.
-3. Call Claude with the neutral-German rewrite prompt (versioned in `packages/core/src/constants.ts` as `REWRITE_SYSTEM_PROMPT`, with a `REWRITE_PROMPT_VERSION` tag stored on every output).
-4. Validate the structured output with Zod (`{ neutral_headline, neutral_body }`). On parse failure, log and exit non-zero — never persist partial output.
+3. Call Claude with the transparent-summary prompt (versioned in `packages/core/src/constants.ts`). Imported source text is explicitly untrusted.
+4. Validate headline/body, short summary, sourced facts, uncertainties, differences and annotations with JSON Schema plus Zod. On parse failure, abort — never persist partial output.
 5. Insert into `published_articles` as `published_at = NULL` (draft).
 
 `bun rewrite:publish --story <slug>` flips `published_at = now()` on the latest draft and back-links `stories.published_article_id`, making it visible at `/artikel/[slug]`.
 
-### 5. Article surface (Piece 3)
+### 5. Story surface
 
 - `/artikel` — list of published rewrites (those with `published_at NOT NULL`), newest first.
-- `/artikel/[slug]` — disclaimer banner at top, then neutral headline as h1, neutral body as paragraphs, then "Quellen" section with each source outlet's original headline (with framing annotations still highlighted), lean label, link out.
+- `/artikel/[slug]` — full progressive Story Summary with sources, uncertainty, differences, interactive framing explanations, quality feedback, sharing, history and comments.
 
 ---
 
@@ -117,12 +102,12 @@ Versions are pinned in `mise.toml`, `package.json`, and `bun.lock`. Do not write
 - **Database:** Postgres + Drizzle ORM + `pgvector` (semantic clustering). Driver is `postgres-js` (standard wire protocol), so it runs against Neon today and any self-hosted Postgres later — switching providers is a `DATABASE_URL` change. The driver is encapsulated in `packages/db`; nothing else knows it.
 - **Scheduled jobs:** long-running ingest worker (`apps/worker`) with an in-process scheduler (`RUN_HOURS_UTC`), deployed as a container (Dokploy). No HTTP route, no Vercel-Cron, no external queue.
 - **AI — Embeddings:** Voyage AI (`voyage-3-lite`, 512 dims, direct HTTP).
-- **AI — Framing annotation + neutral rewrite:** Claude (Anthropic API, `claude-opus-4-7`).
+- **AI — Framing annotation + transparent summary:** Claude (Anthropic API).
 - **Auth:** Better Auth (passwordless magic-link), Drizzle adapter on the shared Postgres, email sent via SMTP (`nodemailer`). Encapsulated in `@kebab/auth`. Note: `kysely` is marked `serverExternalPackages` in `apps/web/next.config.ts` — it's a dead transitive dep of better-auth (we use the Drizzle adapter) whose sqlite dialects break Turbopack's build trace; externalizing stops it being parsed (see §IX).
 - **Hosting:** Vercel (web app, root dir `apps/web`) + Dokploy (ingest worker container).
 - **Quality:** Biome (lint + format), Vitest (tests).
 
-Deferred until the product earns it: persistent vote weighting, external job queues.
+Deferred until the product earns it: per-user trust scores, external job queues and full editorial write forms.
 
 ---
 
@@ -134,10 +119,13 @@ Current tables (in `packages/db/src/schema.ts`):
 - `stories` — id, slug, label (= first article's headline, used as fallback before rewrite exists), first_seen_at, last_seen_at, centroid (vector 512), article_count.
 - `articles` — id, outlet_id (FK), url (unique), headline, teaser, headline_annotations (jsonb), teaser_annotations (jsonb), published_at, fetched_at, embedding (vector 512), story_id (FK nullable).
 
-New tables for Product B:
+Summary and interaction tables:
 
-- `votes` — id, story_id (FK cascade), user_id (text FK → user, cascade), created_at. Unique (story_id, user_id). Indexed on (story_id) for hot-path counting.
-- `published_articles` — id, story_id (FK restrict), slug (unique), neutral_headline, neutral_body (markdown text), source_count, source_outlet_slugs (text[]), model, prompt_version, rewritten_at, published_at (nullable; NULL = draft, NOT NULL = live).
+- `published_articles` — append-only Story Summary versions. Alongside legacy headline/body it stores short summary, paragraph ids, facts, uncertainties, differences, annotations, status, origin and correction metadata.
+- `summary_ratings` — one `-1|1` quality rating per `(summary_id, user_id)` plus optional structured downvote reason.
+- `comments`, `comment_helpful_votes`, `comment_reports` — threaded plaintext discussion with ownership, moderation and reporting.
+- `share_events` — summary id, channel and timestamp only; no account, IP or user agent.
+- `votes` — legacy topic votes retained for migration compatibility, not surfaced.
 - `stories.published_article_id` — nullable FK back-pointer added via migration.
 
 Better Auth tables (canonical shapes, defined in the same `schema.ts` so drizzle-kit stays single-source — note `user.id` is **text**, not uuid):
@@ -157,12 +145,12 @@ These are non-negotiable. Violating them is the most common mistake — see Sect
 2. **No other package managers.** This is a Bun project. No `npm install`, no `pnpm`, no `yarn`.
 3. **Finishing a step requires `mise exec -- bun check:all`.** Before declaring any coding step complete, run it. Fix what it reports.
 4. **DB migrations are generated, never hand-edited.** Run `mise exec -- bun db:generate` after schema changes, then `mise exec -- bun db:migrate`. Do not edit the generated SQL files in `packages/db/drizzle/` by hand. The metadata snapshots in `packages/db/drizzle/meta/` are also generated; the only time you touch them is to repair a known-broken chain (see §IX).
-5. **No AI calls in the web app.** All AI work runs in the ingest worker (`apps/worker`) or operator-triggered commands (`bun ingest:run`, `bun rewrite:run`). Never in the path of a page render or a `POST /api/vote`. The web app reads from the DB, handles auth (Better Auth: sessions, magic-link sign-in, sending login emails via SMTP), and writes votes — but never calls an AI model.
+5. **No AI calls in the web app.** All AI work runs in the worker or operator commands. Page renders and reader-interaction routes never call a model.
 6. **Rewrite output is structured.** Claude is called with `output_config.format: { type: "json_schema", ... }`. The output is Zod-validated before persistence. On parse failure, the rewrite is aborted and logged — never saved as partial garbage.
 7. **Disclaimer is mandatory.** Every `/artikel/[slug]` page renders the *"KI-generierte Zusammenfassung. Ungeprüft."* banner above the rewritten content. Removing it requires editing this rule first.
 8. **Original sources are always visible.** Every published article has a "Quellen" section listing every outlet that fed the rewrite, with link-outs. No rewrite ships without sources.
 9. **No body scraping.** v1 uses only RSS headlines + teasers — for the rewrite input, for the radar UI, for everything. Same pattern as Ground News. Removing this constraint requires editing this rule and reopening the DE press-law question in §VII first.
-10. **German only (for now).** All user-facing strings live in `messages/de.json`. English content was removed to focus on the German-speaking market; next-intl stays wired up so other languages can be added later. URL routes are German too (`/artikel`, `/radar`, `/vision`, `/impressum`, `/datenschutz`).
+10. **German only (for now).** Reusable interface strings belong in `messages/de.json`; long page-specific editorial copy may be colocated with its German-only route. next-intl stays wired for a later locale expansion.
 11. **Design aesthetic:** professional, scientific, slate-blue/white. Clarity over clutter. No "news site" chrome (no breaking-news red, no urgency framing). The rewrite UI reads more like a research paper than like a newspaper.
 
 ---

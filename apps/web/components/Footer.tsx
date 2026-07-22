@@ -11,6 +11,12 @@ export const Footer = () => {
         <Wordmark />
         <div className="flex flex-wrap items-center gap-4 text-ink-mute text-xs">
           <Link
+            href="/methodik"
+            className="rounded-sm hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
+          >
+            {t("method")}
+          </Link>
+          <Link
             href="/impressum"
             className="rounded-sm hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
           >

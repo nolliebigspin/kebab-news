@@ -3,6 +3,11 @@
     "github": "GitHub",
     "github_label": "Projekt auf GitHub ansehen (öffnet neuen Tab)",
     "nav_label": "Hauptnavigation",
+    "current": "Aktuell",
+    "topics": "Themen",
+    "learn": "Lernen",
+    "method": "Methodik",
+    "about": "Über uns",
     "radar": "Radar",
     "articles": "Artikel",
     "vision": "Vision",
@@ -13,7 +18,7 @@
   },
   "auth": {
     "page_title": "Anmelden",
-    "page_subtitle": "Melde dich mit deiner E-Mail-Adresse an, um über Geschichten abzustimmen. Wir schicken dir einen Anmeldelink — kein Passwort nötig.",
+    "page_subtitle": "Melde dich mit deiner E-Mail-Adresse an, um Zusammenfassungen zu bewerten und sachlich zu kommentieren. Wir schicken dir einen Anmeldelink — kein Passwort nötig.",
     "email_label": "E-Mail-Adresse",
     "email_placeholder": "du@beispiel.de",
     "send_link": "Anmeldelink senden",
@@ -38,11 +43,12 @@
   "footer": {
     "nonprofit": "unabhängig · werbefrei · open source",
     "impressum": "Impressum",
-    "datenschutz": "Datenschutz"
+    "datenschutz": "Datenschutz",
+    "method": "Methodik"
   },
   "radar": {
     "page_title": "Radar",
-    "page_subtitle": "Dieselbe Geschichte, nebeneinander, über das politische Spektrum hinweg. Rahmung wird an den Schlagzeilen markiert — geschrieben wird nichts um.",
+    "page_subtitle": "Dieselbe Geschichte aus mehreren Quellen. Vergleiche Schlagzeilen und mögliche Rahmungen, bevor du die Zusammenfassung liest.",
     "empty": "Noch keine Geschichten. Das Radar füllt sich, sobald die ersten Quellen aktualisiert sind.",
     "empty_search": "Keine Geschichten für diese Filter. Passe Suche oder Zeitraum an.",
     "filters": {
@@ -70,7 +76,6 @@
       "sort_label": "Sortierung",
       "sort_option": {
         "recent": "Neuste zuerst",
-        "votes": "Meiste Stimmen",
         "outlets": "Meiste Outlets"
       },
       "reset": "Zurücksetzen"
@@ -113,10 +118,10 @@
     }
   },
   "articles": {
-    "page_title": "Artikel",
-    "page_subtitle": "Automatisch erstellte neutrale Fassungen ausgewählter Geschichten. kebab.news ist ein Informations-Werkzeug, keine Redaktion. Die Originalquellen sind unter jedem Artikel verlinkt.",
-    "empty": "Noch keine veröffentlichten Artikel.",
-    "empty_search": "Keine Artikel für diese Filter. Passe Suche oder Zeitraum an.",
+    "page_title": "Themen",
+    "page_subtitle": "Viele Quellen, verständlich gebündelt. Jede Story zeigt Belege, offene Fragen und Unterschiede zwischen Darstellungen.",
+    "empty": "Noch keine Story veröffentlicht.",
+    "empty_search": "Keine Storys für diese Filter. Passe Suche oder Zeitraum an.",
     "filters": {
       "search_placeholder": "Artikel durchsuchen …",
       "search_label": "Nach Titel oder Inhalt suchen",
@@ -175,19 +180,19 @@
   "datenschutz": {
     "page_title": "Datenschutzerklärung",
     "intro_heading": "Überblick",
-    "intro_body": "Diese Website verarbeitet so wenig personenbezogene Daten wie möglich. Es gibt kein Tracking über Cookies und keine Werbung. Zum Abstimmen kannst du ein Konto mit deiner E-Mail-Adresse anlegen; dabei wird ein technisch notwendiges Sitzungs-Cookie gesetzt. Alle eingesetzten Dienste verarbeiten die Daten innerhalb der Europäischen Union.",
+    "intro_body": "Diese Website verarbeitet so wenig personenbezogene Daten wie möglich. Es gibt kein werbebasiertes Tracking. Für Bewertungen und Kommentare kannst du ein Konto mit deiner E-Mail-Adresse anlegen; dabei wird ein technisch notwendiges Sitzungs-Cookie gesetzt.",
     "controller_heading": "Verantwortlicher",
     "controller_body": "Verantwortlich für die Datenverarbeitung auf dieser Website ist Alec Winter, Blumenau 89, 22089 Hamburg, Deutschland. Kontakt: contact@awinter.dev. Die vollständigen Angaben finden sich im Impressum.",
     "hosting_heading": "Hosting (Vercel)",
     "hosting_body": "Die Website wird bei der Vercel Inc. gehostet, mit Datenverarbeitung in der Europäischen Union. Beim Aufruf werden technisch notwendige Server-Logs (u. a. IP-Adresse, Zeitpunkt der Anfrage, abgerufene Ressource, übermittelte Datenmenge, Referrer und User-Agent) verarbeitet, um den Betrieb, die Sicherheit und die Stabilität der Website zu gewährleisten. Rechtsgrundlage ist das berechtigte Interesse an einem sicheren und funktionsfähigen Betrieb (Art. 6 Abs. 1 lit. f DSGVO). Mit Vercel besteht ein Vertrag zur Auftragsverarbeitung.",
     "database_heading": "Datenbank (Neon)",
-    "database_body": "Inhaltsdaten der Anwendung werden in einer Postgres-Datenbank des Anbieters Neon gespeichert, mit Datenverarbeitung in der Europäischen Union. Personenbezogene Daten entstehen hier in Form der unten beschriebenen Konto- und Abstimmungsdaten (E-Mail-Adresse, Sitzungen, Stimmen). Auch mit Neon besteht ein Vertrag zur Auftragsverarbeitung.",
+    "database_body": "Inhaltsdaten der Anwendung werden in einer Postgres-Datenbank des Anbieters Neon gespeichert. Personenbezogene Daten entstehen in Form der unten beschriebenen Konto-, Bewertungs- und Kommentardaten. Mit Neon ist vor dem öffentlichen Betrieb der konkrete Verarbeitungsort und Vertrag zur Auftragsverarbeitung zu verifizieren.",
     "analytics_heading": "Reichweitenmessung (Vercel Analytics)",
     "analytics_body": "Zur Reichweitenmessung nutzen wir Vercel Analytics in der cookielosen Variante. Es werden keine Cookies gesetzt und keine geräteübergreifenden Profile gebildet; die Auswertung erfolgt aggregiert. Rechtsgrundlage ist das berechtigte Interesse an einer datensparsamen Reichweitenmessung (Art. 6 Abs. 1 lit. f DSGVO).",
     "account_heading": "Konto & Anmeldung",
-    "account_body": "Zum Abstimmen legst du ein Konto mit deiner E-Mail-Adresse an. Die Anmeldung erfolgt passwortlos: Wir senden dir einen einmaligen Anmeldelink per E-Mail. Gespeichert werden deine E-Mail-Adresse sowie technische Anmeldedaten (Sitzungen). Rechtsgrundlage ist die Erfüllung des von dir angeforderten Dienstes – die Abstimmungsfunktion (Art. 6 Abs. 1 lit. b DSGVO). Nach erfolgreicher Anmeldung wird ein technisch notwendiges Sitzungs-Cookie gesetzt, das dich angemeldet hält; es dient ausschließlich der Anmeldung und keiner Reichweitenmessung. Den Versand der Anmeldelinks übernimmt unser E-Mail-Dienstleister als Auftragsverarbeiter; mit ihm besteht ein Vertrag zur Auftragsverarbeitung. Du kannst die Löschung deines Kontos jederzeit über die im Impressum genannte Kontaktadresse verlangen.",
-    "voting_heading": "Abstimmungen",
-    "voting_body": "Stimmst du über eine Geschichte ab, wird deine Stimme deinem Konto zugeordnet gespeichert, um sicherzustellen, dass pro Konto und Geschichte nur einmal abgestimmt wird. Es werden keine IP-Adressen zur Abstimmung gespeichert. Rechtsgrundlage ist die Erfüllung des von dir angeforderten Dienstes (Art. 6 Abs. 1 lit. b DSGVO).",
+    "account_body": "Für Bewertungen und Kommentare legst du ein Konto mit deiner E-Mail-Adresse an. Die Anmeldung erfolgt passwortlos über einen einmaligen Anmeldelink. Gespeichert werden E-Mail-Adresse und technische Sitzungsdaten. Das notwendige Sitzungs-Cookie dient ausschließlich der Anmeldung. Den Versand übernimmt ein E-Mail-Dienstleister als Auftragsverarbeiter. Du kannst die Löschung deines Kontos über die im Impressum genannte Kontaktadresse verlangen.",
+    "voting_heading": "Bewertungen und Kommentare",
+    "voting_body": "Qualitätsbewertungen und Kommentare werden deinem Konto zugeordnet, damit pro Zusammenfassung nur eine aktive Bewertung gilt und du eigene Kommentare bearbeiten oder löschen kannst. Share-Aktionen werden nur inhaltsbezogen nach Kanal gespeichert, ohne Konto-, IP- oder User-Agent-Zuordnung.",
     "rights_heading": "Deine Rechte",
     "rights_body": "Du hast das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung, ein Widerspruchsrecht gegen Verarbeitungen auf Grundlage berechtigten Interesses sowie ein Recht auf Datenübertragbarkeit. Außerdem steht dir ein Beschwerderecht bei einer Datenschutz-Aufsichtsbehörde zu. Wende dich für die Wahrnehmung deiner Rechte an die im Impressum genannte Kontaktadresse."
   }

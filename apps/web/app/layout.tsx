@@ -3,7 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Inter } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, getTranslations } from "next-intl/server";
+import { getMessages } from "next-intl/server";
 import { Suspense } from "react";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
@@ -25,12 +25,10 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("hero");
-
-  const title = `kebab.news — ${t("tagline")}`;
-  const description = `${t("tagline")} ${t("tagline_accent")}`;
-
+export function generateMetadata(): Metadata {
+  const title = "kebab.news — We wrapped the news.";
+  const description =
+    "Viele Quellen, eine verständliche Zusammenfassung. Unterschiede, Unsicherheiten und Framing transparent.";
   return {
     title,
     description,

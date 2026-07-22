@@ -1,104 +1,73 @@
 # kebab.news
 
-> **Eine Geschichte. Eine neutrale Fassung. Alle Quellen sichtbar.**
+> **Viele Quellen. Eine verständliche Zusammenfassung. Alle Unterschiede transparent.**
 
-kebab.news is an **information tool**, not a news outlet. It takes the day's German news stories, shows how outlets across the political spectrum frame them, and produces **one neutral, automatically rewritten version per story** — with every original outlet article linked underneath as receipts.
+kebab.news clusters reporting about the same event into a readable German Story Summary. It does not promise neutrality. Instead, it exposes evidence, uncertainty, disagreements, framing choices, original sources and corrections.
 
-It is not run by journalists and it is not a publication. It's a tool that makes framing and bias visible, and offers a neutral reading of the same story next to the originals.
+## Product
 
----
+- `/` — current published Story Summaries
+- `/artikel/[slug]` — short and long summary, sourced facts, open questions, source differences, interactive framing notes, original sources, quality rating, sharing and comments
+- `/radar` — compare the source coverage behind story clusters
+- `/lernen` — short lessons about bias, framing and source literacy
+- `/methodik` — public methodology and limitations
+- `/redaktion` — server-authorized review dashboard for moderators, editors and admins
 
-## Our stance
+Story selection is a system/editorial concern. Readers do not vote on which topics receive coverage; authenticated readers rate the quality of published summaries and can contribute contextual comments.
 
-We don't promise truth. The tool offers **one consistent, neutrally-worded version of each story**, plus the original outlet coverage in full sight. If the rewrite reads differently than what taz, FAZ, or Welt published, you can click through and check — the linked originals are what's authoritative.
+## Architecture
 
-Every generated article carries a visible disclaimer: *"KI-generierte Zusammenfassung. Ungeprüft."*
+- **Web:** Next.js App Router, TypeScript, Tailwind CSS, next-intl
+- **Data:** Postgres, Drizzle ORM and pgvector
+- **Auth:** Better Auth passwordless magic links
+- **Worker:** long-running Bun process for RSS ingest, embeddings, clustering, framing analysis and structured summary generation
+- **AI seams:** Voyage embeddings and Claude structured outputs
+- **Quality:** Vitest, TypeScript and Biome
 
-> *Neutralität durch Rewriting. Transparenz durch Quellenangabe.*
+The structured summary contract lives in `packages/core/src/story-summary.ts`. Important module seams, versioning and safety decisions are documented in [`docs/architecture/product-mvp.md`](docs/architecture/product-mvp.md).
 
----
+## Trust and safety
 
-## How it works
+- Original sources stay visible and linked.
+- AI output is JSON-schema constrained and Zod validated before persistence.
+- Imported source text is untrusted input; embedded instructions never override the worker prompt.
+- Public story reads require a publication timestamp; drafts remain private.
+- User content is validated plaintext and rendered without raw HTML.
+- Share analytics store only summary, channel and timestamp.
+- The current pipeline imports RSS headlines and teasers, not full article bodies.
 
-### 1. It collects what German outlets publish
-Scheduled ingest pulls headlines and teasers from ~25 outlets spanning left → public broadcasters (taz, SZ, FAZ, Welt, NZZ, Junge Freiheit, Nius, tagesschau, and more). Articles are clustered into stories using semantic similarity, so "the same news" from different outlets ends up in one group regardless of how each outlet headlined it.
+Every generated Story Summary carries the disclosure **“KI-generierte Zusammenfassung. Ungeprüft.”** This is transparency, not legal immunity or a quality guarantee.
 
-### 2. It annotates framing on the source headlines
-AI flags loaded language, emotional triggers, presuppositions, euphemisms, and omissions — directly on each outlet's headline. The original headline stays visible; the annotation explains *why* the framing differs.
-
-### 3. Readers vote on what gets rewritten
-The radar shows the day's top clusters. Readers vote on which stories deserve a full neutral rewrite. One vote per IP per day per story. The winning story of the day becomes the target.
-
-### 4. It rewrites the winner, neutrally
-For the selected story, the tool takes the headlines + teasers from every outlet that covered it, feeds them through Claude with a strict neutral-German rewrite prompt, and produces one headline + one body (target length set in `src/lib/constants.ts`). Statements about identifiable people are attributed to their source and phrased in the subjunctive ("laut X"), never asserted as the tool's own fact. The output is published at `/artikel/[slug]`. It deliberately doesn't scrape article bodies — same pattern as Ground News.
-
-### 5. Sources stay visible
-Every generated article has a "Quellen" section underneath the rewrite — every original outlet article, its lean label, its framing annotations, and a link out. If the rewrite seems off, you can check.
-
----
-
-## Tech stack
-
-- **Framework:** [Next.js](https://nextjs.org/) (App Router, TypeScript)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/)
-- **i18n:** [next-intl](https://next-intl.dev/) — German only for now; the plumbing stays so other languages can be added later
-- **Database:** [Neon](https://neon.tech/) Postgres + [Drizzle ORM](https://orm.drizzle.team/) + `pgvector`
-- **Scheduled jobs:** Vercel Cron
-- **AI — embeddings:** [Voyage AI](https://www.voyageai.com/) (`voyage-3-lite`, 512 dims) for story clustering
-- **AI — framing annotation + neutral rewriting:** [Claude](https://www.anthropic.com/) (`claude-opus-4-7`)
-- **Hosting:** [Vercel](https://vercel.com/)
-- **Tooling:** [Bun](https://bun.sh/) (managed via [mise](https://mise.jdx.dev/)), [Biome](https://biomejs.dev/), [Vitest](https://vitest.dev/)
-
-Dependency versions live in `package.json` / `mise.toml` — not in this README.
-
----
-
-## Run it locally
+## Local development
 
 ```bash
-mise install                    # installs the pinned Bun version
-mise exec -- bun install        # installs npm deps
-mise exec -- bun dev            # starts the dev server
+mise install
+mise exec -- bun install
+mise exec -- bun db:migrate
+mise exec -- bun dev
 ```
 
-Operator commands (v1 is manual on purpose):
+Operator commands:
 
 ```bash
-mise exec -- bun ingest:run                    # pull feeds, embed, cluster
-mise exec -- bun rewrite:run --story SLUG      # generate a neutral rewrite draft (+ annotate sources)
-mise exec -- bun rewrite:publish --story SLUG  # flip the draft to live
-mise exec -- bun seed:outlets                  # idempotent upsert of the outlet set
-mise exec -- bun db:reset                      # wipe ingested data (refuses non-dev DBs)
+mise exec -- bun ingest:run
+mise exec -- bun rewrite:run --story <story-slug>
+mise exec -- bun rewrite:publish --story <story-slug>
+mise exec -- bun seed:outlets
 ```
 
-Before declaring any change done:
+Before declaring a change ready:
 
 ```bash
-mise exec -- bun check:all      # imports, format, lint, typecheck
-mise exec -- bun run test       # vitest suite (NOT `bun test`)
+mise exec -- bun check:all
+mise exec -- bun run test
+mise exec -- bun run build
 ```
 
-> All commands run through `mise exec --`. Bare `bun` / `npm` / `pnpm` / `yarn` will use the wrong runtime. Tests run via `mise exec -- bun run test` (vitest) — `bun test` invokes Bun's native runner and reports false failures.
+Always run Bun through `mise exec --`; the repository pins its runtime version there.
 
----
+## Before public launch
 
-## A note on legal and bias
+The German legal posture needs professional review. In particular, verify the operating entity, press-law obligations, quote/snippet usage, SMTP and hosting processor agreements, privacy wording, account deletion flow and a named human moderation contact.
 
-kebab.news is positioned as an **information tool**, not a media publication — but the obligations attach to what the tool does, not to its label. Two honest disclaimers:
-
-- **Claude's "neutral" is its training data's neutral.** German AI rewrites lean toward the editorial style of public broadcasters and translated Anglosphere coverage. We don't pretend otherwise — the original outlet versions are always one click away.
-- **Generating rewrites about identifiable people can trigger German press-law obligations** (Presserecht, Sorgfaltspflicht). The disclaimer is required honesty; it is not legal immunity. The intent is to run the platform through a company so liability and finances sit with the legal entity rather than a private person — see the deployment notes before going public.
-
----
-
-## Open source & contributing
-
-kebab.news is MIT-licensed (see [`LICENSE`](LICENSE)) and developed in the open. We need developers, data analysts, journalists, and fact-checkers — especially anyone who has dealt with German media law, primary-source archives (Bundestag, Destatis, EUR-Lex), or NLP for German.
-
-- **Status:** vision & prototyping
-- **License:** MIT
-- **Contact:** see `CONTRIBUTING.md`
-
----
-
-*Made for German-speaking readers (DE / AT / CH) who want one neutral entry point into the day's news — with the original sources always one click away.*
+MIT licensed. See [CONTRIBUTING.md](CONTRIBUTING.md).
