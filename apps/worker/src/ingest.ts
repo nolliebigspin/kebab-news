@@ -210,7 +210,7 @@ async function ingestOutlet(outlet: Outlet, runId: string): Promise<OutletResult
 
   // Embed + cluster each new article. Framing annotation is deliberately NOT
   // done here — it's the expensive per-article Claude call, and only the
-  // stories that win the vote are ever shown with annotations, so annotation
+  // source-diverse stories selected for summaries are shown with annotations, so annotation
   // is deferred to the rewrite trigger (see runAutoRewrites / annotateStory).
   // Embedding (cheap Voyage call) + clustering (pure math) stay in ingest so
   // stories actually form.

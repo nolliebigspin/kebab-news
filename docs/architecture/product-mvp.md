@@ -13,7 +13,9 @@ kebab.news does not promise neutrality. Its public unit is a versioned **Story S
 
 ## Versioning
 
-`published_articles` remains the append-only summary-version table. `version`, `status`, `change_summary` and `correction_note` make updates auditable. `stories.published_article_id` points at the current public version. Older rows remain available to the editorial workflow.
+`published_articles` remains the append-only summary-version table. `version`, `status`, `change_summary` and `correction_note` make updates auditable. Generated updates compare themselves with the current public version and record the newly added information in `change_summary`. `stories.published_article_id` is the only public version; older rows remain available to the editorial workflow. The public URL uses the stable `stories.slug`, independent of version-internal slugs. `summary_sources` freezes the exact article receipts for each new version so later cluster changes cannot rewrite its evidence. Rows created before receipts existed use one best-effort article per persisted outlet, never an article newer than the summary, and the UI labels that reconstruction as approximate.
+
+Publishing requires an explicit operator choice: either `--reviewed-by <name>` (which records `reviewed_at` and `reviewed_by`) or `--unreviewed` (which keeps the visible unreviewed state). Running the publish command alone never implies editorial review.
 
 ## Annotation anchoring
 
@@ -26,7 +28,7 @@ Annotations use a paragraph id plus exact quote and optional prefix/suffix conte
 - User content is plaintext, length-validated server-side and rendered through React escaping. No user HTML is accepted.
 - Rating and comment mutations require a server-side session and are rate limited.
 - Share analytics store only summary id, channel and timestamp; no account, IP or user agent.
-- Public reads require `published_at`; drafts are not reachable through the story loader.
+- Public reads require `published_at` and the story's current-version pointer; drafts and superseded versions are not reachable through the public loader.
 
 ## Editorial states
 

@@ -8,35 +8,48 @@ import { describe, expect, it } from "vitest";
 
 const SOURCES = [
   {
+    id: "source-welt",
     outletName: "Welt",
     outletSlug: "welt",
     lean: "right" as const,
     headline: "Welt-Schlagzeile",
     teaser: "Welt-Teaser",
     url: "https://welt.example/a",
+    sourceKind: "secondary" as const,
   },
   {
+    id: "source-taz",
     outletName: "taz",
     outletSlug: "taz",
     lean: "left" as const,
     headline: "taz-Schlagzeile",
     teaser: null,
     url: "https://taz.example/a",
+    sourceKind: "secondary" as const,
   },
   {
+    id: "source-tagesschau",
     outletName: "Tagesschau",
     outletSlug: "tagesschau",
     lean: "public" as const,
     headline: "Tagesschau-Schlagzeile",
     teaser: "Sachlicher Teaser",
     url: "https://tagesschau.example/a",
+    sourceKind: "secondary" as const,
   },
 ];
 
 const STRUCTURED_SECTIONS = {
+  change_summary: null,
   short_summary: "Die wichtigsten Entwicklungen in Kürze.",
   body: [{ id: "overview", text: "Der Bundestag hat über den Haushalt beraten." }],
-  confirmed_facts: [{ text: "Die Beratung fand statt.", source_ids: ["taz"], confidence: "high" }],
+  confirmed_facts: [
+    {
+      text: "Die Beratung fand statt.",
+      source_ids: ["source-taz", "source-welt"],
+      confidence: "high",
+    },
+  ],
   uncertainties: [],
   differences: [],
   annotations: [],
@@ -63,9 +76,9 @@ describe("buildUserMessage", () => {
 
   it("includes every outlet with its lean tag", () => {
     const msg = buildUserMessage("X", SOURCES);
-    expect(msg).toContain("### Welt (right, source_id: welt)");
-    expect(msg).toContain("### taz (left, source_id: taz)");
-    expect(msg).toContain("### Tagesschau (public, source_id: tagesschau)");
+    expect(msg).toContain("### Welt (right, secondary, source_id: source-welt)");
+    expect(msg).toContain("### taz (left, secondary, source_id: source-taz)");
+    expect(msg).toContain("### Tagesschau (public, secondary, source_id: source-tagesschau)");
   });
 
   it("includes the teaser when present and omits when null", () => {
@@ -88,6 +101,17 @@ describe("buildUserMessage", () => {
     const msg = buildUserMessage("X", SOURCES);
     expect(msg).toContain("JSON");
     expect(msg).toContain("strukturierten Format");
+  });
+
+  it("gives update generations the previous version as comparison context", () => {
+    const msg = buildUserMessage("X", SOURCES, {
+      headline: "Bisherige Überschrift",
+      shortSummary: "Bisherige Kurzfassung.",
+      body: "Bisheriger Langtext.",
+    });
+
+    expect(msg).toContain("Bisherige Überschrift");
+    expect(msg).toContain("welche neuen Informationen");
   });
 });
 
@@ -160,5 +184,76 @@ describe("validateRewriteSources", () => {
     });
 
     expect(validateRewriteSources(parsed, SOURCES)).toBe(true);
+  });
+
+  it("requires two independent outlets unless the sole source is primary", () => {
+    const parsed = RewriteSchema.parse({
+      neutral_headline: "h",
+      neutral_body: "b",
+      ...STRUCTURED_SECTIONS,
+      confirmed_facts: [
+        { text: "Nur einmal berichtet", source_ids: ["source-taz"], confidence: "high" },
+      ],
+    });
+
+    expect(validateRewriteSources(parsed, SOURCES)).toBe(false);
+    const duplicatedPublisher = RewriteSchema.parse({
+      neutral_headline: "h",
+      neutral_body: "b",
+      ...STRUCTURED_SECTIONS,
+      confirmed_facts: [
+        {
+          text: "Zwei Artikel desselben Publishers",
+          source_ids: ["source-taz", "source-taz-update"],
+          confidence: "high",
+        },
+      ],
+    });
+    expect(
+      validateRewriteSources(duplicatedPublisher, [
+        ...SOURCES,
+        { ...SOURCES[1], id: "source-taz-update" },
+      ])
+    ).toBe(false);
+    expect(
+      validateRewriteSources(parsed, [
+        SOURCES[0],
+        { ...SOURCES[1], sourceKind: "primary" },
+        SOURCES[2],
+      ])
+    ).toBe(true);
+  });
+
+  it("requires annotation evidence quotes to occur in the cited source", () => {
+    const annotation = {
+      paragraph_id: "overview",
+      quote: "Bundestag",
+      category: "word-choice",
+      title: "Wortwahl",
+      explanation: "Die Formulierung kann einen Akzent setzen.",
+      possible_effect: "Ein Aspekt kann stärker wirken.",
+      alternatives: [],
+      evidence: [{ source_id: "source-welt", quote: "frei erfundenes Zitat" }],
+      confidence: "medium" as const,
+      origin: "automatic" as const,
+      review_status: "needs_review" as const,
+    };
+    const invented = RewriteSchema.parse({
+      neutral_headline: "h",
+      neutral_body: "b",
+      ...STRUCTURED_SECTIONS,
+      annotations: [annotation],
+    });
+    expect(validateRewriteSources(invented, SOURCES)).toBe(false);
+
+    const exact = RewriteSchema.parse({
+      neutral_headline: "h",
+      neutral_body: "b",
+      ...STRUCTURED_SECTIONS,
+      annotations: [
+        { ...annotation, evidence: [{ source_id: "source-welt", quote: "Welt-Teaser" }] },
+      ],
+    });
+    expect(validateRewriteSources(exact, SOURCES)).toBe(true);
   });
 });

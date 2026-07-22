@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { FiAlertCircle, FiCheckCircle, FiExternalLink, FiHelpCircle } from "react-icons/fi";
 import { AnnotatedText } from "@/components/AnnotatedText";
@@ -26,7 +26,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const data = await loadPublishedStory(slug);
   if (!data) return { title: "Story nicht gefunden — kebab.news" };
-  const canonical = `${BASE_URL}/artikel/${slug}`;
+  const canonical = `${BASE_URL}/artikel/${data.story.slug}`;
   const description = data.shortSummary.slice(0, 155);
   return {
     title: `${data.summary.neutralHeadline} — kebab.news`,
@@ -51,11 +51,13 @@ function SourceRefs({
   sources,
 }: {
   ids: string[];
-  sources: Array<{ outletSlug: string; outletName: string }>;
+  sources: Array<{ id: string; outletName: string; outletSlug: string }>;
 }) {
   const names = [
     ...new Set(
-      sources.filter((source) => ids.includes(source.outletSlug)).map((source) => source.outletName)
+      sources
+        .filter((source) => ids.includes(source.id) || ids.includes(source.outletSlug))
+        .map((source) => source.outletName)
     ),
   ];
   return names.length > 0 ? (
@@ -69,13 +71,20 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
   const { slug } = await params;
   const data = await loadPublishedStory(slug);
   if (!data) notFound();
+  if (slug !== data.story.slug) permanentRedirect(`/artikel/${data.story.slug}`);
   const session = await getSession();
   const [rating, comments, tRadar] = await Promise.all([
     getSummaryRatingSnapshot(data.summary.id, session?.user.id),
     listComments(data.summary.id),
     getTranslations("radar"),
   ]);
-  const canonical = `${BASE_URL}/artikel/${slug}`;
+  const canonical = `${BASE_URL}/artikel/${data.story.slug}`;
+  const disclosureTitle =
+    data.summary.contentOrigin === "manual"
+      ? "Redaktionell erstellte Zusammenfassung."
+      : data.summary.reviewedAt && data.summary.reviewedBy
+        ? "KI-generierte Zusammenfassung. Redaktionell freigegeben."
+        : "KI-generierte Zusammenfassung. Ungeprüft.";
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
@@ -110,15 +119,17 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
           <p className="mt-6 max-w-3xl text-ink-soft text-lg leading-8">{data.shortSummary}</p>
           <div className="mt-7 flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[11px] text-ink-mute uppercase tracking-[0.1em]">
             <span>
-              Erstellt{" "}
-              <time dateTime={data.summary.rewrittenAt.toISOString()}>
-                {format(data.summary.rewrittenAt, "d. MMM yyyy, HH:mm", { locale: de })}
+              Veröffentlicht{" "}
+              <time dateTime={data.summary.publishedAt?.toISOString()}>
+                {data.summary.publishedAt
+                  ? format(data.summary.publishedAt, "d. MMM yyyy, HH:mm", { locale: de })
+                  : "—"}
               </time>
             </span>
             <span aria-hidden>·</span>
             <span>
-              Zuletzt aktualisiert{" "}
-              {format(data.story.lastSeenAt, "d. MMM yyyy, HH:mm", { locale: de })}
+              Zusammenfassung aktualisiert{" "}
+              {format(data.summary.rewrittenAt, "d. MMM yyyy, HH:mm", { locale: de })}
             </span>
             <span aria-hidden>·</span>
             <span>
@@ -142,9 +153,9 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
             className="rounded-xl border border-warn/35 bg-warn-wash p-4 text-ink-soft text-sm"
             aria-label="Transparenzhinweis"
           >
-            <strong className="text-ink">KI-generierte Zusammenfassung. Ungeprüft.</strong> Sie ist
-            eine quellengebundene Einordnung, keine Garantie auf Neutralität oder Wahrheit.
-            Unsicherheiten und Unterschiede werden separat ausgewiesen.
+            <strong className="text-ink">{disclosureTitle}</strong> Sie ist eine quellengebundene
+            Einordnung, keine Garantie auf Neutralität oder Wahrheit. Prüfstatus, Unsicherheiten und
+            Unterschiede werden separat ausgewiesen.
           </aside>
 
           <section aria-labelledby="summary-heading">
@@ -162,9 +173,10 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
               paragraphs={data.paragraphs}
               annotations={data.annotations}
               sources={data.sources.map((source) => ({
-                id: source.outletSlug,
+                id: source.id,
                 name: source.outletName,
                 headline: source.headline,
+                url: source.url,
               }))}
             />
           </section>
@@ -265,6 +277,14 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
               Viele Quellen sind kein automatischer Qualitätsbeweis. Entscheidend ist, was eine
               Quelle tatsächlich belegt und ob sie Primärinformationen enthält.
             </p>
+            {data.sourceReceiptMode === "legacy_best_effort" && (
+              <p className="mt-3 rounded-lg border border-warn/30 bg-warn-wash p-3 text-ink-soft text-sm">
+                Transparenzhinweis: Diese ältere Version stammt aus der Zeit vor exakten
+                Quellenbelegen. Angezeigt wird pro damals gespeichertem Publisher der zeitlich
+                passendste Beitrag; die ursprüngliche Auswahl lässt sich nicht vollständig
+                rekonstruieren.
+              </p>
+            )}
             <ol className="mt-6 space-y-4">
               {data.sources.map((source) => {
                 const parsed = AnnotationsSchema.safeParse(
@@ -291,6 +311,11 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
                         <span className="text-ink-mute text-xs">
                           {source.language.toUpperCase()}
                         </span>
+                        {source.sourceKind === "primary" && (
+                          <span className="rounded-full bg-brand-wash px-2 py-0.5 text-brand-ink text-xs">
+                            Primärquelle
+                          </span>
+                        )}
                       </div>
                       <h3 className="mt-3 font-display text-lg leading-snug group-hover:text-brand-ink">
                         <AnnotatedText
@@ -298,9 +323,9 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
                           annotations={parsed.success ? parsed.data : []}
                         />
                       </h3>
-                      {(source.excerpt || source.teaser) && (
+                      {source.teaser && (
                         <blockquote className="mt-3 border-line border-l-2 pl-3 text-ink-soft text-sm leading-6">
-                          „{(source.excerpt || source.teaser)?.slice(0, 280)}“
+                          „{source.teaser.slice(0, 280)}“
                         </blockquote>
                       )}
                       <div className="mt-3 flex flex-wrap gap-2 text-ink-mute text-xs">

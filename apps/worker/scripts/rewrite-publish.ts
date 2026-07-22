@@ -10,8 +10,13 @@ import "@kebab/env/load";
  * warning. If there's a never-published older draft sitting around, we
  * deliberately publish the newest one only — older drafts stay as history.
  *
+ * Publishing requires an explicit review decision. Use --reviewed-by with the
+ * editor name after review, or --unreviewed to publish with the visible
+ * "Ungeprüft" disclosure.
+ *
  * Usage:
- *   mise exec -- bun scripts/rewrite-publish.ts --story <story-slug>
+ *   mise exec -- bun scripts/rewrite-publish.ts --story <story-slug> --reviewed-by <name>
+ *   mise exec -- bun scripts/rewrite-publish.ts --story <story-slug> --unreviewed
  */
 
 import { db, publishedArticles, stories } from "@kebab/db";
@@ -25,6 +30,21 @@ const storySlug = (() => {
   console.error("usage: bun scripts/rewrite-publish.ts --story <story-slug>");
   process.exit(1);
 })();
+
+function readArg(name: string): string | null {
+  const inline = process.argv.find((arg) => arg.startsWith(`--${name}=`));
+  if (inline) return inline.slice(name.length + 3).trim() || null;
+  const index = process.argv.indexOf(`--${name}`);
+  return index >= 0 ? (process.argv[index + 1]?.trim() ?? null) : null;
+}
+
+const reviewedBy = readArg("reviewed-by");
+const publishUnreviewed = process.argv.includes("--unreviewed");
+
+if (Boolean(reviewedBy) === publishUnreviewed) {
+  console.error("Choose exactly one review state: --reviewed-by <name> or --unreviewed");
+  process.exit(1);
+}
 
 async function main() {
   const found = await db.select().from(stories).where(eq(stories.slug, storySlug)).limit(1);
@@ -54,14 +74,26 @@ async function main() {
   }
 
   const now = new Date();
-  await db
-    .update(publishedArticles)
-    .set({ publishedAt: now, status: "published" })
-    .where(eq(publishedArticles.id, draft.id));
+  await db.transaction(async (tx) => {
+    if (story.publishedArticleId && story.publishedArticleId !== draft.id) {
+      await tx
+        .update(publishedArticles)
+        .set({ status: "archived" })
+        .where(eq(publishedArticles.id, story.publishedArticleId));
+    }
+    await tx
+      .update(publishedArticles)
+      .set({
+        publishedAt: now,
+        reviewedAt: reviewedBy ? now : null,
+        reviewedBy,
+        status: reviewedBy ? (draft.version > 1 ? "updated" : "published") : "needs_review",
+      })
+      .where(eq(publishedArticles.id, draft.id));
+    await tx.update(stories).set({ publishedArticleId: draft.id }).where(eq(stories.id, story.id));
+  });
 
-  await db.update(stories).set({ publishedArticleId: draft.id }).where(eq(stories.id, story.id));
-
-  console.log(`✓ Published: /articles/${draft.slug}`);
+  console.log(`✓ Published: /artikel/${story.slug}`);
   console.log(`  story:  ${storySlug}`);
   console.log(`  at:     ${now.toISOString()}`);
 }

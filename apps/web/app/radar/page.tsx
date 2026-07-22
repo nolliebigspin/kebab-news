@@ -28,23 +28,6 @@ type StoryCard = {
 };
 
 async function loadStories(filters: RadarFilterState): Promise<StoryCard[]> {
-  // Live published rewrite per story (published_at NOT NULL). Pre-aggregated so
-  // the join stays 1:1 even if a story ever has multiple live rows — we link to
-  // the most recently published one. LEFT JOIN keeps stories without a rewrite.
-  const pubLive = db
-    .select({
-      storyId: publishedArticles.storyId,
-      slug: sql<
-        string | null
-      >`(array_agg(${publishedArticles.slug} ORDER BY ${publishedArticles.publishedAt} DESC))[1]`.as(
-        "published_slug"
-      ),
-    })
-    .from(publishedArticles)
-    .where(sql`${publishedArticles.publishedAt} IS NOT NULL`)
-    .groupBy(publishedArticles.storyId)
-    .as("pub_live");
-
   // Row-level WHERE filters: date window (by first appearance) + free-text
   // search across the story label and every article's headline/teaser.
   const where: SQL[] = [];
@@ -81,14 +64,16 @@ async function loadStories(filters: RadarFilterState): Promise<StoryCard[]> {
       firstSeenAt: stories.firstSeenAt,
       lastSeenAt: stories.lastSeenAt,
       leans: sql<OutletLean[]>`array_agg(DISTINCT ${outlets.politicalLean})`,
-      publishedSlug: pubLive.slug,
+      publishedSlug: sql<
+        string | null
+      >`case when ${publishedArticles.publishedAt} is not null then ${stories.slug} else null end`,
     })
     .from(stories)
     .innerJoin(articles, sql`${articles.storyId} = ${stories.id}`)
     .innerJoin(outlets, sql`${outlets.id} = ${articles.outletId}`)
-    .leftJoin(pubLive, sql`${pubLive.storyId} = ${stories.id}`)
+    .leftJoin(publishedArticles, sql`${publishedArticles.id} = ${stories.publishedArticleId}`)
     .where(where.length > 0 ? and(...where) : undefined)
-    .groupBy(stories.id, pubLive.slug)
+    .groupBy(stories.id, publishedArticles.id)
     .having(and(...having))
     .orderBy(...orderBy)
     .limit(50);

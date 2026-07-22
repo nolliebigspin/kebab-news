@@ -30,6 +30,8 @@ export default async function EditorialPage() {
         status: publishedArticles.status,
         sourceCount: publishedArticles.sourceCount,
         rewrittenAt: publishedArticles.rewrittenAt,
+        reviewedAt: publishedArticles.reviewedAt,
+        reviewedBy: publishedArticles.reviewedBy,
       })
       .from(publishedArticles)
       .orderBy(desc(publishedArticles.rewrittenAt))
@@ -74,6 +76,7 @@ export default async function EditorialPage() {
                 <th className="p-3">Status</th>
                 <th className="p-3">Version</th>
                 <th className="p-3">Quellen</th>
+                <th className="p-3">Prüfung</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line-soft">
@@ -97,6 +100,11 @@ export default async function EditorialPage() {
                   </td>
                   <td className="p-3 tabular-nums">{summary.version}</td>
                   <td className="p-3 tabular-nums">{summary.sourceCount}</td>
+                  <td className="p-3 text-ink-soft text-xs">
+                    {summary.reviewedAt && summary.reviewedBy
+                      ? `${summary.reviewedBy} · ${summary.reviewedAt.toLocaleString("de-DE")}`
+                      : "Ungeprüft"}
+                  </td>
                 </tr>
               ))}
             </tbody>

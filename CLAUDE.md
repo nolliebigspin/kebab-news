@@ -43,7 +43,7 @@ The learning area teaches bias, framing and source literacy through concrete exa
 
 We deliberately do **not** scrape article bodies. Same pattern as Ground News: headlines + teasers carry most of the framing signal, and skipping body scraping removes the open DE legal question around derivative works while keeping paywalled outlets (NZZ, FAZ) in the spectrum. See §VII.
 
-The published Story Summary lives at `/artikel/[slug]` and carries the mandatory disclosure *"KI-generierte Zusammenfassung. Ungeprüft."* Original sources are always linked.
+The published Story Summary lives at `/artikel/[slug]` and always discloses both its origin (AI or manual) and its actual review state. A summary is shown as editorially reviewed only when `reviewed_at` and `reviewed_by` were set by an explicit publish decision. Original sources are always linked.
 
 `/artikel` is the accumulating archive of published summaries, newest first.
 
@@ -82,7 +82,7 @@ Source headline annotations retain the legacy offset format. Story Summary annot
 4. Validate headline/body, short summary, sourced facts, uncertainties, differences and annotations with JSON Schema plus Zod. On parse failure, abort — never persist partial output.
 5. Insert into `published_articles` as `published_at = NULL` (draft).
 
-`bun rewrite:publish --story <slug>` flips `published_at = now()` on the latest draft and back-links `stories.published_article_id`, making it visible at `/artikel/[slug]`.
+`bun rewrite:publish --story <slug> --reviewed-by <name>` publishes the latest reviewed draft and records the review receipt. `--unreviewed` is the explicit alternative. The command back-links `stories.published_article_id`, making that version visible at `/artikel/[slug]`.
 
 ### 5. Story surface
 
@@ -117,11 +117,12 @@ Current tables (in `packages/db/src/schema.ts`):
 
 - `outlets` — id, slug, name, political_lean (enum), feed_url, homepage_url, created_at.
 - `stories` — id, slug, label (= first article's headline, used as fallback before rewrite exists), first_seen_at, last_seen_at, centroid (vector 512), article_count.
-- `articles` — id, outlet_id (FK), url (unique), headline, teaser, headline_annotations (jsonb), teaser_annotations (jsonb), published_at, fetched_at, embedding (vector 512), story_id (FK nullable).
+- `articles` — source article metadata, RSS headline/teaser, language, primary/secondary kind, annotations, publication time, embedding and story assignment.
 
 Summary and interaction tables:
 
 - `published_articles` — append-only Story Summary versions. Alongside legacy headline/body it stores short summary, paragraph ids, facts, uncertainties, differences, annotations, status, origin and correction metadata.
+- `summary_sources` — immutable article receipts for one summary version; evidence ids in structured content reference these article ids.
 - `summary_ratings` — one `-1|1` quality rating per `(summary_id, user_id)` plus optional structured downvote reason.
 - `comments`, `comment_helpful_votes`, `comment_reports` — threaded plaintext discussion with ownership, moderation and reporting.
 - `share_events` — summary id, channel and timestamp only; no account, IP or user agent.
@@ -147,7 +148,7 @@ These are non-negotiable. Violating them is the most common mistake — see Sect
 4. **DB migrations are generated, never hand-edited.** Run `mise exec -- bun db:generate` after schema changes, then `mise exec -- bun db:migrate`. Do not edit the generated SQL files in `packages/db/drizzle/` by hand. The metadata snapshots in `packages/db/drizzle/meta/` are also generated; the only time you touch them is to repair a known-broken chain (see §IX).
 5. **No AI calls in the web app.** All AI work runs in the worker or operator commands. Page renders and reader-interaction routes never call a model.
 6. **Rewrite output is structured.** Claude is called with `output_config.format: { type: "json_schema", ... }`. The output is Zod-validated before persistence. On parse failure, the rewrite is aborted and logged — never saved as partial garbage.
-7. **Disclaimer is mandatory.** Every `/artikel/[slug]` page renders the *"KI-generierte Zusammenfassung. Ungeprüft."* banner above the rewritten content. Removing it requires editing this rule first.
+7. **Generation and review disclosure is mandatory.** Every `/artikel/[slug]` page states whether the summary is AI-generated or manual and whether it has been editorially reviewed. Never present generated content as reviewed without both `reviewed_at` and `reviewed_by`.
 8. **Original sources are always visible.** Every published article has a "Quellen" section listing every outlet that fed the rewrite, with link-outs. No rewrite ships without sources.
 9. **No body scraping.** v1 uses only RSS headlines + teasers — for the rewrite input, for the radar UI, for everything. Same pattern as Ground News. Removing this constraint requires editing this rule and reopening the DE press-law question in §VII first.
 10. **German only (for now).** Reusable interface strings belong in `messages/de.json`; long page-specific editorial copy may be colocated with its German-only route. next-intl stays wired for a later locale expansion.
@@ -161,7 +162,7 @@ The agent should flag these before merging anything that touches them. **The leg
 
 - **"Tool, not portal" is a positioning choice, not a legal shield.** We present kebab.news as an information tool, but Presserecht / Persönlichkeitsrecht attach to what the tool *does* — publishing statements about named persons — not to the label. Don't oversell the framing as if it removed the obligations.
 - **The real exposure is wrong AI statements about identifiable people.** Generating coverage of named persons/organizations triggers Sorgfaltspflicht. Mitigation in the product: the rewrite prompt (`REWRITE_SYSTEM_PROMPT`, `REWRITE_PROMPT_VERSION` v2+) requires source-attributed, subjunctive phrasing ("laut X") for any claim about a person and forbids inventing facts. Keep this constraint when editing the prompt.
-- **Disclaimer alone does not eliminate liability.** "KI-generierte Zusammenfassung. Ungeprüft." is required honesty but it does not get us off the hook for factually wrong statements about identifiable people.
+- **Disclosure or review alone does not eliminate liability.** A visible generation/review status does not remove responsibility for factually wrong statements about identifiable people.
 - **Run it through a company, not personally.** The intent is to operate the platform via the operator's company (e.g. UG/GmbH) so press-law liability and finances sit with the legal entity rather than the operator privately. Until that's set up, the Impressum still names a private operator and personal liability stands — flag this before public livegang.
 - **We don't scrape article bodies.** RSS headlines + teasers only. This removes the open DE derivative-work question, keeps paywalled outlets (NZZ, FAZ) in the spectrum, and matches Ground News' pattern. If body scraping is ever reintroduced, the legal question reopens and requires media-lawyer review before any `/artikel/[slug]` is publicly deployed.
 - **Press snippet right (§ 87f ff. UrhG / Art. 15 DSM).** Headlines are generally unprotected; full RSS teasers may exceed "sehr kurze Auszüge". Ground News sits outside the EU regime — we can't copy it 1:1. If a verlag complains, the lever is to shorten or stop displaying teasers (teasers can stay internal for clustering/AI without being shown).
@@ -178,7 +179,7 @@ The agent should flag these before merging anything that touches them. **The leg
 - **Root scripts delegate into workspaces** via `bun --filter`. Run them from the repo root (`mise exec -- bun <script>`); the underlying script lives in `apps/worker` or `packages/db`.
   - `bun ingest:run` — one manual ingest pass (→ `@kebab/worker ingest:once`). Automatic ingest is the long-running worker (`bun worker`, or the deployed container).
   - `bun rewrite:run --story <slug>` — generate a draft rewrite for one story.
-  - `bun rewrite:publish --story <slug>` — flip the latest draft to live.
+  - `bun rewrite:publish --story <slug> --reviewed-by <name>` — publish a reviewed draft; use `--unreviewed` only as an explicit alternative.
   - `bun seed:outlets` — idempotent upsert of the outlet set (currently 25, spanning left → public; the canonical list lives in `apps/worker/scripts/seed-outlets.ts`). Re-run after `db:reset --full`.
   - `bun db:reset` — wipe ingested data (articles, stories, votes, published_articles). Refuses non-dev DBs without `--force` and demands typed confirmation. `--full` also wipes outlets.
   - `bun worker` — start the long-running ingest worker (in-process scheduler). `RUN_ON_BOOT=true` runs one pass immediately on start.

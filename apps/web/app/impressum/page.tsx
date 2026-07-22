@@ -50,6 +50,11 @@ export default async function ImpressumPage() {
           <h2 className="mb-2 font-display text-lg">{t("ai_heading")}</h2>
           <p className="text-ink-soft">{t("ai_body")}</p>
         </section>
+
+        <section>
+          <h2 className="mb-2 font-display text-lg">{t("moderation_heading")}</h2>
+          <p className="text-ink-soft">{t("moderation_body")}</p>
+        </section>
       </div>
     </article>
   );

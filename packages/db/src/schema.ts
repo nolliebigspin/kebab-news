@@ -29,6 +29,10 @@ export const outletLeanValues = [
 export const outletLeanEnum = pgEnum("outlet_lean", outletLeanValues);
 export type OutletLean = (typeof outletLeanValues)[number];
 
+export const sourceKindValues = ["primary", "secondary"] as const;
+export const sourceKindEnum = pgEnum("source_kind", sourceKindValues);
+export type SourceKind = (typeof sourceKindValues)[number];
+
 export const userRoleValues = ["user", "moderator", "editor", "admin"] as const;
 export const userRoleEnum = pgEnum("user_role", userRoleValues);
 export type UserRole = (typeof userRoleValues)[number];
@@ -120,7 +124,7 @@ export const articles = pgTable(
     headline: text("headline").notNull(),
     teaser: text("teaser"),
     language: text("language").notNull().default("de"),
-    relevantExcerpt: text("relevant_excerpt"),
+    sourceKind: sourceKindEnum("source_kind").notNull().default("secondary"),
     headlineAnnotations: jsonb("headline_annotations").notNull().default(sql`'[]'::jsonb`),
     teaserAnnotations: jsonb("teaser_annotations").notNull().default(sql`'[]'::jsonb`),
     publishedAt: timestamp("published_at", { withTimezone: true }).notNull(),
@@ -176,7 +180,7 @@ export const votes = pgTable(
  * AI-rewritten neutral version of a story. Created as a draft (published_at
  * NULL) by `bun rewrite:run`, flipped to live (published_at = now()) by
  * `bun rewrite:publish`. The source article bodies are NOT stored — only the
- * rewrite itself plus per-source slugs for receipts on /artikel/[slug].
+ * rewrite itself plus immutable article-level receipts on /artikel/[slug].
  *
  * `model` + `promptVersion` are stamped on every row so we can identify
  * outputs that came from an older prompt and re-run them if needed.
@@ -208,12 +212,32 @@ export const publishedArticles = pgTable(
     contentOrigin: text("content_origin").notNull().default("automatic"),
     changeSummary: text("change_summary"),
     correctionNote: text("correction_note"),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    reviewedBy: text("reviewed_by"),
     rewrittenAt: timestamp("rewritten_at", { withTimezone: true }).notNull().defaultNow(),
     publishedAt: timestamp("published_at", { withTimezone: true }),
   },
   (t) => [
     index("published_articles_published_at_idx").on(t.publishedAt.desc()),
     index("published_articles_story_id_idx").on(t.storyId),
+  ]
+);
+
+/** Immutable receipt set for one concrete summary version. */
+export const summarySources = pgTable(
+  "summary_sources",
+  {
+    summaryId: uuid("summary_id")
+      .notNull()
+      .references(() => publishedArticles.id, { onDelete: "cascade" }),
+    articleId: uuid("article_id")
+      .notNull()
+      .references(() => articles.id, { onDelete: "restrict" }),
+    usedFor: text("used_for"),
+  },
+  (t) => [
+    uniqueIndex("summary_sources_unique").on(t.summaryId, t.articleId),
+    index("summary_sources_article_idx").on(t.articleId),
   ]
 );
 

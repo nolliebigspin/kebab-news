@@ -28,7 +28,7 @@ export default async function LandingPage() {
           </h1>
           <p className="mt-7 max-w-2xl text-ink-soft text-lg leading-8">
             kebab.news bündelt Berichte zu einer Story und zeigt, was belegt ist, was offen bleibt
-            und wo Medien unterschiedlich rahmen.
+            und wo Medien unterschiedlich framen.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
             <a

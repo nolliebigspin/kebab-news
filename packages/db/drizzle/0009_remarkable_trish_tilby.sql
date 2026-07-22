@@ -1,0 +1,1 @@
+ALTER TABLE "published_articles" ADD COLUMN "reviewed_by" text;

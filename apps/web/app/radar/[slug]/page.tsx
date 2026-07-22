@@ -58,9 +58,8 @@ async function loadStory(slug: string) {
     teaserAnnotations: parseAnnotations(r.teaserAnnotations),
   }));
 
-  // Look up the live published rewrite (if any) so we can link to /artikel.
-  // We don't follow stories.publishedArticleId — that pointer can be stale
-  // if a draft was deleted. Source of truth is publishedArticles.publishedAt.
+  // Look up the live published rewrite (if any) so we can link to its stable
+  // story URL under /artikel.
   let published: { slug: string; neutralHeadline: string } | null = null;
   if (story.publishedArticleId) {
     const pubRows = await db
@@ -73,7 +72,7 @@ async function loadStory(slug: string) {
       .where(eq(publishedArticles.id, story.publishedArticleId))
       .limit(1);
     if (pubRows.length > 0 && pubRows[0].publishedAt) {
-      published = { slug: pubRows[0].slug, neutralHeadline: pubRows[0].neutralHeadline };
+      published = { slug: story.slug, neutralHeadline: pubRows[0].neutralHeadline };
     }
   }
 

@@ -44,7 +44,12 @@ const validSummary = {
       explanation: "Die Bezeichnung übernimmt die Sprache der Regierung.",
       possible_effect: "Die Maßnahme kann dadurch innovativer wirken.",
       alternatives: ["Maßnahmenpaket", "Vorhaben"],
-      evidence_source_ids: ["source-a"],
+      evidence: [
+        {
+          source_id: "source-a",
+          quote: "Die Regierung bezeichnete das Vorhaben als neues Programm.",
+        },
+      ],
       confidence: "medium",
       origin: "automatic",
       review_status: "needs_review",

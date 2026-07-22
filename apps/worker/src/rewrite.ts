@@ -1,7 +1,6 @@
 /**
- * Shared rewrite logic, used by both the operator command
- * (`scripts/rewrite-run.ts`) and the worker's automatic vote-threshold
- * trigger (see `runAutoRewrites` below).
+ * Shared summary logic used by the operator command and the worker's
+ * source-diversity trigger (see `runAutoRewrites` below).
  *
  * Keeping it here means the auto-trigger and the manual command produce
  * identical drafts — same sources query, same Claude call, same persistence.
@@ -16,20 +15,22 @@ import {
   REWRITE_PROMPT_VERSION,
   type SourceItem,
 } from "@kebab/core";
-import { articles, db, outlets, publishedArticles, stories } from "@kebab/db";
-import { desc, eq, isNull, sql } from "drizzle-orm";
+import { articles, db, outlets, publishedArticles, stories, summarySources } from "@kebab/db";
+import { desc, eq, sql } from "drizzle-orm";
 
 export type StoryRow = typeof stories.$inferSelect;
 
 export async function loadSources(storyId: string): Promise<SourceItem[]> {
   return db
     .select({
+      id: articles.id,
       outletName: outlets.name,
       outletSlug: outlets.slug,
       lean: outlets.politicalLean,
       headline: articles.headline,
       teaser: articles.teaser,
       url: articles.url,
+      sourceKind: articles.sourceKind,
     })
     .from(articles)
     .innerJoin(outlets, eq(outlets.id, articles.outletId))
@@ -37,7 +38,7 @@ export async function loadSources(storyId: string): Promise<SourceItem[]> {
 }
 
 /**
- * Annotate framing language on a winning story's source headlines + teasers.
+ * Annotate framing language on a selected story's source headlines + teasers.
  *
  * Framing annotation used to run on every article during ingest, which burned
  * a lot of Claude tokens on articles that never get shown with annotations.
@@ -85,44 +86,72 @@ export async function rewriteStory(story: StoryRow): Promise<RewriteOutcome> {
   const sources = await loadSources(story.id);
   if (sources.length === 0) return { kind: "no-sources" };
 
-  // Annotate the sources now that this story has won — framing markings are
+  const previousRows = story.publishedArticleId
+    ? await db
+        .select({
+          headline: publishedArticles.neutralHeadline,
+          shortSummary: publishedArticles.shortSummary,
+          body: publishedArticles.neutralBody,
+        })
+        .from(publishedArticles)
+        .where(eq(publishedArticles.id, story.publishedArticleId))
+        .limit(1)
+    : [];
+  const previousSummary = previousRows[0] ?? null;
+
+  // Annotate the sources now that this story was selected — framing markings are
   // only ever shown for stories that reach a rewrite (radar detail + the
   // "Quellen" section on /artikel/[slug]), so this is the first time we need
   // them. Deferred from ingest to keep token cost bounded.
   await annotateStory(story.id);
 
-  const rewrite = await generateRewrite(story.label, sources);
+  const rewrite = await generateRewrite(story.label, sources, previousSummary);
   if (!rewrite) return { kind: "generation-failed" };
 
-  const draftSlug = generateStorySlug(rewrite.neutral_headline);
   const sourceOutletSlugs = [...new Set(sources.map((s) => s.outletSlug))].sort();
+  const versions = await db
+    .select({ latest: sql<number>`coalesce(max(${publishedArticles.version}), 0)::int` })
+    .from(publishedArticles)
+    .where(eq(publishedArticles.storyId, story.id));
+  const version = (versions[0]?.latest ?? 0) + 1;
+  const draftSlug = generateStorySlug(
+    `${rewrite.neutral_headline}-${story.id.slice(0, 8)}-v${version}`
+  );
 
-  await db.insert(publishedArticles).values({
-    storyId: story.id,
-    slug: draftSlug,
-    neutralHeadline: rewrite.neutral_headline,
-    neutralBody: rewrite.neutral_body,
-    shortSummary: rewrite.short_summary,
-    bodyParagraphs: rewrite.body,
-    confirmedFacts: rewrite.confirmed_facts,
-    uncertainties: rewrite.uncertainties,
-    sourceDifferences: rewrite.differences,
-    bodyAnnotations: rewrite.annotations,
-    sourceCount: sources.length,
-    sourceOutletSlugs,
-    model: REWRITE_MODEL,
-    promptVersion: REWRITE_PROMPT_VERSION,
-    status: "needs_review",
-    // publishedAt left NULL — this is a draft. Operator publishes manually.
+  await db.transaction(async (tx) => {
+    const inserted = await tx
+      .insert(publishedArticles)
+      .values({
+        storyId: story.id,
+        slug: draftSlug,
+        neutralHeadline: rewrite.neutral_headline,
+        neutralBody: rewrite.neutral_body,
+        shortSummary: rewrite.short_summary,
+        bodyParagraphs: rewrite.body,
+        confirmedFacts: rewrite.confirmed_facts,
+        uncertainties: rewrite.uncertainties,
+        sourceDifferences: rewrite.differences,
+        bodyAnnotations: rewrite.annotations,
+        changeSummary: version > 1 ? rewrite.change_summary : null,
+        sourceCount: sources.length,
+        sourceOutletSlugs,
+        model: REWRITE_MODEL,
+        promptVersion: REWRITE_PROMPT_VERSION,
+        version,
+        status: "needs_review",
+      })
+      .returning({ id: publishedArticles.id });
+    await tx
+      .insert(summarySources)
+      .values(sources.map((source) => ({ summaryId: inserted[0].id, articleId: source.id })));
   });
 
   return { kind: "saved", slug: draftSlug, headline: rewrite.neutral_headline };
 }
 
 /**
- * Source-diverse stories that do not yet have a draft or published summary.
- * Selection is a system/editorial concern; reader quality ratings never decide
- * what gets covered.
+ * Source-diverse stories without a summary, plus published stories whose
+ * cluster received newer sources. An existing draft suppresses duplicate work.
  */
 export async function findStoriesReadyForRewrite(): Promise<StoryRow[]> {
   const rows = await db
@@ -130,9 +159,17 @@ export async function findStoriesReadyForRewrite(): Promise<StoryRow[]> {
     .from(stories)
     .innerJoin(articles, eq(articles.storyId, stories.id))
     .leftJoin(publishedArticles, eq(publishedArticles.storyId, stories.id))
-    .where(isNull(publishedArticles.id))
     .groupBy(stories.id)
-    .having(sql`count(DISTINCT ${articles.outletId}) >= ${RADAR_MIN_OUTLETS}`)
+    .having(
+      sql`count(DISTINCT ${articles.outletId}) >= ${RADAR_MIN_OUTLETS}
+        and (
+          count(DISTINCT ${publishedArticles.id}) = 0
+          or (
+            ${stories.lastSeenAt} > max(${publishedArticles.rewrittenAt})
+            and count(*) filter (where ${publishedArticles.publishedAt} is null) = 0
+          )
+        )`
+    )
     .orderBy(desc(stories.lastSeenAt));
   return rows.map((r) => r.story);
 }
@@ -140,9 +177,8 @@ export async function findStoriesReadyForRewrite(): Promise<StoryRow[]> {
 export type AutoRewriteResult = { triggered: number; saved: number; failed: number };
 
 /**
- * Worker hook: rewrite every story that has earned it. Called once per ingest
- * pass. AI calls stay in the worker process (CLAUDE.md rule #5) — the web app
- * only records the votes that make a story eligible.
+ * Worker hook: draft every source-diverse story. Called once per ingest pass.
+ * AI calls stay in the worker process (CLAUDE.md rule #5).
  */
 export async function runAutoRewrites(
   log: (event: string, fields?: Record<string, unknown>) => void = () => {}

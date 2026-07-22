@@ -36,7 +36,7 @@ The structured summary contract lives in `packages/core/src/story-summary.ts`. I
 - Share analytics store only summary, channel and timestamp.
 - The current pipeline imports RSS headlines and teasers, not full article bodies.
 
-Every generated Story Summary carries the disclosure **“KI-generierte Zusammenfassung. Ungeprüft.”** This is transparency, not legal immunity or a quality guarantee.
+Every Story Summary discloses whether it was generated or manual and whether editorial review occurred. This is transparency, not legal immunity or a quality guarantee.
 
 ## Local development
 
@@ -52,7 +52,9 @@ Operator commands:
 ```bash
 mise exec -- bun ingest:run
 mise exec -- bun rewrite:run --story <story-slug>
-mise exec -- bun rewrite:publish --story <story-slug>
+mise exec -- bun rewrite:publish --story <story-slug> --reviewed-by <name>
+# or make the unreviewed state explicit:
+mise exec -- bun rewrite:publish --story <story-slug> --unreviewed
 mise exec -- bun seed:outlets
 ```
 

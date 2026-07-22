@@ -57,6 +57,20 @@
       "when": 1784751094806,
       "tag": "0007_square_mandroid",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1784751824517,
+      "tag": "0008_even_microbe",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1784752458178,
+      "tag": "0009_remarkable_trish_tilby",
+      "breakpoints": true
     }
   ]
 }

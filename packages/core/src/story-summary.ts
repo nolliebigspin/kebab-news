@@ -6,6 +6,11 @@ export const annotationOriginValues = ["automatic", "manual"] as const;
 
 const SourceIdsSchema = z.array(z.string().min(1)).min(1).max(50);
 
+const EvidenceQuoteSchema = z.object({
+  source_id: z.string().min(1),
+  quote: z.string().min(1).max(500),
+});
+
 export const SummaryParagraphSchema = z.object({
   id: z.string().min(1).max(80),
   text: z.string().min(1).max(4000),
@@ -37,7 +42,7 @@ export const SourceDifferenceSchema = z.object({
     .max(8),
 });
 
-export const StoryAnnotationSchema = z.object({
+const StoryAnnotationFields = {
   paragraph_id: z.string().min(1).max(80),
   quote: z.string().min(1).max(500),
   prefix: z.string().max(160).optional(),
@@ -47,11 +52,21 @@ export const StoryAnnotationSchema = z.object({
   explanation: z.string().min(1).max(1200),
   possible_effect: z.string().min(1).max(800),
   alternatives: z.array(z.string().min(1).max(500)).max(8).default([]),
-  evidence_source_ids: SourceIdsSchema,
   confidence: z.enum(confidenceValues),
   origin: z.enum(annotationOriginValues),
   review_status: z.enum(reviewStatusValues),
   created_at: z.string().datetime().optional(),
+};
+
+export const StoryAnnotationSchema = z.object({
+  ...StoryAnnotationFields,
+  evidence: z.array(EvidenceQuoteSchema).min(1).max(12),
+});
+
+/** Compatibility shape used before article-level evidence quotes were stored. */
+export const LegacyStoryAnnotationSchema = z.object({
+  ...StoryAnnotationFields,
+  evidence_source_ids: SourceIdsSchema,
 });
 
 export const StorySummarySchema = z

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { FiCheck, FiCopy, FiShare2 } from "react-icons/fi";
 
@@ -24,8 +25,9 @@ export function ShareMenu({
   sourceCount: number;
   canonicalUrl: string;
 }) {
+  const t = useTranslations("story.share");
   const [copied, setCopied] = useState(false);
-  const text = `${sourceCount} Quellen, eine verständliche Zusammenfassung: ${title}`;
+  const text = t("text", { sourceCount, title });
 
   function track(channel: Channel) {
     void fetch("/api/share", {
@@ -55,55 +57,56 @@ export function ShareMenu({
   const targets: Array<{ channel: Channel; label: string; href: string }> = [
     {
       channel: "x",
-      label: "X",
+      label: t("channel.x"),
       href: `https://x.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(canonicalUrl)}`,
     },
     {
       channel: "linkedin",
-      label: "LinkedIn",
+      label: t("channel.linkedin"),
       href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(canonicalUrl)}`,
     },
     {
       channel: "facebook",
-      label: "Facebook",
+      label: t("channel.facebook"),
       href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonicalUrl)}`,
     },
     {
       channel: "whatsapp",
-      label: "WhatsApp",
+      label: t("channel.whatsapp"),
       href: `https://wa.me/?text=${encodeURIComponent(`${text} ${canonicalUrl}`)}`,
     },
     {
       channel: "telegram",
-      label: "Telegram",
+      label: t("channel.telegram"),
       href: `https://t.me/share/url?url=${encodeURIComponent(canonicalUrl)}&text=${encodeURIComponent(text)}`,
     },
     {
       channel: "email",
-      label: "E-Mail",
+      label: t("channel.email"),
       href: `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`${text}\n\n${canonicalUrl}`)}`,
     },
   ];
 
   return (
-    <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Story teilen">
+    <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t("group_label")}>
       <button
         type="button"
         onClick={nativeShare}
         className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm text-white hover:bg-brand-ink focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
       >
-        <FiShare2 aria-hidden /> Teilen
+        <FiShare2 aria-hidden /> {t("native")}
       </button>
       <button
         type="button"
         onClick={copyLink}
         className="inline-flex items-center gap-2 rounded-full border border-line px-3 py-2 text-sm hover:border-brand focus-visible:outline-2 focus-visible:outline-brand"
       >
-        {copied ? <FiCheck aria-hidden /> : <FiCopy aria-hidden />} {copied ? "Kopiert" : "Link"}
+        {copied ? <FiCheck aria-hidden /> : <FiCopy aria-hidden />}{" "}
+        {copied ? t("copied") : t("copy")}
       </button>
       <details className="relative">
         <summary className="cursor-pointer list-none rounded-full border border-line px-3 py-2 text-sm hover:border-brand focus-visible:outline-2 focus-visible:outline-brand">
-          Mehr
+          {t("more")}
         </summary>
         <div className="absolute right-0 z-20 mt-2 grid min-w-40 rounded-xl border border-line bg-bg p-2 shadow-xl">
           {targets.map((target) => (

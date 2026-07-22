@@ -33,9 +33,8 @@ async function safeRun(reason: string): Promise<void> {
       durationMs: result.durationMs,
     });
 
-    // After ingest, pick up any story that has crossed the vote threshold and
-    // has no rewrite yet. Votes are recorded by the web app; the AI rewrite
-    // runs only here (CLAUDE.md rule #5).
+    // After ingest, pick up source-diverse stories and published stories with
+    // newly attached sources. The AI rewrite runs only here (CLAUDE.md rule #5).
     const auto = await runAutoRewrites(log);
     if (auto.triggered > 0) log("worker.auto_rewrites_done", auto);
   } catch (err) {

@@ -1,7 +1,7 @@
-import { db, publishedArticles } from "@kebab/db";
+import { db, publishedArticles, stories } from "@kebab/db";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
-import { and, desc, isNotNull, type SQL, sql } from "drizzle-orm";
+import { and, desc, eq, isNotNull, type SQL, sql } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
@@ -48,12 +48,13 @@ async function loadPublished(filters: ArticleFilterState): Promise<ArticleCard[]
 
   return db
     .select({
-      slug: publishedArticles.slug,
+      slug: stories.slug,
       neutralHeadline: publishedArticles.neutralHeadline,
       sourceCount: publishedArticles.sourceCount,
       publishedAt: publishedArticles.publishedAt,
     })
     .from(publishedArticles)
+    .innerJoin(stories, eq(stories.publishedArticleId, publishedArticles.id))
     .where(and(...where))
     .orderBy(...orderBy)
     .limit(100);

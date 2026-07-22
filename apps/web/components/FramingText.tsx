@@ -1,10 +1,11 @@
 "use client";
 
 import type { StoryAnnotation } from "@kebab/core";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { FiX } from "react-icons/fi";
 
-type SourceRef = { id: string; name: string; headline: string };
+type SourceRef = { id: string; name: string; headline: string; url: string };
 
 function locate(text: string, annotation: StoryAnnotation) {
   const starts: number[] = [];
@@ -40,6 +41,7 @@ export function FramingText({
   annotations: StoryAnnotation[];
   sources: SourceRef[];
 }) {
+  const t = useTranslations("story.framing");
   const [active, setActive] = useState<StoryAnnotation | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -73,7 +75,7 @@ export function FramingText({
                 type="button"
                 onClick={() => setActive(mark.item)}
                 className="rounded-sm bg-brand-wash px-0.5 text-left text-brand-ink underline decoration-brand decoration-dotted underline-offset-4 hover:bg-brand/15 focus-visible:outline-2 focus-visible:outline-brand"
-                aria-label={`Framing-Hinweis: ${mark.item.quote}`}
+                aria-label={t("annotation_label", { quote: mark.item.quote })}
               >
                 {mark.item.quote}
               </button>
@@ -98,13 +100,7 @@ export function FramingText({
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="font-mono text-[11px] text-brand-ink uppercase tracking-[0.14em]">
-                  Mögliches Framing ·{" "}
-                  {active.confidence === "high"
-                    ? "hohe"
-                    : active.confidence === "medium"
-                      ? "mittlere"
-                      : "niedrige"}{" "}
-                  Sicherheit
+                  {t("eyebrow", { confidence: t(`confidence.${active.confidence}`) })}
                 </p>
                 <h2 id="framing-dialog-title" className="mt-2 font-display text-2xl">
                   {active.title}
@@ -114,7 +110,7 @@ export function FramingText({
                 ref={closeRef}
                 type="button"
                 onClick={() => setActive(null)}
-                aria-label="Dialog schließen"
+                aria-label={t("close")}
                 className="rounded-full border border-line p-2 focus-visible:outline-2 focus-visible:outline-brand"
               >
                 <FiX aria-hidden />
@@ -125,16 +121,16 @@ export function FramingText({
             </blockquote>
             <div className="mt-6 space-y-5 text-ink-soft text-sm leading-6">
               <div>
-                <h3 className="font-semibold text-ink">Warum diese Stelle auffällt</h3>
+                <h3 className="font-semibold text-ink">{t("why")}</h3>
                 <p>{active.explanation}</p>
               </div>
               <div>
-                <h3 className="font-semibold text-ink">Mögliche Wirkung</h3>
+                <h3 className="font-semibold text-ink">{t("effect")}</h3>
                 <p>{active.possible_effect}</p>
               </div>
               {active.alternatives.length > 0 && (
                 <div>
-                  <h3 className="font-semibold text-ink">Alternative Formulierungen</h3>
+                  <h3 className="font-semibold text-ink">{t("alternatives")}</h3>
                   <ul className="mt-2 list-disc space-y-1 pl-5">
                     {active.alternatives.map((alternative) => (
                       <li key={alternative}>{alternative}</li>
@@ -143,22 +139,31 @@ export function FramingText({
                 </div>
               )}
               <div>
-                <h3 className="font-semibold text-ink">Belege</h3>
+                <h3 className="font-semibold text-ink">{t("evidence")}</h3>
                 <ul className="mt-2 space-y-2">
-                  {sources
-                    .filter((source) => active.evidence_source_ids.includes(source.id))
-                    .map((source) => (
-                      <li key={source.id}>
-                        <span className="font-medium text-ink">{source.name}:</span> „
-                        {source.headline}“
+                  {active.evidence.map((evidence) => {
+                    const source = sources.find((item) => item.id === evidence.source_id);
+                    return (
+                      <li key={`${evidence.source_id}-${evidence.quote}`}>
+                        {source ? (
+                          <a
+                            href={source.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-ink underline decoration-line underline-offset-2"
+                          >
+                            {source.name} — {source.headline}
+                          </a>
+                        ) : (
+                          <span className="font-medium text-ink">{evidence.source_id}</span>
+                        )}
+                        <span className="block">„{evidence.quote}“</span>
                       </li>
-                    ))}
+                    );
+                  })}
                 </ul>
               </div>
-              <p className="rounded-lg bg-bg-warm p-3 text-xs">
-                Diese Markierung ist eine Einordnung, keine objektive Wahrheit. Die Quellen
-                gewichten diesen Aspekt möglicherweise unterschiedlich.
-              </p>
+              <p className="rounded-lg bg-bg-warm p-3 text-xs">{t("disclaimer")}</p>
             </div>
           </aside>
         </div>
