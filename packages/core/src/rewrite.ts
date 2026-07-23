@@ -15,7 +15,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { OutletLean, SourceKind } from "@kebab/db";
 import { z } from "zod";
 
-import { REWRITE_MODEL, REWRITE_SYSTEM_PROMPT, REWRITE_TARGET_WORDS_MAX } from "./constants";
+import { REWRITE_MAX_OUTPUT_TOKENS, REWRITE_MODEL, REWRITE_SYSTEM_PROMPT } from "./constants";
 import { LEAN_ORDER } from "./lean";
 import { StorySummarySchema } from "./story-summary";
 
@@ -270,28 +270,26 @@ export async function generateRewrite(
 ): Promise<Rewrite | null> {
   const client = getClient();
   const userMessage = buildUserMessage(label, sources, previousSummary);
-  // German is ~2–2.5 tokens/word (denser than English). 400 words ≈ ~1000
-  // tokens for the body alone; add JSON wrapper + headline + safety margin.
-  // 4× the word cap keeps us safely under the 4096-token sanity ceiling
-  // while never silently truncating a valid response.
-  const maxTokens = Math.min(4096, REWRITE_TARGET_WORDS_MAX * 4);
 
   try {
-    const response = await client.messages.create({
-      model: REWRITE_MODEL,
-      max_tokens: maxTokens,
-      system: REWRITE_SYSTEM_PROMPT,
-      output_config: {
-        format: { type: "json_schema", schema: REWRITE_JSON_SCHEMA },
-      },
-      messages: [{ role: "user", content: userMessage }],
-    });
+    const response = await client.messages
+      .stream({
+        model: REWRITE_MODEL,
+        max_tokens: REWRITE_MAX_OUTPUT_TOKENS,
+        thinking: { type: "disabled" },
+        system: REWRITE_SYSTEM_PROMPT,
+        output_config: {
+          format: { type: "json_schema", schema: REWRITE_JSON_SCHEMA },
+        },
+        messages: [{ role: "user", content: userMessage }],
+      })
+      .finalMessage();
 
     // If Claude hit the token cap, the JSON is truncated mid-string.
     // JSON.parse would throw; abort cleanly instead.
     if (response.stop_reason === "max_tokens") {
       console.error(
-        `[rewrite] response truncated at max_tokens (${maxTokens}). Raise the cap or shorten the prompt.`
+        `[rewrite] response truncated at max_tokens (${REWRITE_MAX_OUTPUT_TOKENS}). Shorten the requested output.`
       );
       return null;
     }

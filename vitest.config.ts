@@ -10,6 +10,7 @@ const r = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 export default defineConfig({
   resolve: {
     alias: {
+      "@anthropic-ai/sdk": r("./packages/core/node_modules/@anthropic-ai/sdk/index.mjs"),
       "@kebab/env": r("./packages/env/src/index.ts"),
       "@kebab/db": r("./packages/db/src/index.ts"),
       "@kebab/core": r("./packages/core/src/index.ts"),

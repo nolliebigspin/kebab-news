@@ -123,6 +123,13 @@ export const REWRITE_PROMPT_VERSION = "v3-transparent-summary-2026-07";
 export const REWRITE_TARGET_WORDS_MIN = 300;
 export const REWRITE_TARGET_WORDS_MAX = 600;
 
+/**
+ * Hard ceiling for the complete structured response. Sonnet 5 counts adaptive
+ * thinking and visible JSON against max_tokens, so keep generous headroom.
+ * Billing is based on tokens actually generated, not this configured ceiling.
+ */
+export const REWRITE_MAX_OUTPUT_TOKENS = 50_000;
+
 export const REWRITE_SYSTEM_PROMPT = [
   "Du erstellst transparente Nachrichten-Zusammenfassungen für deutschsprachige Lesende.",
   "Aufgabe: Aus mehreren Outlet-Versionen derselben Geschichte (Schlagzeilen, Teaser, ggf. Volltexte)",
