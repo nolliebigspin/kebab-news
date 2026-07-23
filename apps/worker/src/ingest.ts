@@ -8,7 +8,7 @@ import {
   STORY_WINDOW_HOURS,
 } from "@kebab/core";
 import { articles, db, type Outlet, outlets, stories } from "@kebab/db";
-import { eq, gt, inArray } from "drizzle-orm";
+import { and, eq, gt, inArray, sql } from "drizzle-orm";
 import Parser from "rss-parser";
 
 const parser = new Parser({
@@ -49,15 +49,24 @@ function log(runId: string, event: string, fields: Record<string, unknown> = {})
 
 /**
  * One full ingest pass: fetch every outlet's feed, dedup, insert new articles,
- * embed + annotate + cluster each. Pure DB work — the worker scheduler (or the
+ * embed + cluster each. Pure DB work — the worker scheduler (or the
  * `ingest:once` script) is the trigger; there is no HTTP layer anymore.
  */
-export async function runIngest(): Promise<IngestResult> {
+export async function runIngest(
+  options: { outletSlugs?: readonly string[]; candidateStoryIds?: readonly string[] } = {}
+): Promise<IngestResult> {
   const runId = `run_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
   const startedAt = Date.now();
   log(runId, "ingest.start");
 
-  const allOutlets = await db.select().from(outlets);
+  const allOutlets = await db
+    .select()
+    .from(outlets)
+    .where(
+      options.outletSlugs && options.outletSlugs.length > 0
+        ? inArray(outlets.slug, [...options.outletSlugs])
+        : undefined
+    );
   log(runId, "ingest.outlets_loaded", { count: allOutlets.length });
 
   const results: OutletResult[] = [];
@@ -67,7 +76,7 @@ export async function runIngest(): Promise<IngestResult> {
   for (const outlet of allOutlets) {
     const outletStartedAt = Date.now();
     try {
-      const r = await ingestOutlet(outlet, runId);
+      const r = await ingestOutlet(outlet, runId, options.candidateStoryIds);
       totalNewArticles += r.newArticles;
       totalNewStories += r.newStories;
       results.push(r);
@@ -112,7 +121,12 @@ export async function runIngest(): Promise<IngestResult> {
   };
 }
 
-async function ingestOutlet(outlet: Outlet, runId: string): Promise<OutletResult> {
+async function ingestOutlet(
+  outlet: Outlet,
+  runId: string,
+  candidateStoryIds?: readonly string[]
+): Promise<OutletResult> {
+  const scopedCandidateStoryIds = candidateStoryIds ? new Set(candidateStoryIds) : null;
   const feed = await parser.parseURL(outlet.feedUrl);
   log(runId, "outlet.feed_parsed", {
     slug: outlet.slug,
@@ -208,12 +222,9 @@ async function ingestOutlet(outlet: Outlet, runId: string): Promise<OutletResult
     return { slug: outlet.slug, newArticles: 0, newStories: 0 };
   }
 
-  // Embed + cluster each new article. Framing annotation is deliberately NOT
-  // done here — it's the expensive per-article Claude call, and only the
-  // source-diverse stories selected for summaries are shown with annotations, so annotation
-  // is deferred to the rewrite trigger (see runAutoRewrites / annotateStory).
-  // Embedding (cheap Voyage call) + clustering (pure math) stay in ingest so
-  // stories actually form.
+  // Embed + cluster each new article. Framing annotation is deliberately
+  // deferred until the complete ingest pass knows which stories have enough
+  // distinct sources to be reader-visible (see annotateReadyStories).
   let newStoriesCount = 0;
 
   for (const article of inserted) {
@@ -229,7 +240,16 @@ async function ingestOutlet(outlet: Outlet, runId: string): Promise<OutletResult
         articleCount: stories.articleCount,
       })
       .from(stories)
-      .where(gt(stories.lastSeenAt, windowStart));
+      .where(
+        scopedCandidateStoryIds
+          ? scopedCandidateStoryIds.size > 0
+            ? and(
+                gt(stories.lastSeenAt, windowStart),
+                inArray(stories.id, [...scopedCandidateStoryIds])
+              )
+            : sql`false`
+          : gt(stories.lastSeenAt, windowStart)
+      );
 
     const candidates: ClusterCandidate[] = candidateRows.map((r) => ({
       storyId: r.storyId,
@@ -268,6 +288,7 @@ async function ingestOutlet(outlet: Outlet, runId: string): Promise<OutletResult
         })
         .returning({ id: stories.id });
       storyId = insertedStories[0].id;
+      scopedCandidateStoryIds?.add(storyId);
       newStoriesCount += 1;
       log(runId, "article.clustered", {
         slug: outlet.slug,

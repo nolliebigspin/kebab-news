@@ -1,0 +1,1 @@
+ALTER TABLE "articles" ADD COLUMN "annotation_version" text;

@@ -286,57 +286,65 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
             )}
             <ol className="mt-6 space-y-4">
               {data.sources.map((source) => {
-                const parsed = AnnotationsSchema.safeParse(
+                const parsedHeadlineAnnotations = AnnotationsSchema.safeParse(
                   (source as { headlineAnnotations?: unknown }).headlineAnnotations ?? []
+                );
+                const parsedTeaserAnnotations = AnnotationsSchema.safeParse(
+                  (source as { teaserAnnotations?: unknown }).teaserAnnotations ?? []
                 );
                 return (
                   <li key={source.id} className="rounded-xl border border-line-soft p-5">
-                    <a
-                      href={source.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group block"
-                    >
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="outline">
-                          <span
-                            className="dot mr-1.5"
-                            style={{ background: leanColor(source.outletLean) }}
-                            aria-hidden
-                          />
-                          {tRadar(`lean.${leanI18nKey(source.outletLean)}`)}
-                        </Badge>
-                        <span className="font-medium text-sm">{source.outletName}</span>
-                        <span className="text-ink-mute text-xs">
-                          {source.language.toUpperCase()}
-                        </span>
-                        {source.sourceKind === "primary" && (
-                          <span className="rounded-full bg-brand-wash px-2 py-0.5 text-brand-ink text-xs">
-                            Primärquelle
-                          </span>
-                        )}
-                      </div>
-                      <h3 className="mt-3 font-display text-lg leading-snug group-hover:text-brand-ink">
-                        <AnnotatedText
-                          text={source.headline}
-                          annotations={parsed.success ? parsed.data : []}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="outline">
+                        <span
+                          className="dot mr-1.5"
+                          style={{ background: leanColor(source.outletLean) }}
+                          aria-hidden
                         />
-                      </h3>
-                      {source.teaser && (
-                        <blockquote className="mt-3 border-line border-l-2 pl-3 text-ink-soft text-sm leading-6">
-                          „{source.teaser.slice(0, 280)}“
-                        </blockquote>
-                      )}
-                      <div className="mt-3 flex flex-wrap gap-2 text-ink-mute text-xs">
-                        {source.author && <span>{source.author}</span>}
-                        <time dateTime={source.publishedAt.toISOString()}>
-                          {format(source.publishedAt, "d. MMM yyyy, HH:mm", { locale: de })}
-                        </time>
-                        <span className="ml-auto inline-flex items-center gap-1 text-brand-ink">
-                          Original öffnen <FiExternalLink aria-hidden />
+                        {tRadar(`lean.${leanI18nKey(source.outletLean)}`)}
+                      </Badge>
+                      <span className="font-medium text-sm">{source.outletName}</span>
+                      <span className="text-ink-mute text-xs">{source.language.toUpperCase()}</span>
+                      {source.sourceKind === "primary" && (
+                        <span className="rounded-full bg-brand-wash px-2 py-0.5 text-brand-ink text-xs">
+                          Primärquelle
                         </span>
-                      </div>
-                    </a>
+                      )}
+                    </div>
+                    <h3 className="mt-3 font-display text-lg leading-snug">
+                      <AnnotatedText
+                        text={source.headline}
+                        annotations={
+                          parsedHeadlineAnnotations.success ? parsedHeadlineAnnotations.data : []
+                        }
+                      />
+                    </h3>
+                    {source.teaser && (
+                      <blockquote className="mt-3 border-line border-l-2 pl-3 text-ink-soft text-sm leading-6">
+                        {"„"}
+                        <AnnotatedText
+                          text={source.teaser.slice(0, 280)}
+                          annotations={
+                            parsedTeaserAnnotations.success ? parsedTeaserAnnotations.data : []
+                          }
+                        />
+                        {"“"}
+                      </blockquote>
+                    )}
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-ink-mute text-xs">
+                      {source.author && <span>{source.author}</span>}
+                      <time dateTime={source.publishedAt.toISOString()}>
+                        {format(source.publishedAt, "d. MMM yyyy, HH:mm", { locale: de })}
+                      </time>
+                      <a
+                        href={source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-auto inline-flex items-center gap-1 text-brand-ink underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-brand"
+                      >
+                        Original öffnen <FiExternalLink aria-hidden />
+                      </a>
+                    </div>
                   </li>
                 );
               })}

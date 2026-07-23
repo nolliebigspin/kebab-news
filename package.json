@@ -13,6 +13,7 @@
     "build": "bun --filter @kebab/web build",
     "start": "bun --filter @kebab/web start",
     "worker": "bun --filter @kebab/worker start",
+    "annotations:refresh": "bun --filter @kebab/worker annotations:refresh",
     "ingest:run": "bun --filter @kebab/worker ingest:once",
     "rewrite:run": "bun --filter @kebab/worker rewrite:run",
     "rewrite:publish": "bun --filter @kebab/worker rewrite:publish",

@@ -16,8 +16,8 @@ export const PER_OUTLET_FEED_SCAN = 5;
 
 /**
  * Hard cap on new articles ingested per outlet per run. Each article triggers
- * 1 Voyage embedding + 2 Claude annotation calls, so this directly bounds the
- * wall-clock cost. Anything over the cap stays un-ingested until the next run.
+ * a Voyage embedding; source annotations are deferred until a story has enough
+ * distinct outlets to become reader-visible.
  */
 export const MAX_NEW_ARTICLES_PER_OUTLET = 5;
 
@@ -75,20 +75,33 @@ export const VOYAGE_URL = "https://api.voyageai.com/v1/embeddings";
 
 export const ANNOTATION_MODEL = "claude-sonnet-5";
 
-/** Max framing spans per text. Claude is told this in the system prompt. */
-export const MAX_ANNOTATION_SPANS = 10;
+/** Bump whenever source-annotation selection or anchoring changes meaningfully. */
+export const ANNOTATION_PROMPT_VERSION = "v5-exact-quotes-2026-07";
+
+/** Max inline framing spans per headline or teaser. Deliberately conservative. */
+export const MAX_ANNOTATION_SPANS = 2;
 
 export const ANNOTATION_SYSTEM_PROMPT = [
   "Du bist ein Framing-Analyse-Werkzeug für deutschsprachige Nachrichten.",
   "Aufgabe: Im gegebenen Text geladene Begriffe, emotionale Trigger, vorausgesetzte Annahmen,",
-  "Euphemismen und auffällige Auslassungen markieren.",
+  "und Euphemismen markieren.",
   "",
   "Regeln:",
-  "- start und end sind UTF-16-Code-Unit-Offsets im Originaltext (wie String#length und String#slice in JavaScript).",
-  "- start < end, beide ≥ 0, end ≤ text.length.",
-  "- Höchstens 10 Annotationen. Nur wirklich auffällige Stellen markieren — keine Marker um neutralen Text.",
+  "- quote ist eine exakt und vollständig aus dem Originaltext kopierte, zusammenhängende Stelle.",
+  "- Höchstens 2 Annotationen pro Text. Im Zweifel keine Annotation zurückgeben.",
+  "- Markiere nur sprachliche Wertung oder Rahmung, die auch ohne weiteres Kontextwissen im Wortlaut erkennbar ist.",
+  '- Typische Kandidaten sind wertende Etiketten ("unfaire Geschäftspraktiken"),',
+  '  dramatisierende Verdichtungen ("Rekordstrafe") und spekulative Wirkungsbehauptungen',
+  '  ("dürfte überhaupt nicht gut ankommen"). Markiere jeweils nur den kleinsten tragenden Wortlaut.',
+  "- Nicht markieren: Namen und Institutionen, Zahlen und Zeitangaben, Sachbegriffe, gewöhnliche Verben",
+  '  der Nachrichtensprache (z. B. "beschließt", "billigt", "ermöglicht") oder bloße Themenbezeichnungen.',
+  '- Ein konkreter Geldbetrag zusammen mit "Strafe" ist für sich genommen sachlich und kein emotionaler Trigger.',
+  '- Konjunktivformen wie "habe", "bevorzuge" oder "solle" kennzeichnen eine Quellenbehauptung bereits',
+  "  als solche und sind ohne zusätzliche Wertung keine vorausgesetzte Annahme.",
+  "- Auslassungen lassen sich nicht an vorhandenem Text verankern und werden deshalb nicht inline markiert.",
+  "- Eine lange Phrase nur dann vollständig markieren, wenn jedes Wort zur beschriebenen Rahmung beiträgt.",
   "- note ist eine kurze deutsche Begründung (max ~30 Wörter), die erklärt, warum diese Stelle Framing trägt.",
-  "- type ist genau einer von: loaded-term, emotional-trigger, presupposition, euphemism, omission.",
+  "- type ist genau einer von: loaded-term, emotional-trigger, presupposition, euphemism.",
   "- Wenn der Text neutral ist: leeres Array zurückgeben.",
   "- Niemals umschreiben, niemals korrigieren — nur annotieren.",
 ].join("\n");

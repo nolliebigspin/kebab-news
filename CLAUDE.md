@@ -59,7 +59,7 @@ The published article lives at `/artikel/[slug]` and always discloses both its o
 
 ### 1. Ingest pipeline (existing, manual)
 
-`bun ingest:run` → fetch RSS feeds → for each new article: embed (Voyage `voyage-3-lite`, 512 dims) + annotate framing (Claude Sonnet 5) → cluster into stories by cosine similarity ≥ `DEFAULT_CLUSTER_THRESHOLD` within a `STORY_WINDOW_HOURS` window. Hard cap of `MAX_NEW_ARTICLES_PER_OUTLET` new articles per outlet per run, so cost is bounded.
+`bun ingest:run` → fetch RSS feeds → embed each new contribution (Voyage `voyage-3-lite`, 512 dims) → cluster into stories by cosine similarity ≥ `DEFAULT_CLUSTER_THRESHOLD` within a `STORY_WINDOW_HOURS` window. Once a story has enough distinct sources to become reader-visible, its headlines and teasers are annotated with exact, quote-anchored passages (Claude Sonnet 5). A persisted annotation prompt version makes this step idempotent and backfills older annotation formats after prompt upgrades. The hard cap of `MAX_NEW_ARTICLES_PER_OUTLET` new articles per outlet per run keeps cost bounded.
 
 All tunables live in `packages/core/src/constants.ts`. The ingest pipeline lives in `apps/worker/src/ingest.ts` (`runIngest()`), driven by the long-running worker's in-process scheduler (`apps/worker/src/index.ts`, `RUN_HOURS_UTC = [6,12,18]` — 07/13/19 CET, 08/14/20 CEST; we accept the 1h DST drift). There is no HTTP route and no Vercel-Cron anymore — the worker process *is* the trigger. `bun ingest:run` (→ `@kebab/worker ingest:once`) runs one pass manually against the same DB.
 
@@ -118,7 +118,7 @@ Current tables (in `packages/db/src/schema.ts`):
 
 - `outlets` — id, slug, name, political_lean (enum), feed_url, homepage_url, created_at.
 - `stories` — id, slug, label (= first article's headline, used as fallback before rewrite exists), first_seen_at, last_seen_at, centroid (vector 512), article_count.
-- `articles` — source article metadata, RSS headline/teaser, language, primary/secondary kind, annotations, publication time, embedding and story assignment.
+- `articles` — source article metadata, RSS headline/teaser, language, primary/secondary kind, versioned quote-anchored annotations, publication time, embedding and story assignment.
 
 Summary and interaction tables:
 
@@ -179,6 +179,8 @@ The agent should flag these before merging anything that touches them. **The leg
 - **Commits:** scoped prefixes (`feat(rewrite): ...`, `feat(vote): ...`, `feat(radar): ...`, `fix(...)`, `docs(...)`). One logical change per commit.
 - **Root scripts delegate into workspaces** via `bun --filter`. Run them from the repo root (`mise exec -- bun <script>`); the underlying script lives in `apps/worker` or `packages/db`.
   - `bun ingest:run` — one manual ingest pass (→ `@kebab/worker ingest:once`). Automatic ingest is the long-running worker (`bun worker`, or the deployed container).
+  - `bun annotations:refresh --ready` — backfill stale quote-anchored annotations for every reader-visible topic.
+  - `bun annotations:refresh --story <slug>` — force re-run source annotations for one existing topic without creating a new article draft.
   - `bun rewrite:run --story <slug>` — generate a draft rewrite for one story.
   - `bun rewrite:publish --story <slug> --reviewed-by <name>` — publish a reviewed draft; use `--unreviewed` only as an explicit alternative.
   - `bun seed:outlets` — idempotent upsert of the outlet set (currently 25, spanning left → public; the canonical list lives in `apps/worker/scripts/seed-outlets.ts`). Re-run after `db:reset --full`.

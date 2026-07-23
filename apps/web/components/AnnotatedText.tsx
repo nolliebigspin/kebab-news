@@ -1,5 +1,6 @@
-import type { Annotation } from "@kebab/core";
+import { type Annotation, MAX_ANNOTATION_SPANS } from "@kebab/core";
 import { useTranslations } from "next-intl";
+import { FramingTooltip } from "@/components/ui/framing-tooltip";
 
 type Props = {
   text: string;
@@ -8,10 +9,8 @@ type Props = {
 };
 
 /**
- * Render `text` with `<mark>` spans for each annotation. Spans are walked in
- * order; overlapping or out-of-range annotations are clipped defensively.
- * Hover/focus on a mark surfaces the framing note as a tooltip via the
- * native `title` attribute.
+ * Render exact, quote-anchored annotations. Legacy offset-only or mismatched
+ * annotations are omitted rather than risking a marker on the wrong passage.
  */
 export function AnnotatedText({ text, annotations, className }: Props) {
   const t = useTranslations("radar");
@@ -20,10 +19,18 @@ export function AnnotatedText({ text, annotations, className }: Props) {
     return <span className={className}>{text}</span>;
   }
 
-  // Sort + clip to text bounds; drop invalid spans defensively.
+  // Only trust annotations whose persisted quote still matches the source.
   const safe = [...annotations]
-    .filter((a) => a.start < a.end && a.start >= 0 && a.end <= text.length)
-    .sort((a, b) => a.start - b.start);
+    .filter(
+      (a) =>
+        a.quote &&
+        a.start < a.end &&
+        a.start >= 0 &&
+        a.end <= text.length &&
+        text.slice(a.start, a.end) === a.quote
+    )
+    .sort((a, b) => a.start - b.start)
+    .slice(0, MAX_ANNOTATION_SPANS);
 
   const parts: Array<{ kind: "text" | "mark"; text: string; annotation?: Annotation }> = [];
   let cursor = 0;
@@ -41,13 +48,13 @@ export function AnnotatedText({ text, annotations, className }: Props) {
         part.kind === "text" ? (
           <span key={`t-${i}-${part.text.slice(0, 8)}`}>{part.text}</span>
         ) : (
-          <mark
+          <FramingTooltip
             key={`m-${part.annotation?.start ?? i}-${part.annotation?.end ?? i}`}
-            className="rounded-sm bg-brand-wash px-[2px] text-brand-ink decoration-brand-ink decoration-dotted underline-offset-2 hover:underline"
-            title={`${t(`annotation.${part.annotation?.type}`)} — ${part.annotation?.note ?? ""}`}
+            label={t(`annotation.${part.annotation?.type}`)}
+            note={part.annotation?.note ?? ""}
           >
             {part.text}
-          </mark>
+          </FramingTooltip>
         )
       )}
     </span>

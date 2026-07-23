@@ -6,6 +6,7 @@
   "scripts": {
     "start": "bun run src/index.ts",
     "dev": "RUN_ON_BOOT=true bun run src/index.ts",
+    "annotations:refresh": "bun run scripts/annotations-refresh.ts",
     "ingest:once": "bun run scripts/ingest-once.ts",
     "rewrite:run": "bun run scripts/rewrite-run.ts",
     "rewrite:publish": "bun run scripts/rewrite-publish.ts",

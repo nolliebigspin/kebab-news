@@ -160,40 +160,38 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
               <ul className="space-y-6">
                 {group.map((article) => (
                   <li key={article.id} className="border-line-soft border-l-2 pl-4">
-                    <a
-                      href={article.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group block"
-                    >
-                      <h3 className="font-display text-lg leading-snug group-hover:text-brand-ink sm:text-xl">
+                    <h3 className="font-display text-lg leading-snug sm:text-xl">
+                      <AnnotatedText
+                        text={article.headline}
+                        annotations={article.headlineAnnotations}
+                      />
+                    </h3>
+                    {article.teaser ? (
+                      <p className="mt-2 text-base text-ink-soft leading-relaxed">
                         <AnnotatedText
-                          text={article.headline}
-                          annotations={article.headlineAnnotations}
+                          text={article.teaser}
+                          annotations={article.teaserAnnotations}
                         />
-                      </h3>
-                      {article.teaser ? (
-                        <p className="mt-2 text-base text-ink-soft leading-relaxed">
-                          <AnnotatedText
-                            text={article.teaser}
-                            annotations={article.teaserAnnotations}
-                          />
-                        </p>
-                      ) : null}
-                      <div className="mt-2 flex flex-wrap items-center gap-3 text-ink-mute text-xs">
-                        <span className="font-medium">{article.outletName}</span>
-                        <span>·</span>
-                        <time dateTime={article.publishedAt.toISOString()}>
-                          {format(article.publishedAt, "d. MMM yyyy, HH:mm", {
-                            locale: de,
-                          })}
-                        </time>
-                        <span>·</span>
-                        <span className="text-brand-ink group-hover:underline">
-                          {t("read_at_source")}
-                        </span>
-                      </div>
-                    </a>
+                      </p>
+                    ) : null}
+                    <div className="mt-2 flex flex-wrap items-center gap-3 text-ink-mute text-xs">
+                      <span className="font-medium">{article.outletName}</span>
+                      <span>·</span>
+                      <time dateTime={article.publishedAt.toISOString()}>
+                        {format(article.publishedAt, "d. MMM yyyy, HH:mm", {
+                          locale: de,
+                        })}
+                      </time>
+                      <span>·</span>
+                      <a
+                        href={article.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-brand-ink underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-brand"
+                      >
+                        {t("read_at_source")}
+                      </a>
+                    </div>
                   </li>
                 ))}
               </ul>

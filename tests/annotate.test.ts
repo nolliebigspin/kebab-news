@@ -1,4 +1,9 @@
-import { AnnotationSchema, AnnotationsSchema } from "@kebab/core";
+import {
+  AnnotationSchema,
+  AnnotationsSchema,
+  anchorAnnotationQuotes,
+  MAX_ANNOTATION_SPANS,
+} from "@kebab/core";
 import { describe, expect, it } from "vitest";
 
 describe("AnnotationSchema", () => {
@@ -59,5 +64,43 @@ describe("AnnotationsSchema", () => {
       note: "x",
     }));
     expect(AnnotationsSchema.safeParse(eleven).success).toBe(false);
+  });
+});
+
+describe("anchorAnnotationQuotes", () => {
+  const candidate = (quote: string, note = "auffällige Zuspitzung") => ({
+    quote,
+    type: "loaded-term" as const,
+    note,
+  });
+
+  it("derives exact UTF-16 offsets from the quoted original text", () => {
+    const text = "Mehr als eine Billion Dollar sieht darin für das Pentagon vor.";
+
+    expect(anchorAnnotationQuotes(text, [candidate("eine Billion Dollar")])).toEqual([
+      {
+        start: text.indexOf("eine Billion Dollar"),
+        end: text.indexOf("eine Billion Dollar") + "eine Billion Dollar".length,
+        quote: "eine Billion Dollar",
+        type: "loaded-term",
+        note: "auffällige Zuspitzung",
+      },
+    ]);
+  });
+
+  it("drops missing or ambiguous quotes instead of highlighting the wrong text", () => {
+    expect(
+      anchorAnnotationQuotes("Der Etat steigt. Der Etat bleibt umstritten.", [
+        candidate("Der Etat"),
+        candidate("kommt nicht vor"),
+      ])
+    ).toEqual([]);
+  });
+
+  it("caps the visible annotations to the conservative product limit", () => {
+    const text = "Alpha, Bravo, Charlie und Delta.";
+    const annotations = ["Alpha", "Bravo", "Charlie", "Delta"].map((quote) => candidate(quote));
+
+    expect(anchorAnnotationQuotes(text, annotations)).toHaveLength(MAX_ANNOTATION_SPANS);
   });
 });

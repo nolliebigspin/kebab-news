@@ -7,6 +7,7 @@
  */
 
 import {
+  ANNOTATION_PROMPT_VERSION,
   annotateText,
   generateRewrite,
   generateStorySlug,
@@ -16,7 +17,7 @@ import {
   type SourceItem,
 } from "@kebab/core";
 import { articles, db, outlets, publishedArticles, stories, summarySources } from "@kebab/db";
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 
 export type StoryRow = typeof stories.$inferSelect;
 
@@ -38,37 +39,93 @@ export async function loadSources(storyId: string): Promise<SourceItem[]> {
 }
 
 /**
- * Annotate framing language on a selected story's source headlines + teasers.
+ * Annotate framing language on a story's source headlines + teasers.
  *
- * Framing annotation used to run on every article during ingest, which burned
- * a lot of Claude tokens on articles that never get shown with annotations.
- * It now runs here — once per story, only when the story has earned a rewrite
- * — so the cost is bounded to the handful of stories that actually surface.
- * Idempotent: re-running re-annotates (cheap relative to the rewrite itself).
+ * This runs once a source-diverse story becomes visible to readers. The
+ * persisted prompt version makes the operation idempotent while still
+ * allowing a later prompt upgrade to re-annotate existing contributions.
  *
- * Never throws into the worker loop: annotateText already swallows AI errors
- * and returns []. A failure just leaves a source unannotated.
+ * Never throws into the worker loop: annotateText reports AI failures as null.
+ * Failed rows keep their last valid analysis and stale version so a later run
+ * retries them instead of persisting a false "no framing found" result.
  */
-export async function annotateStory(storyId: string): Promise<void> {
+export async function annotateStory(
+  storyId: string,
+  options: { force?: boolean } = {}
+): Promise<number> {
   const rows = await db
     .select({
       id: articles.id,
       headline: articles.headline,
       teaser: articles.teaser,
+      annotationVersion: articles.annotationVersion,
     })
     .from(articles)
-    .where(eq(articles.storyId, storyId));
+    .where(
+      options.force
+        ? eq(articles.storyId, storyId)
+        : and(
+            eq(articles.storyId, storyId),
+            or(
+              isNull(articles.annotationVersion),
+              ne(articles.annotationVersion, ANNOTATION_PROMPT_VERSION)
+            )
+          )
+    );
 
+  let annotatedArticles = 0;
   for (const row of rows) {
     const [headlineAnnotations, teaserAnnotations] = await Promise.all([
       annotateText(row.headline),
       row.teaser ? annotateText(row.teaser) : Promise.resolve([]),
     ]);
+    if (headlineAnnotations === null || teaserAnnotations === null) continue;
+
     await db
       .update(articles)
-      .set({ headlineAnnotations, teaserAnnotations })
+      .set({
+        headlineAnnotations,
+        teaserAnnotations,
+        annotationVersion: ANNOTATION_PROMPT_VERSION,
+      })
       .where(eq(articles.id, row.id));
+    annotatedArticles += 1;
   }
+
+  return annotatedArticles;
+}
+
+/**
+ * Annotate every source in a story as soon as that story is visible in the
+ * source comparison. A persisted prompt version distinguishes "neutral, no
+ * annotations" from "not analyzed yet" and makes prompt upgrades backfillable.
+ */
+export async function annotateReadyStories(
+  options: { storyIds?: readonly string[] } = {}
+): Promise<{ stories: number; articles: number }> {
+  const readyStories = await db
+    .select({ id: stories.id })
+    .from(stories)
+    .innerJoin(articles, eq(articles.storyId, stories.id))
+    .where(
+      options.storyIds && options.storyIds.length > 0
+        ? inArray(stories.id, [...options.storyIds])
+        : undefined
+    )
+    .groupBy(stories.id)
+    .having(
+      sql`count(distinct ${articles.outletId}) >= ${RADAR_MIN_OUTLETS}
+        and bool_or(
+          ${articles.annotationVersion} is distinct from ${ANNOTATION_PROMPT_VERSION}
+        )`
+    );
+
+  let annotatedArticles = 0;
+  for (const story of readyStories) {
+    annotatedArticles += await annotateStory(story.id);
+  }
+
+  return { stories: readyStories.length, articles: annotatedArticles };
 }
 
 export type RewriteOutcome =
@@ -99,10 +156,8 @@ export async function rewriteStory(story: StoryRow): Promise<RewriteOutcome> {
     : [];
   const previousSummary = previousRows[0] ?? null;
 
-  // Annotate the sources now that this story was selected — framing markings are
-  // only ever shown for stories that reach a rewrite (radar detail + the
-  // "Quellen" section on /artikel/[slug]), so this is the first time we need
-  // them. Deferred from ingest to keep token cost bounded.
+  // Ensure the sources use the current prompt version. This is normally a
+  // no-op because reader-visible topics are annotated directly after ingest.
   await annotateStory(story.id);
 
   const rewrite = await generateRewrite(story.label, sources, previousSummary);

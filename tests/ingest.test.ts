@@ -1,13 +1,5 @@
-import {
-  articles,
-  db,
-  EMBEDDING_DIMENSIONS,
-  type NewOutlet,
-  outlets,
-  publishedArticles,
-  stories,
-} from "@kebab/db";
-import { eq } from "drizzle-orm";
+import { articles, db, EMBEDDING_DIMENSIONS, outlets, publishedArticles, stories } from "@kebab/db";
+import { eq, inArray } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const TEST_OUTLET_SLUG = "__ingest_test_outlet__";
@@ -43,19 +35,33 @@ function uniformVector(value: number): number[] {
 }
 
 let outletId: string;
-let savedOutlets: NewOutlet[] = [];
+
+async function cleanup() {
+  const testOutlets = await db
+    .select({ id: outlets.id })
+    .from(outlets)
+    .where(eq(outlets.slug, TEST_OUTLET_SLUG));
+  if (testOutlets.length === 0) return;
+
+  const testArticles = await db
+    .select({ storyId: articles.storyId })
+    .from(articles)
+    .where(eq(articles.outletId, testOutlets[0].id));
+  const storyIds = [
+    ...new Set(testArticles.flatMap((article) => (article.storyId ? [article.storyId] : []))),
+  ];
+
+  if (storyIds.length > 0) {
+    await db.delete(publishedArticles).where(inArray(publishedArticles.storyId, storyIds));
+    await db.delete(articles).where(inArray(articles.storyId, storyIds));
+    await db.delete(stories).where(inArray(stories.id, storyIds));
+  }
+  await db.delete(articles).where(eq(articles.outletId, testOutlets[0].id));
+  await db.delete(outlets).where(eq(outlets.id, testOutlets[0].id));
+}
 
 beforeEach(async () => {
-  // Ingest iterates every outlet in the DB. To make this test isolated and
-  // deterministic, snapshot the existing outlets (seeded data) out, run the
-  // test against ONE outlet, then restore the originals in afterEach.
-  savedOutlets = await db.select().from(outlets);
-  // Order matters: published_articles → stories (RESTRICT), articles → outlets
-  // (cascade). published_articles must go first or the stories delete blocks.
-  await db.delete(publishedArticles);
-  await db.delete(articles);
-  await db.delete(stories);
-  await db.delete(outlets);
+  await cleanup();
 
   const inserted = await db
     .insert(outlets)
@@ -75,14 +81,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  // Clear everything created in this test, then restore the snapshotted outlets.
-  await db.delete(publishedArticles);
-  await db.delete(articles);
-  await db.delete(stories);
-  await db.delete(outlets);
-  if (savedOutlets.length > 0) {
-    await db.insert(outlets).values(savedOutlets);
-  }
+  await cleanup();
   vi.clearAllMocks();
 });
 
@@ -123,7 +122,11 @@ describe("runIngest", () => {
       .mockResolvedValueOnce(uniformVector(0.51))
       .mockResolvedValueOnce(orthogonal);
 
-    const first = await runIngest();
+    const ingestOptions = {
+      outletSlugs: [TEST_OUTLET_SLUG],
+      candidateStoryIds: [],
+    };
+    const first = await runIngest(ingestOptions);
     const ourResult = first.results.find((r) => r.slug === TEST_OUTLET_SLUG);
     expect(ourResult).toBeDefined();
     expect(ourResult?.error).toBeUndefined();
@@ -151,7 +154,7 @@ describe("runIngest", () => {
     embedTextMock.mockClear();
     annotateTextMock.mockClear();
 
-    const second = await runIngest();
+    const second = await runIngest(ingestOptions);
     const ourSecond = second.results.find((r) => r.slug === TEST_OUTLET_SLUG);
     expect(ourSecond?.newArticles).toBe(0);
 
@@ -169,7 +172,10 @@ describe("runIngest", () => {
   it("survives a feed parser failure without affecting other outlets", async () => {
     parseURLMock.mockRejectedValue(new Error("boom"));
 
-    const result = await runIngest();
+    const result = await runIngest({
+      outletSlugs: [TEST_OUTLET_SLUG],
+      candidateStoryIds: [],
+    });
     const ourResult = result.results.find((r) => r.slug === TEST_OUTLET_SLUG);
     expect(ourResult?.error).toBe("boom");
   });

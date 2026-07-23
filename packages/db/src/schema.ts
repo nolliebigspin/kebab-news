@@ -127,6 +127,7 @@ export const articles = pgTable(
     sourceKind: sourceKindEnum("source_kind").notNull().default("secondary"),
     headlineAnnotations: jsonb("headline_annotations").notNull().default(sql`'[]'::jsonb`),
     teaserAnnotations: jsonb("teaser_annotations").notNull().default(sql`'[]'::jsonb`),
+    annotationVersion: text("annotation_version"),
     publishedAt: timestamp("published_at", { withTimezone: true }).notNull(),
     fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),
     embedding: vector("embedding", { dimensions: EMBEDDING_DIMENSIONS }),

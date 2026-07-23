@@ -10,7 +10,7 @@ import "@kebab/env/load";
  */
 import { nextRunDate, RUN_HOURS_UTC } from "@kebab/core";
 import { runIngest } from "./ingest";
-import { runAutoRewrites } from "./rewrite";
+import { annotateReadyStories, runAutoRewrites } from "./rewrite";
 
 function log(event: string, fields: Record<string, unknown> = {}) {
   console.log(JSON.stringify({ ts: new Date().toISOString(), event, ...fields }));
@@ -32,6 +32,11 @@ async function safeRun(reason: string): Promise<void> {
       newStories: result.newStories,
       durationMs: result.durationMs,
     });
+
+    const annotations = await annotateReadyStories();
+    if (annotations.stories > 0) {
+      log("worker.source_annotations_done", annotations);
+    }
 
     // After ingest, pick up source-diverse stories and published stories with
     // newly attached sources. The AI rewrite runs only here (CLAUDE.md rule #5).

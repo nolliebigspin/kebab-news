@@ -91,6 +91,7 @@ export async function loadPublishedStory(slug: string) {
       headline: articles.headline,
       headlineAnnotations: articles.headlineAnnotations,
       teaser: articles.teaser,
+      teaserAnnotations: articles.teaserAnnotations,
       language: articles.language,
       sourceKind: articles.sourceKind,
       publishedAt: articles.publishedAt,
