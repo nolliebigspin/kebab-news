@@ -26,9 +26,6 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
             aria-label={t("nav_label")}
             className="order-last flex w-full items-center gap-6 md:order-0 md:w-auto md:gap-8"
           >
-            <Link href="/" className={NAV_LINK}>
-              {t("current")}
-            </Link>
             <Link href="/themen" className={NAV_LINK}>
               {t("topics")}
             </Link>
