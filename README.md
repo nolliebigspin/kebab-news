@@ -2,18 +2,20 @@
 
 > **Viele Quellen. Eine verständliche Zusammenfassung. Alle Unterschiede transparent.**
 
-kebab.news clusters reporting about the same event into a readable German Story Summary. It does not promise neutrality. Instead, it exposes evidence, uncertainty, disagreements, framing choices, original sources and corrections.
+kebab.news bündelt Originalbeiträge zum selben Thema und veröffentlicht daraus verständliche Artikel. Es verspricht keine vollständige Neutralität, sondern zeigt Belege, Unsicherheiten, Unterschiede, mögliche Rahmungen und Korrekturen.
 
 ## Product
 
-- `/` — current published Story Summaries
-- `/artikel/[slug]` — short and long summary, sourced facts, open questions, source differences, interactive framing notes, original sources, quality rating, sharing and comments
-- `/radar` — compare the source coverage behind story clusters
+- `/` — aktuelle veröffentlichte Artikel
+- `/themen` — Themen mit Quellenvergleich, Originalbeiträgen und Blindstellen
+- `/artikel` — Archiv der veröffentlichten Artikel
+- `/artikel/[slug]` — kurze und ausführliche Zusammenfassung, Fakten, offene Fragen, Quellenunterschiede, Framing-Hinweise, Originalbeiträge, Bewertung, Teilen und Kommentare
 - `/lernen` — short lessons about bias, framing and source literacy
 - `/methodik` — public methodology and limitations
+- `/ueber-uns` — Haltung und Produktidee
 - `/redaktion` — server-authorized review dashboard for moderators, editors and admins
 
-Story selection is a system/editorial concern. Readers do not vote on which topics receive coverage; authenticated readers rate the quality of published summaries and can contribute contextual comments.
+Die Themenauswahl ist eine System-/Redaktionsentscheidung. Leser stimmen nicht über die Abdeckung ab; angemeldete Leser bewerten die Qualität veröffentlichter Artikel und können Kontext kommentieren.
 
 ## Architecture
 
@@ -36,7 +38,7 @@ The structured summary contract lives in `packages/core/src/story-summary.ts`. I
 - Share analytics store only summary, channel and timestamp.
 - The current pipeline imports RSS headlines and teasers, not full article bodies.
 
-Every Story Summary discloses whether it was generated or manual and whether editorial review occurred. This is transparency, not legal immunity or a quality guarantee.
+Jeder Artikel weist aus, ob er automatisch oder manuell erstellt und ob er redaktionell geprüft wurde. Das schafft Transparenz, ist aber weder Haftungsausschluss noch Qualitätsgarantie.
 
 ## Local development
 

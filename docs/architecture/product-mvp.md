@@ -2,7 +2,7 @@
 
 ## Decision
 
-kebab.news does not promise neutrality. Its public unit is a versioned **Story Summary** built from a cluster of source articles. Reader voting no longer selects topics; readers rate the quality of a published summary.
+kebab.news does not promise neutrality. Its reader-facing units are a **Thema** (the clustered original contributions and source comparison) and a versioned **Artikel** (the published summary built from that topic). Reader voting no longer selects topics; readers rate the quality of a published article.
 
 ## Deep modules and seams
 

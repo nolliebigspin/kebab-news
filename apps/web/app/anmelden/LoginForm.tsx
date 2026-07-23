@@ -27,7 +27,7 @@ export function LoginForm() {
           // callbackURL is where the magic-link lands after verification. The
           // ?angemeldet=1 marker is consumed once by <LoginToast> to show the
           // "logged in" toast, then stripped from the URL.
-          body: JSON.stringify({ email, callbackURL: "/radar?angemeldet=1" }),
+          body: JSON.stringify({ email, callbackURL: "/themen?angemeldet=1" }),
         });
         if (res.ok) setSent(true);
         else setErrored(true);

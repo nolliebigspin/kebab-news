@@ -10,8 +10,8 @@ import {
 } from "@/lib/radar-filters";
 
 /**
- * Radar filter controls: search + date window + lean + sort. The shared
- * FilterBar owns the search box, URL push and reset; this wires the radar's
+ * Topic filter controls: search + date window + lean + sort. The shared
+ * FilterBar owns the search box, URL push and reset; this wires the topic
  * own selects and serialization.
  *
  * `leanOptions` is passed from the Server Component rather than imported from

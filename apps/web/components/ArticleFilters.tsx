@@ -12,7 +12,7 @@ import { DAY_PRESETS } from "@/lib/filters";
 /**
  * Article filter controls: search + date window + sort. No lean axis (operator
  * decision — a finished neutral rewrite is filtered by text/date/sort only).
- * Reuses the shared FilterBar and the radar's filter i18n namespace, with an
+ * Reuses the shared FilterBar and the topic filter i18n namespace, with an
  * article-specific sort enum.
  */
 export function ArticleFilters({ filters }: { filters: ArticleFilterState }) {

@@ -29,8 +29,11 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
             <Link href="/" className={NAV_LINK}>
               {t("current")}
             </Link>
-            <Link href="/artikel" className={NAV_LINK}>
+            <Link href="/themen" className={NAV_LINK}>
               {t("topics")}
+            </Link>
+            <Link href="/artikel" className={NAV_LINK}>
+              {t("articles")}
             </Link>
             <Link href="/lernen" className={NAV_LINK}>
               {t("learn")}
@@ -41,9 +44,8 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
           </nav>
         </div>
         <div className="flex items-center gap-4 md:gap-5">
-          {/* On desktop How-to sits on the right; on mobile it lives in the
-              wrapped nav row above, so it's hidden here below md. */}
-          <Link href="/vision" className={`${NAV_LINK} hidden md:inline`}>
+          {/* The about link sits beside the account actions on wider screens. */}
+          <Link href="/ueber-uns" className={`${NAV_LINK} hidden md:inline`}>
             {t("about")}
           </Link>
           <Button

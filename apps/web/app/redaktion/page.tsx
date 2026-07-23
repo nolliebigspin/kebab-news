@@ -10,6 +10,22 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+const roleLabels = {
+  moderator: "Moderation",
+  editor: "Redaktion",
+  admin: "Administration",
+} as const;
+
+const statusLabels = {
+  draft: "Entwurf",
+  processing: "In Verarbeitung",
+  needs_review: "Prüfung erforderlich",
+  published: "Veröffentlicht",
+  updated: "Aktualisiert",
+  corrected: "Korrigiert",
+  archived: "Archiviert",
+} as const;
+
 export default async function EditorialPage() {
   const session = await getSession();
   if (!session) notFound();
@@ -46,7 +62,7 @@ export default async function EditorialPage() {
     <div className="mx-auto max-w-5xl px-6 py-14">
       <header>
         <p className="font-mono text-[11px] text-brand-ink uppercase tracking-[0.14em]">
-          Interner Bereich · {actor[0].role}
+          Interner Bereich · {roleLabels[actor[0].role as keyof typeof roleLabels]}
         </p>
         <h1 className="mt-2 font-display text-4xl">Redaktion</h1>
         <p className="mt-3 text-ink-soft">
@@ -67,12 +83,12 @@ export default async function EditorialPage() {
         ))}
       </div>
       <section className="mt-12">
-        <h2 className="font-display text-2xl">Zusammenfassungen</h2>
+        <h2 className="font-display text-2xl">Artikel</h2>
         <div className="mt-5 overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-line border-b font-mono text-[10px] text-ink-mute uppercase">
               <tr>
-                <th className="p-3">Story</th>
+                <th className="p-3">Artikel</th>
                 <th className="p-3">Status</th>
                 <th className="p-3">Version</th>
                 <th className="p-3">Quellen</th>
@@ -95,7 +111,7 @@ export default async function EditorialPage() {
                   </td>
                   <td className="p-3">
                     <span className="rounded-full bg-bg-warm px-2 py-1 font-mono text-[10px] uppercase">
-                      {summary.status}
+                      {statusLabels[summary.status]}
                     </span>
                   </td>
                   <td className="p-3 tabular-nums">{summary.version}</td>
@@ -112,9 +128,9 @@ export default async function EditorialPage() {
         </div>
       </section>
       <aside className="mt-10 rounded-xl bg-warn-wash p-4 text-ink-soft text-sm">
-        Automatisch erzeugte Einträge mit <code>needs_review</code> dürfen erst nach Prüfung von
-        Quellenbelegen, Zitaten, Unsicherheiten und Markierungen veröffentlicht werden.
-        Schreibaktionen werden als nächster Adapter auf denselben Rollen-Seam gesetzt.
+        Automatisch erzeugte Einträge mit dem Status „Prüfung erforderlich“ dürfen erst nach Prüfung
+        von Quellenbelegen, Zitaten, Unsicherheiten und Markierungen veröffentlicht werden.
+        Schreibaktionen werden künftig über dieselben Rollen abgesichert.
       </aside>
     </div>
   );

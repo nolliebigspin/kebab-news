@@ -10,18 +10,18 @@ export const metadata: Metadata = {
 const steps = [
   [
     "1",
-    "Quellen auswählen",
-    "Wir importieren Schlagzeilen und RSS-Teaser verschiedener deutschsprachiger Publisher. Publisher-Namen gelten nicht allein als Qualitätsurteil; Primärquellen sollen erkennbar werden.",
+    "Originalbeiträge erfassen",
+    "Wir importieren Schlagzeilen und RSS-Teaser verschiedener deutschsprachiger Medien. Der Name eines Mediums ist kein Qualitätsurteil; Primärquellen sollen erkennbar werden.",
   ],
   [
     "2",
-    "Artikel gruppieren",
-    "Semantische Ähnlichkeit bildet Themen-Cluster. Konservative Schwellen sollen falsche Zusammenführungen vermeiden. Die Zuordnung kann redaktionell korrigiert werden.",
+    "Beiträge zu Themen bündeln",
+    "Semantische Ähnlichkeit bündelt Originalbeiträge zu Themen. Konservative Schwellen sollen falsche Zusammenführungen vermeiden. Die Zuordnung kann redaktionell korrigiert werden.",
   ],
   [
     "3",
     "Aussagen belegen",
-    "Das System extrahiert Aussagen und verknüpft sie mit source_ids. Ohne Beleg wird eine Aussage als unsicher markiert oder verworfen.",
+    "Das System extrahiert Aussagen und verknüpft sie mit konkreten Originalbeiträgen. Ohne Beleg wird eine Aussage als unsicher markiert oder verworfen.",
   ],
   [
     "4",
@@ -36,7 +36,7 @@ const steps = [
   [
     "6",
     "Prüfen und veröffentlichen",
-    "Automatische Entwürfe tragen needs_review. Veröffentlichung, Aktualisierung und Korrektur bleiben versioniert und auditierbar.",
+    "Automatische Entwürfe bleiben sichtbar ungeprüft. Veröffentlichung, Aktualisierung und Korrektur werden versioniert und nachvollziehbar dokumentiert.",
   ],
 ];
 
@@ -56,7 +56,7 @@ export default function MethodPage() {
         </p>
       </header>
       <section className="mt-14">
-        <h2 className="font-display text-3xl">Von der Quelle zur Story</h2>
+        <h2 className="font-display text-3xl">Von Originalbeiträgen zum Artikel</h2>
         <ol className="mt-7 space-y-5">
           {steps.map(([number, title, body]) => (
             <li
@@ -77,9 +77,9 @@ export default function MethodPage() {
           <h2 className="font-display text-2xl">Rolle der KI</h2>
           <p className="mt-3 text-ink-soft text-sm leading-6">
             KI unterstützt Clustering, Extraktion, Zusammenfassung und Framing-Analyse.
-            Strukturierte Ausgaben werden validiert. Importierte Artikel gelten als untrusted; darin
-            enthaltene Anweisungen werden ignoriert. Ein Modell kann trotzdem irren oder eigene
-            Verzerrungen reproduzieren.
+            Strukturierte Ausgaben werden validiert. Importierte Originalbeiträge gelten als nicht
+            vertrauenswürdige Eingaben; darin enthaltene Anweisungen werden ignoriert. Ein Modell
+            kann trotzdem irren oder eigene Verzerrungen reproduzieren.
           </p>
         </div>
         <div>
@@ -94,9 +94,9 @@ export default function MethodPage() {
       <section className="mt-14 rounded-2xl bg-bg-warm p-6">
         <h2 className="font-display text-2xl">Grenzen & Fehler</h2>
         <p className="mt-3 text-ink-soft text-sm leading-6">
-          RSS-Teaser enthalten nur einen Ausschnitt. Viele Artikel können dieselbe Ursprungsquelle
-          wiederholen. Fehlende Perspektiven sind nicht immer automatisch erkennbar. Kurze Zitate
-          bleiben auf das notwendige Maß begrenzt und verlinken zum Original.
+          RSS-Teaser enthalten nur einen Ausschnitt. Viele Originalbeiträge können dieselbe
+          Ursprungsquelle wiederholen. Fehlende Perspektiven sind nicht immer automatisch erkennbar.
+          Kurze Zitate bleiben auf das notwendige Maß begrenzt und verlinken zum Original.
         </p>
         <p className="mt-4 text-sm">
           Fehler gefunden?{" "}
@@ -104,7 +104,7 @@ export default function MethodPage() {
             href="mailto:contact@awinter.dev"
             className="text-brand-ink underline underline-offset-4"
           >
-            Melde ihn mit Story-Link und Beleg.
+            Melde ihn mit Artikel-Link und Beleg.
           </Link>{" "}
           Sachliche Korrekturen werden in der Versionshistorie dokumentiert.
         </p>

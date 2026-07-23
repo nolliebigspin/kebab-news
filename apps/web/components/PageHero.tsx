@@ -6,10 +6,9 @@ type Props = {
 };
 
 /**
- * Shared page hero (h1 + intro line). Used by /radar, /artikel and /how-to so
+ * Shared page hero (h1 + intro line). Used by /themen and /artikel so
  * the title size, subtitle treatment and spacing are identical across pages —
- * each page still owns its own outer container width (the radar list is wider
- * than the reading-width article/how-to pages).
+ * each page still owns its own outer container width.
  */
 export function PageHero({ title, subtitle }: Props) {
   return (

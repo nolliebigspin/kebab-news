@@ -25,7 +25,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const data = await loadPublishedStory(slug);
-  if (!data) return { title: "Story nicht gefunden — kebab.news" };
+  if (!data) return { title: "Artikel nicht gefunden — kebab.news" };
   const canonical = `${BASE_URL}/artikel/${data.story.slug}`;
   const description = data.shortSummary.slice(0, 155);
   return {
@@ -103,12 +103,10 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
       <header className="border-line-soft border-b bg-bg-warm/55">
         <div className="mx-auto max-w-5xl px-6 py-10 sm:py-14">
           <nav
-            aria-label="Brotkrumen"
+            aria-label="Zurück zur Übersicht"
             className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]"
           >
-            <Link href="/">Aktuell</Link>
-            <span aria-hidden> / </span>
-            <span>Story</span>
+            <Link href="/artikel">← Alle Artikel</Link>
           </nav>
           <p className="mt-8 font-mono text-[11px] text-brand-ink uppercase tracking-[0.14em]">
             {data.summary.sourceCount} Quellen · Version {data.summary.version}
@@ -271,7 +269,8 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
 
           <section id="quellen" aria-labelledby="sources-heading">
             <h2 id="sources-heading" className="font-display text-2xl">
-              Originalquellen <span className="text-ink-mute">{data.sources.length}</span>
+              Verwendete Originalbeiträge{" "}
+              <span className="text-ink-mute">{data.sources.length}</span>
             </h2>
             <p className="mt-2 text-ink-soft text-sm">
               Viele Quellen sind kein automatischer Qualitätsbeweis. Entscheidend ist, was eine
@@ -280,7 +279,7 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
             {data.sourceReceiptMode === "legacy_best_effort" && (
               <p className="mt-3 rounded-lg border border-warn/30 bg-warn-wash p-3 text-ink-soft text-sm">
                 Transparenzhinweis: Diese ältere Version stammt aus der Zeit vor exakten
-                Quellenbelegen. Angezeigt wird pro damals gespeichertem Publisher der zeitlich
+                Quellenbelegen. Angezeigt wird pro damals gespeichertem Medium der zeitlich
                 passendste Beitrag; die ursprüngliche Auswahl lässt sich nicht vollständig
                 rekonstruieren.
               </p>
@@ -389,7 +388,7 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
             className="sticky top-6 rounded-xl border border-line-soft p-4 text-sm"
           >
             <p className="font-mono text-[10px] text-ink-mute uppercase tracking-[0.12em]">
-              In dieser Story
+              In diesem Artikel
             </p>
             <ul className="mt-3 space-y-2 text-ink-soft">
               <li>
@@ -409,9 +408,12 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
               </li>
             </ul>
             <Link
-              href="/methodik"
+              href={`/themen/${data.story.slug}`}
               className="mt-5 block border-line-soft border-t pt-4 text-brand-ink"
             >
+              Quellenvergleich zum Thema →
+            </Link>
+            <Link href="/methodik" className="mt-3 block text-brand-ink">
               So arbeiten wir →
             </Link>
           </nav>

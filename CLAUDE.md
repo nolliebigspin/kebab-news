@@ -16,13 +16,13 @@ kebab.news is a German-language news platform that clusters multiple reports abo
 
 **Why now:** Aggregators expose many links but rarely connect individual claims to evidence or explain uncertainty and framing in a readable German product.
 
-**The product flow in one sentence:** outlets publish → we cluster → the system/editorial workflow creates a sourced draft → humans can review → we publish a versioned Story Summary → readers rate its quality and discuss context.
+**The product flow in one sentence:** outlets publish → we cluster contributions into a topic → the system/editorial workflow creates a sourced draft → humans can review → we publish a versioned article → readers rate its quality and discuss context.
 
 ---
 
 ## II. Product Scope
 
-The focused MVP is one vertical Story Summary slice plus supporting discovery and learning surfaces.
+The focused MVP is one vertical article slice plus supporting topic-discovery and learning surfaces. In reader-facing German, use **Thema** for a source cluster and **Artikel** for a published kebab.news summary. "Story" and "Radar" are legacy/internal terms and must not appear as navigation or content labels.
 
 ### Piece 1 — Discovery and source radar
 
@@ -31,11 +31,11 @@ The radar is the day's top clusters of German news. For each cluster:
 - Annotate possible framing language on source headlines and teasers.
 - Show blind spots — which political lean(s) didn't cover it.
 
-The homepage and `/artikel` are the primary discovery surfaces. Radar is a source-comparison tool.
+The homepage and `/artikel` are the primary article-discovery surfaces. `/themen` is the source-comparison surface; legacy `/radar` URLs redirect there.
 
-### Piece 2 — Versioned Story Summary
+### Piece 2 — Versioned article
 
-Each public Story Summary includes a headline, short summary, longer paragraphs, sourced facts, uncertainties, source differences, framing annotations, original sources, quality ratings, sharing, comments and version/correction metadata. Topic selection is system/editorial; there is no community vote deciding coverage.
+Each public article includes a headline, short summary, longer paragraphs, sourced facts, uncertainties, source differences, framing annotations, original contributions, quality ratings, sharing, comments and version/correction metadata. Topic selection is system/editorial; there is no community vote deciding coverage.
 
 ### Piece 3 — Learning and editorial workflow
 
@@ -43,7 +43,7 @@ The learning area teaches bias, framing and source literacy through concrete exa
 
 We deliberately do **not** scrape article bodies. Same pattern as Ground News: headlines + teasers carry most of the framing signal, and skipping body scraping removes the open DE legal question around derivative works while keeping paywalled outlets (NZZ, FAZ) in the spectrum. See §VII.
 
-The published Story Summary lives at `/artikel/[slug]` and always discloses both its origin (AI or manual) and its actual review state. A summary is shown as editorially reviewed only when `reviewed_at` and `reviewed_by` were set by an explicit publish decision. Original sources are always linked.
+The published article lives at `/artikel/[slug]` and always discloses both its origin (AI or manual) and its actual review state. A summary is shown as editorially reviewed only when `reviewed_at` and `reviewed_by` were set by an explicit publish decision. Original contributions are always linked.
 
 `/artikel` is the accumulating archive of published summaries, newest first.
 
@@ -84,10 +84,11 @@ Source headline annotations retain the legacy offset format. Story Summary annot
 
 `bun rewrite:publish --story <slug> --reviewed-by <name>` publishes the latest reviewed draft and records the review receipt. `--unreviewed` is the explicit alternative. The command back-links `stories.published_article_id`, making that version visible at `/artikel/[slug]`.
 
-### 5. Story surface
+### 5. Topic and article surfaces
 
 - `/artikel` — list of published rewrites (those with `published_at NOT NULL`), newest first.
-- `/artikel/[slug]` — full progressive Story Summary with sources, uncertainty, differences, interactive framing explanations, quality feedback, sharing, history and comments.
+- `/artikel/[slug]` — full progressive article with sources, uncertainty, differences, interactive framing explanations, quality feedback, sharing, history and comments.
+- `/themen` and `/themen/[slug]` — source clusters and their publisher-grouped original contributions; `/radar` remains redirect-only for old links.
 
 ---
 

@@ -27,15 +27,15 @@ export default async function LandingPage() {
             <span className="text-brand-ink">Eine verständliche Zusammenfassung.</span>
           </h1>
           <p className="mt-7 max-w-2xl text-ink-soft text-lg leading-8">
-            kebab.news bündelt Berichte zu einer Story und zeigt, was belegt ist, was offen bleibt
-            und wo Medien unterschiedlich framen.
+            kebab.news bündelt Berichte zu einem Thema und zeigt, was belegt ist, was offen bleibt
+            und wo Medien unterschiedlich rahmen.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
             <a
               href="#aktuell"
               className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-3 font-medium text-sm text-white hover:bg-brand-ink focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
             >
-              Aktuelle Storys <FiArrowRight aria-hidden />
+              Aktuelle Artikel <FiArrowRight aria-hidden />
             </a>
             <Link
               href="/methodik"
@@ -48,7 +48,7 @@ export default async function LandingPage() {
             <li className="flex gap-3">
               <FiLayers className="mt-0.5 shrink-0 text-brand" aria-hidden />
               <span>
-                <strong className="block text-ink">Sources first</strong>Jede wesentliche Aussage
+                <strong className="block text-ink">Quellen zuerst</strong>Jede wesentliche Aussage
                 bleibt zu Quellen rückverfolgbar.
               </span>
             </li>
@@ -76,23 +76,23 @@ export default async function LandingPage() {
             <p className="font-mono text-[11px] text-brand-ink uppercase tracking-[0.14em]">
               Aktuell
             </p>
-            <h2 className="mt-2 font-display text-3xl">Die wichtigsten Storys</h2>
+            <h2 className="mt-2 font-display text-3xl">Die neuesten Artikel</h2>
           </div>
           <Link href="/artikel" className="text-brand-ink text-sm hover:underline">
-            Alle Storys →
+            Alle Artikel →
           </Link>
         </div>
         {stories.length === 0 ? (
           <div className="rounded-2xl border border-line border-dashed p-10 text-center">
-            <h3 className="font-display text-xl">Noch keine Story veröffentlicht</h3>
+            <h3 className="font-display text-xl">Noch kein Artikel veröffentlicht</h3>
             <p className="mt-2 text-ink-soft text-sm">
               Sobald eine geprüfte Zusammenfassung bereitsteht, erscheint sie hier.
             </p>
             <Link
-              href="/radar"
+              href="/themen"
               className="mt-5 inline-block text-brand-ink text-sm underline underline-offset-4"
             >
-              Quellen im Radar ansehen
+              Themen und Quellen ansehen
             </Link>
           </div>
         ) : (
@@ -131,7 +131,7 @@ export default async function LandingPage() {
                         {summary}
                       </p>
                       <span className="mt-6 inline-flex items-center gap-2 text-brand-ink text-sm">
-                        Story verstehen{" "}
+                        Artikel lesen{" "}
                         <FiArrowRight
                           className="transition-transform group-hover:translate-x-1"
                           aria-hidden

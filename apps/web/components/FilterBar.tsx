@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 /**
- * Generic, URL-driven filter bar shared by the radar and article lists. It owns
+ * Generic, URL-driven filter bar shared by the topic and article lists. It owns
  * the parts both surfaces have in common — a debounced search input, the
  * searchParams push, and the reset button — and is otherwise agnostic about the
  * filter shape `F`. Each page supplies:

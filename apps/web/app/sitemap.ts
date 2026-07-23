@@ -7,11 +7,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     ["", "daily", 1],
     ["/artikel", "daily", 0.9],
-    ["/radar", "daily", 0.7],
+    ["/themen", "daily", 0.7],
     ["/lernen", "monthly", 0.7],
     ["/lernen/framing", "monthly", 0.6],
     ["/methodik", "monthly", 0.7],
-    ["/vision", "monthly", 0.5],
+    ["/ueber-uns", "monthly", 0.5],
     ["/impressum", "yearly", 0.2],
     ["/datenschutz", "yearly", 0.2],
   ].map(([path, changeFrequency, priority]) => ({
