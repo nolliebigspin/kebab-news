@@ -59,7 +59,7 @@ The published article lives at `/artikel/[slug]` and always discloses both its o
 
 ### 1. Ingest pipeline (existing, manual)
 
-`bun ingest:run` → fetch RSS feeds → for each new article: embed (Voyage `voyage-3-lite`, 512 dims) + annotate framing (Claude Opus 4.7) → cluster into stories by cosine similarity ≥ `DEFAULT_CLUSTER_THRESHOLD` within a `STORY_WINDOW_HOURS` window. Hard cap of `MAX_NEW_ARTICLES_PER_OUTLET` new articles per outlet per run, so cost is bounded.
+`bun ingest:run` → fetch RSS feeds → for each new article: embed (Voyage `voyage-3-lite`, 512 dims) + annotate framing (Claude Sonnet 5) → cluster into stories by cosine similarity ≥ `DEFAULT_CLUSTER_THRESHOLD` within a `STORY_WINDOW_HOURS` window. Hard cap of `MAX_NEW_ARTICLES_PER_OUTLET` new articles per outlet per run, so cost is bounded.
 
 All tunables live in `packages/core/src/constants.ts`. The ingest pipeline lives in `apps/worker/src/ingest.ts` (`runIngest()`), driven by the long-running worker's in-process scheduler (`apps/worker/src/index.ts`, `RUN_HOURS_UTC = [6,12,18]` — 07/13/19 CET, 08/14/20 CEST; we accept the 1h DST drift). There is no HTTP route and no Vercel-Cron anymore — the worker process *is* the trigger. `bun ingest:run` (→ `@kebab/worker ingest:once`) runs one pass manually against the same DB.
 

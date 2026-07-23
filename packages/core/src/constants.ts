@@ -73,7 +73,7 @@ export const VOYAGE_URL = "https://api.voyageai.com/v1/embeddings";
 // Radar — annotation (Claude)
 // ============================================================================
 
-export const ANNOTATION_MODEL = "claude-opus-4-7";
+export const ANNOTATION_MODEL = "claude-sonnet-5";
 
 /** Max framing spans per text. Claude is told this in the system prompt. */
 export const MAX_ANNOTATION_SPANS = 10;
@@ -97,7 +97,7 @@ export const ANNOTATION_SYSTEM_PROMPT = [
 // Radar — neutral rewrite (Claude)
 // ============================================================================
 
-export const REWRITE_MODEL = "claude-opus-4-7";
+export const REWRITE_MODEL = "claude-sonnet-5";
 
 /**
  * Version stamp persisted on every generated rewrite. Bump whenever the

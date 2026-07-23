@@ -45,7 +45,7 @@ Jeder erzeugte Artikel hat unterhalb der Umschreibung einen „Quellen"-Bereich 
 - **Datenbank:** [Neon](https://neon.tech/) Postgres + [Drizzle ORM](https://orm.drizzle.team/) + `pgvector`
 - **Geplante Jobs:** Vercel Cron
 - **KI — Embeddings:** [Voyage AI](https://www.voyageai.com/) (`voyage-3-lite`, 512 Dimensionen) fürs Clustern
-- **KI — Framing-Annotation & neutrale Umschreibung:** [Claude](https://www.anthropic.com/) (`claude-opus-4-7`)
+- **KI — Framing-Annotation & neutrale Umschreibung:** [Claude](https://www.anthropic.com/) (`claude-sonnet-5`)
 - **Hosting:** [Vercel](https://vercel.com/)
 - **Werkzeuge:** [Bun](https://bun.sh/) (verwaltet über [mise](https://mise.jdx.dev/)), [Biome](https://biomejs.dev/), [Vitest](https://vitest.dev/)
 
