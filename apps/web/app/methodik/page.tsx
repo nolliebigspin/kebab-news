@@ -35,8 +35,8 @@ const steps = [
   ],
   [
     "6",
-    "Prüfen und veröffentlichen",
-    "Automatische Entwürfe bleiben sichtbar ungeprüft. Veröffentlichung, Aktualisierung und Korrektur werden versioniert und nachvollziehbar dokumentiert.",
+    "Veröffentlichen",
+    "Zusammenfassungen werden automatisch veröffentlicht. Veröffentlichung, Aktualisierung und Korrektur werden versioniert und nachvollziehbar dokumentiert.",
   ],
 ];
 
@@ -85,9 +85,9 @@ export default function MethodPage() {
         <div>
           <h2 className="font-display text-2xl">Rolle von Menschen</h2>
           <p className="mt-3 text-ink-soft text-sm leading-6">
-            Berechtigte Redakteure prüfen Quellenbelege, Zitate, Unsicherheiten, Markierungen und
-            Korrekturen. Automatisch erzeugte und geprüfte Inhalte werden unterschiedlich
-            gekennzeichnet.
+            Die Verarbeitung läuft automatisch, von der Bündelung bis zur Veröffentlichung. Menschen
+            greifen nachträglich ein: bei gemeldeten Fehlern, Korrekturen und der Moderation von
+            Kommentaren. Maßgeblich bleiben die verlinkten Originalbeiträge.
           </p>
         </div>
       </section>

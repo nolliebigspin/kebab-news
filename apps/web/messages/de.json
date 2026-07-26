@@ -131,7 +131,7 @@
     },
     "source_count": "{count, plural, one {# Quelle} other {# Quellen}}",
     "disclaimer_title": "Transparenzhinweis zur Erstellung",
-    "disclaimer_body": "Der jeweilige Hinweis zeigt, ob eine Zusammenfassung automatisch oder redaktionell erstellt und ob sie redaktionell geprüft wurde. Maßgeblich bleiben die verlinkten Originalbeiträge.",
+    "disclaimer_body": "Zusammenfassungen entstehen automatisiert aus den verlinkten Originalbeiträgen. Maßgeblich bleiben die Originalbeiträge.",
     "sources_heading": "Quellen",
     "sources_subheading": "Diese Medien haben über das Thema berichtet. Öffne einen Originalbeitrag, um die jeweilige Fassung zu lesen; mögliche Framing-Stellen sind in Schlagzeile und Teaser markiert.",
     "back_to_index": "Zurück zu allen Artikeln",
@@ -263,7 +263,7 @@
     "responsible_heading": "Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV",
     "responsible_body": "Alec Winter, Anschrift wie oben.",
     "ai_heading": "Hinweis zu KI-generierten Inhalten",
-    "ai_body": "Artikel können automatisiert auf Basis öffentlich zugänglicher Schlagzeilen und Teaser entstehen. Der jeweilige Prüfstatus wird am Inhalt ausgewiesen. KI-Ausgaben ersetzen keine eigene Prüfung; die verwendeten Originalbeiträge sind unter jedem Artikel verlinkt.",
+    "ai_body": "Artikel entstehen automatisiert auf Basis öffentlich zugänglicher Schlagzeilen und Teaser. KI-Ausgaben ersetzen keine eigene Prüfung; die verwendeten Originalbeiträge sind unter jedem Artikel verlinkt.",
     "moderation_heading": "Kontakt für Kommentarmoderation",
     "moderation_body": "Verantwortlicher Ansprechpartner für Meldungen zu Kommentaren ist Alec Winter. Bitte nutze die oben genannte E-Mail-Adresse und füge den Link zum betroffenen Artikel bei."
   },

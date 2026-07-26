@@ -1,14 +1,11 @@
 import "@kebab/env/load";
 /**
- * Milestone 3 — Operator-triggered rewrite.
+ * Operator-triggered rewrite.
  *
- * Generates a transparent German summary for one story and persists it as a
- * DRAFT (published_at = NULL) in published_articles. A separate command
- * (`bun rewrite:publish --story <slug>`) flips the latest draft to live.
- *
- * The draft / publish split is deliberate: it gives the operator one chance
- * to read the rewrite (in db:studio or the eventual admin UI) before it
- * appears at /artikel/[slug] with its generation and review status.
+ * Generates a transparent German summary for one story and publishes it
+ * immediately — same code path as the worker's autonomous trigger, so a manual
+ * run and a scheduled one produce identical results. There is no draft state
+ * and no review gate.
  *
  * Usage:
  *   mise exec -- bun scripts/rewrite-run.ts --story <story-slug>
@@ -50,14 +47,10 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`\n✓ Draft saved:`);
+  console.log(`\n✓ Published:`);
   console.log(`  slug: ${outcome.slug}`);
   console.log(`  Headline: ${outcome.headline}`);
-  console.log(`\nTo publish:`);
-  console.log(
-    `  mise exec -- bun scripts/rewrite-publish.ts --story ${storySlug} --reviewed-by <name>`
-  );
-  console.log(`  # or explicitly publish as unreviewed with --unreviewed`);
+  console.log(`  Live at: /artikel/${storySlug}`);
 }
 
 main()

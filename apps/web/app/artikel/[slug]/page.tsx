@@ -79,12 +79,6 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
     getTranslations("radar"),
   ]);
   const canonical = `${BASE_URL}/artikel/${data.story.slug}`;
-  const disclosureTitle =
-    data.summary.contentOrigin === "manual"
-      ? "Redaktionell erstellte Zusammenfassung."
-      : data.summary.reviewedAt && data.summary.reviewedBy
-        ? "KI-generierte Zusammenfassung. Redaktionell freigegeben."
-        : "KI-generierte Zusammenfassung. Ungeprüft.";
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
@@ -129,10 +123,6 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
               Zusammenfassung aktualisiert{" "}
               {format(data.summary.rewrittenAt, "d. MMM yyyy, HH:mm", { locale: de })}
             </span>
-            <span aria-hidden>·</span>
-            <span>
-              {data.summary.contentOrigin === "manual" ? "Redaktionell" : "Automatisch erstellt"}
-            </span>
           </div>
           <div className="mt-7">
             <ShareMenu
@@ -151,8 +141,8 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
             className="rounded-xl border border-warn/35 bg-warn-wash p-4 text-ink-soft text-sm"
             aria-label="Transparenzhinweis"
           >
-            <strong className="text-ink">{disclosureTitle}</strong> Sie ist eine quellengebundene
-            Einordnung, keine Garantie auf Neutralität oder Wahrheit. Prüfstatus, Unsicherheiten und
+            <strong className="text-ink">Quellengebundene Zusammenfassung.</strong> Sie ist eine
+            Einordnung, keine Garantie auf Neutralität oder Wahrheit. Unsicherheiten und
             Unterschiede werden separat ausgewiesen.
           </aside>
 

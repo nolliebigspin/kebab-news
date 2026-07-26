@@ -12,6 +12,7 @@ import {
   generateRewrite,
   generateStorySlug,
   RADAR_MIN_OUTLETS,
+  REWRITE_MIN_NEW_SOURCES,
   REWRITE_MODEL,
   REWRITE_PROMPT_VERSION,
   type SourceItem,
@@ -134,10 +135,11 @@ export type RewriteOutcome =
   | { kind: "generation-failed" };
 
 /**
- * Generate + persist a DRAFT rewrite (published_at = NULL) for one story.
- * Never publishes — the operator still flips drafts live via
- * `rewrite:publish`. Returns a structured outcome instead of throwing so the
- * worker loop can log and move on.
+ * Generate + persist a summary for one story and publish it immediately.
+ *
+ * The pipeline runs autonomously: there is no review gate and no draft state.
+ * Returns a structured outcome instead of throwing so the worker loop can log
+ * and move on.
  */
 export async function rewriteStory(story: StoryRow): Promise<RewriteOutcome> {
   const sources = await loadSources(story.id);
@@ -173,6 +175,8 @@ export async function rewriteStory(story: StoryRow): Promise<RewriteOutcome> {
     `${rewrite.neutral_headline}-${story.id.slice(0, 8)}-v${version}`
   );
 
+  const now = new Date();
+
   await db.transaction(async (tx) => {
     const inserted = await tx
       .insert(publishedArticles)
@@ -193,20 +197,42 @@ export async function rewriteStory(story: StoryRow): Promise<RewriteOutcome> {
         model: REWRITE_MODEL,
         promptVersion: REWRITE_PROMPT_VERSION,
         version,
-        status: "needs_review",
+        // The pipeline is autonomous: generation publishes directly. A version
+        // > 1 supersedes an earlier live summary for the same story.
+        status: version > 1 ? "updated" : "published",
+        publishedAt: now,
       })
       .returning({ id: publishedArticles.id });
+
     await tx
       .insert(summarySources)
       .values(sources.map((source) => ({ summaryId: inserted[0].id, articleId: source.id })));
+
+    // Supersede the previous live version and point the story at the new one.
+    if (story.publishedArticleId && story.publishedArticleId !== inserted[0].id) {
+      await tx
+        .update(publishedArticles)
+        .set({ status: "archived" })
+        .where(eq(publishedArticles.id, story.publishedArticleId));
+    }
+    await tx
+      .update(stories)
+      .set({ publishedArticleId: inserted[0].id })
+      .where(eq(stories.id, story.id));
   });
 
   return { kind: "saved", slug: draftSlug, headline: rewrite.neutral_headline };
 }
 
 /**
- * Source-diverse stories without a summary, plus published stories whose
- * cluster received newer sources. An existing draft suppresses duplicate work.
+ * Source-diverse stories without a summary, plus already-summarized stories
+ * that gained at least REWRITE_MIN_NEW_SOURCES sources since their last
+ * rewrite.
+ *
+ * The re-summary condition counts articles newer than the latest rewrite
+ * rather than comparing `stories.lastSeenAt` to it. `lastSeenAt` moves on
+ * every cluster touch, so the old comparison re-summarized a live story on
+ * essentially every ingest pass — the dominant AI cost in the pipeline.
  */
 export async function findStoriesReadyForRewrite(): Promise<StoryRow[]> {
   const rows = await db
@@ -219,10 +245,13 @@ export async function findStoriesReadyForRewrite(): Promise<StoryRow[]> {
       sql`count(DISTINCT ${articles.outletId}) >= ${RADAR_MIN_OUTLETS}
         and (
           count(DISTINCT ${publishedArticles.id}) = 0
-          or (
-            ${stories.lastSeenAt} > max(${publishedArticles.rewrittenAt})
-            and count(*) filter (where ${publishedArticles.publishedAt} is null) = 0
-          )
+          or count(DISTINCT ${articles.id}) filter (
+            where ${articles.publishedAt} > (
+              select max(prev.rewritten_at)
+              from ${publishedArticles} prev
+              where prev.story_id = ${stories.id}
+            )
+          ) >= ${REWRITE_MIN_NEW_SOURCES}
         )`
     )
     .orderBy(desc(stories.lastSeenAt));

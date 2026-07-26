@@ -86,7 +86,7 @@ export default async function LandingPage() {
           <div className="rounded-2xl border border-line border-dashed p-10 text-center">
             <h3 className="font-display text-xl">Noch kein Artikel veröffentlicht</h3>
             <p className="mt-2 text-ink-soft text-sm">
-              Sobald eine geprüfte Zusammenfassung bereitsteht, erscheint sie hier.
+              Sobald eine Zusammenfassung bereitsteht, erscheint sie hier.
             </p>
             <Link
               href="/themen"
