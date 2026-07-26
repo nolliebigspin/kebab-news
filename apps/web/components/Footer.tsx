@@ -17,6 +17,12 @@ export const Footer = () => {
             {t("method")}
           </Link>
           <Link
+            href="/ueber-uns"
+            className="rounded-sm hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
+          >
+            {t("about")}
+          </Link>
+          <Link
             href="/impressum"
             className="rounded-sm hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
           >

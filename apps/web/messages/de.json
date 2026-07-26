@@ -3,6 +3,8 @@
     "github": "GitHub",
     "github_label": "Projekt auf GitHub ansehen (öffnet neuen Tab)",
     "nav_label": "Hauptnavigation",
+    "menu_label": "Menü öffnen",
+    "menu_close_label": "Menü schließen",
     "topics": "Themen",
     "learn": "Lernen",
     "method": "Methodik",
@@ -43,7 +45,8 @@
     "nonprofit": "unabhängig · werbefrei · open source",
     "impressum": "Impressum",
     "datenschutz": "Datenschutz",
-    "method": "Methodik"
+    "method": "Methodik",
+    "about": "Über uns"
   },
   "radar": {
     "page_title": "Themen",

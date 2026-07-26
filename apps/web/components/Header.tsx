@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { FaGithub } from "react-icons/fa6";
 import { LogoutButton } from "@/components/LogoutButton";
+import { MobileNav } from "@/components/MobileNav";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/Wordmark";
 
@@ -17,15 +18,13 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
 
   return (
     <header className="hairline border-b px-6 py-4">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-8 gap-y-3">
-        <div className="flex flex-1 items-center gap-6 md:flex-none md:gap-10">
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-x-8">
+        <div className="flex items-center gap-6 md:gap-10">
           <Wordmark />
-          {/* Primary nav. On narrow screens it wraps to its own full-width row
-              below the wordmark instead of crunching against the actions. */}
-          <nav
-            aria-label={t("nav_label")}
-            className="order-last flex w-full items-center gap-6 md:order-0 md:w-auto md:gap-8"
-          >
+          {/* Primary nav. Below `md` it is replaced by the drawer in
+              <MobileNav>, which lists every destination including the ones
+              hidden here at narrower breakpoints. */}
+          <nav aria-label={t("nav_label")} className="hidden items-center gap-6 md:flex md:gap-8">
             <Link href="/themen" className={NAV_LINK}>
               {t("topics")}
             </Link>
@@ -50,21 +49,29 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
             size="icon-sm"
             nativeButton={false}
             aria-label={t("github_label")}
+            className="hidden md:inline-flex"
             render={
               <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
                 <FaGithub />
               </a>
             }
           />
-          {isAuthenticated ? (
-            <LogoutButton />
-          ) : (
-            <Button
-              size="sm"
-              nativeButton={false}
-              render={<Link href="/anmelden">{t("login")}</Link>}
-            />
-          )}
+          {/* Account actions stay in the bar on desktop; on mobile the drawer
+              carries them so the header keeps to a single row. */}
+          <div className="hidden md:block">
+            {isAuthenticated ? (
+              <LogoutButton />
+            ) : (
+              <Button
+                size="sm"
+                nativeButton={false}
+                render={<Link href="/anmelden">{t("login")}</Link>}
+              />
+            )}
+          </div>
+          <div className="md:hidden">
+            <MobileNav isAuthenticated={isAuthenticated} githubUrl={GITHUB_URL} />
+          </div>
         </div>
       </div>
     </header>
