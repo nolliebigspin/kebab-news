@@ -74,7 +74,7 @@ export function FramingText({
                 key={`${paragraph.id}-${mark.start}`}
                 type="button"
                 onClick={() => setActive(mark.item)}
-                className="rounded-sm bg-brand-wash px-0.5 text-left text-brand-ink underline decoration-brand decoration-dotted underline-offset-4 hover:bg-brand/15 focus-visible:outline-2 focus-visible:outline-brand"
+                className="cursor-pointer rounded-sm bg-brand-wash px-0.5 text-left text-brand-ink underline decoration-brand decoration-dotted underline-offset-4 hover:bg-brand/15 focus-visible:outline-2 focus-visible:outline-brand"
                 aria-label={t("annotation_label", { quote: mark.item.quote })}
               >
                 {mark.item.quote}
