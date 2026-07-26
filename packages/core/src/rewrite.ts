@@ -277,7 +277,15 @@ export async function generateRewrite(
         model: REWRITE_MODEL,
         max_tokens: REWRITE_MAX_OUTPUT_TOKENS,
         thinking: { type: "disabled" },
-        system: REWRITE_SYSTEM_PROMPT,
+        // The system prompt is identical on every call and is by far the
+        // largest fixed input. Caching it bills repeat reads at 10%.
+        system: [
+          {
+            type: "text",
+            text: REWRITE_SYSTEM_PROMPT,
+            cache_control: { type: "ephemeral" },
+          },
+        ],
         output_config: {
           format: { type: "json_schema", schema: REWRITE_JSON_SCHEMA },
         },

@@ -124,7 +124,15 @@ export async function annotateText(text: string): Promise<Annotation[] | null> {
     const response = await client.messages.create({
       model: ANNOTATION_MODEL,
       max_tokens: 1024,
-      system: ANNOTATION_SYSTEM_PROMPT,
+      // Annotation inputs are one headline or teaser; the system prompt
+      // dominates the input tokens. Caching it bills repeat reads at 10%.
+      system: [
+        {
+          type: "text",
+          text: ANNOTATION_SYSTEM_PROMPT,
+          cache_control: { type: "ephemeral" },
+        },
+      ],
       output_config: {
         format: { type: "json_schema", schema: JSON_SCHEMA },
       },

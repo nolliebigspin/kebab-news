@@ -56,6 +56,15 @@ export const RADAR_MIN_OUTLETS = 3;
  */
 export const REWRITE_VOTE_THRESHOLD = 5;
 
+/**
+ * How many NEW sources must attach to an already-summarized story before it is
+ * rewritten again. Without this, every ingest pass that moved `last_seen_at`
+ * triggered a fresh full-cost Claude call — by far the largest AI spend in the
+ * pipeline. A re-summary is only worth its cost when the cluster actually
+ * gained substance, not when one more outlet echoed the same report.
+ */
+export const REWRITE_MIN_NEW_SOURCES = 4;
+
 // ============================================================================
 // Radar — embeddings (Voyage AI)
 // ============================================================================
