@@ -15,9 +15,18 @@ import {
   REWRITE_MIN_NEW_SOURCES,
   REWRITE_MODEL,
   REWRITE_PROMPT_VERSION,
+  REWRITE_VOTE_THRESHOLD,
   type SourceItem,
 } from "@kebab/core";
-import { articles, db, outlets, publishedArticles, stories, summarySources } from "@kebab/db";
+import {
+  articles,
+  db,
+  outlets,
+  publishedArticles,
+  stories,
+  summarySources,
+  votes,
+} from "@kebab/db";
 import { and, desc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 
 export type StoryRow = typeof stories.$inferSelect;
@@ -225,9 +234,8 @@ export async function rewriteStory(story: StoryRow): Promise<RewriteOutcome> {
 }
 
 /**
- * Source-diverse stories without a summary, plus already-summarized stories
- * that gained at least REWRITE_MIN_NEW_SOURCES sources since their last
- * rewrite.
+ * Upvoted, source-diverse stories without a summary, plus upvoted stories that
+ * gained at least REWRITE_MIN_NEW_SOURCES sources since their last rewrite.
  *
  * The re-summary condition counts articles newer than the latest rewrite
  * rather than comparing `stories.lastSeenAt` to it. `lastSeenAt` moves on
@@ -239,10 +247,12 @@ export async function findStoriesReadyForRewrite(): Promise<StoryRow[]> {
     .select({ story: stories })
     .from(stories)
     .innerJoin(articles, eq(articles.storyId, stories.id))
+    .innerJoin(votes, eq(votes.storyId, stories.id))
     .leftJoin(publishedArticles, eq(publishedArticles.storyId, stories.id))
     .groupBy(stories.id)
     .having(
       sql`count(DISTINCT ${articles.outletId}) >= ${RADAR_MIN_OUTLETS}
+        and count(DISTINCT ${votes.id}) >= ${REWRITE_VOTE_THRESHOLD}
         and (
           count(DISTINCT ${publishedArticles.id}) = 0
           or count(DISTINCT ${articles.id}) filter (
@@ -261,8 +271,8 @@ export async function findStoriesReadyForRewrite(): Promise<StoryRow[]> {
 export type AutoRewriteResult = { triggered: number; saved: number; failed: number };
 
 /**
- * Worker hook: draft every source-diverse story. Called once per ingest pass.
- * AI calls stay in the worker process (CLAUDE.md rule #5).
+ * Worker hook: write every upvoted, source-diverse story that is ready. Called
+ * once per ingest pass. AI calls stay in the worker process (CLAUDE.md rule #5).
  */
 export async function runAutoRewrites(
   log: (event: string, fields?: Record<string, unknown>) => void = () => {}

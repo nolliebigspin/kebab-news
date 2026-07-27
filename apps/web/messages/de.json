@@ -107,16 +107,16 @@
       "omission": "Auslassung"
     },
     "vote": {
-      "cta": "Abstimmen",
-      "voted": "Stimme gezählt",
-      "already_voted": "Bereits abgestimmt",
+      "cta": "Upvoten",
+      "voted": "Upvote gezählt",
+      "already_voted": "Bereits upgevotet",
       "error": "Fehler — erneut versuchen",
-      "login_cta": "Anmelden zum Abstimmen",
-      "toast_recorded": "Stimme gezählt. Danke!",
-      "toast_duplicate": "Du hast für dieses Thema bereits abgestimmt.",
-      "toast_error": "Abstimmen fehlgeschlagen. Bitte versuche es erneut.",
-      "threshold_progress": "{count}/{threshold} bis zur Fassung",
-      "threshold_reached": "Schwelle erreicht — Fassung folgt"
+      "login_cta": "Anmelden zum Upvoten",
+      "toast_recorded": "Upvote gezählt. Danke!",
+      "toast_duplicate": "Du hast dieses Thema bereits upgevotet.",
+      "toast_error": "Upvote fehlgeschlagen. Bitte versuche es erneut.",
+      "threshold_progress": "{count}/{threshold} bis zum Artikel",
+      "threshold_reached": "Interesse bestätigt — Artikel folgt"
     }
   },
   "articles": {
@@ -237,9 +237,9 @@
     "step1_body": "Mehrmals täglich liest das Werkzeug die RSS-Feeds deutschsprachiger Medien quer durch das politische Spektrum (links bis öffentlich-rechtlich). Schlagzeile und Teaser jedes neuen Artikels werden eingelesen — Artikeltexte werden bewusst nicht gespeichert.",
     "step2_title": "2 · Beiträge werden zu Themen gebündelt",
     "step2_body": "Berichten mehrere Medien über dasselbe Ereignis, werden ihre Originalbeiträge automatisch zu einem Thema gruppiert. In der Themenübersicht stehen die Schlagzeilen und möglichen Rahmungen nebeneinander.",
-    "step3_title": "3 · Quellenvielfalt wird geprüft",
-    "step3_body_before": "Ein Thema wird für einen Artikel ausgewählt, wenn genügend unabhängige Quellen vorliegen. Die frühere Abstimmungsschwelle ist nicht mehr Teil des Produkts: ",
-    "step3_body_after": " ist nur ein nicht mehr verwendeter Legacy-Wert.",
+    "step3_title": "3 · Interesse wird bestätigt",
+    "step3_body_before": "Sobald ein Thema genügend unabhängige Quellen hat und mindestens ",
+    "step3_body_after": " Upvote erhalten hat, darf daraus ein Artikel generiert werden.",
     "step4_title": "4 · Der Artikel entsteht",
     "step4_body": "Erfüllt ein Thema die Quellenkriterien, erstellt eine KI beim nächsten Lauf aus allen Schlagzeilen und Teasern einen transparenten Artikel. Er zeigt seinen tatsächlichen Prüfstatus und verlinkt alle verwendeten Originalbeiträge.",
     "schedule_title": "Wann werden neue Quellen geladen?",
@@ -249,7 +249,7 @@
     "countdown_hours": "Std",
     "countdown_minutes": "Min",
     "countdown_seconds": "Sek",
-    "threshold_note": "Frühere Artikelschwelle: {threshold} Stimmen pro Thema."
+    "threshold_note": "Artikelschwelle: {threshold} Upvote pro Thema."
   },
   "impressum": {
     "page_title": "Impressum",

@@ -1,4 +1,4 @@
-import { LEAN_ORDER, RADAR_MIN_OUTLETS } from "@kebab/core";
+import { LEAN_ORDER, RADAR_MIN_OUTLETS, REWRITE_VOTE_THRESHOLD } from "@kebab/core";
 import { articles, db, type OutletLean, outlets, publishedArticles, stories } from "@kebab/db";
 import { and, desc, type SQL, sql } from "drizzle-orm";
 import type { Metadata } from "next";
@@ -7,8 +7,11 @@ import { getTranslations } from "next-intl/server";
 import { PageHero } from "@/components/PageHero";
 import { RadarFilters } from "@/components/RadarFilters";
 import { Card } from "@/components/ui/card";
+import { VoteButton } from "@/components/VoteButton";
 import { leanColor } from "@/lib/lean";
 import { parseRadarFilters, type RadarFilters as RadarFilterState } from "@/lib/radar-filters";
+import { getSession } from "@/lib/session";
+import { getCumulativeVoteCounts } from "@/lib/vote";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("radar");
@@ -88,6 +91,10 @@ export default async function TopicsPage({
   const t = await getTranslations("radar");
   const filters = parseRadarFilters(await searchParams);
   const stories_ = await loadStories(filters);
+  const [voteCounts, session] = await Promise.all([
+    getCumulativeVoteCounts(stories_.map((story) => story.id)),
+    getSession(),
+  ]);
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-12">
@@ -139,6 +146,16 @@ export default async function TopicsPage({
                         {t("article_count", { count: story.articleCount })}
                       </span>
                     </div>
+                    {!story.publishedSlug ? (
+                      <div className="relative z-10">
+                        <VoteButton
+                          storyId={story.id}
+                          initialCount={voteCounts.get(story.id) ?? 0}
+                          threshold={REWRITE_VOTE_THRESHOLD}
+                          isAuthenticated={session !== null}
+                        />
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </Card>

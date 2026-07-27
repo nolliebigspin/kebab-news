@@ -51,10 +51,10 @@ export const RADAR_MIN_OUTLETS = 3;
 /**
  * Minimum number of (cumulative, all-time) upvotes a radar story needs before
  * it qualifies for an automatic neutral rewrite. Once a story crosses this
- * threshold and has no rewrite yet, the next worker run picks it up and
- * generates a draft. Surfaced in the UI (vote progress) and on /how-to.
+ * threshold, the next worker run may generate or update its article. Surfaced
+ * in the topic UI as vote progress.
  */
-export const REWRITE_VOTE_THRESHOLD = 5;
+export const REWRITE_VOTE_THRESHOLD = 1;
 
 /**
  * How many NEW sources must attach to an already-summarized story before it is

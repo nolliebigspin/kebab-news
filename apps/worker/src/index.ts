@@ -38,8 +38,9 @@ async function safeRun(reason: string): Promise<void> {
       log("worker.source_annotations_done", annotations);
     }
 
-    // After ingest, pick up source-diverse stories and published stories with
-    // newly attached sources. The AI rewrite runs only here (CLAUDE.md rule #5).
+    // After ingest, pick up upvoted, source-diverse stories and published,
+    // upvoted stories with newly attached sources. The AI rewrite runs only
+    // here (CLAUDE.md rule #5).
     const auto = await runAutoRewrites(log);
     if (auto.triggered > 0) log("worker.auto_rewrites_done", auto);
   } catch (err) {

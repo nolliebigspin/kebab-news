@@ -16,7 +16,7 @@ kebab.news is a German-language news platform that clusters multiple reports abo
 
 **Why now:** Aggregators expose many links but rarely connect individual claims to evidence or explain uncertainty and framing in a readable German product.
 
-**The product flow in one sentence:** outlets publish → we cluster contributions into a topic → the system creates and publishes a sourced, versioned article automatically → readers rate its quality and discuss context.
+**The product flow in one sentence:** outlets publish → we cluster contributions into a topic → one reader upvote unlocks automatic creation and publication of a sourced, versioned article → readers rate its quality and discuss context.
 
 ---
 
@@ -35,7 +35,7 @@ The homepage and `/artikel` are the primary article-discovery surfaces. `/themen
 
 ### Piece 2 — Versioned article
 
-Each public article includes a headline, short summary, longer paragraphs, sourced facts, uncertainties, source differences, framing annotations, original contributions, quality ratings, sharing, comments and version/correction metadata. Topic selection is system/editorial; there is no community vote deciding coverage.
+Each public article includes a headline, short summary, longer paragraphs, sourced facts, uncertainties, source differences, framing annotations, original contributions, quality ratings, sharing, comments and version/correction metadata. Topics form automatically, but article generation requires at least one account-based topic upvote so AI spend follows demonstrated reader interest.
 
 ### Piece 3 — Learning and editorial workflow
 
@@ -71,18 +71,18 @@ Source headline annotations retain the legacy offset format. Story Summary annot
 
 ### 3. Reader interactions
 
-`POST /api/summary-rating` sets, changes or removes one quality rating per user and published summary. `POST /api/comments` validates and authorizes comment creation, replies, owner edits/deletes, helpful votes and reports. Comments are readable without login and always rendered as plaintext. The old `/api/vote` and `votes` table are legacy compatibility only and are not a product surface.
+`POST /api/vote` records one permanent topic upvote per account; a topic becomes eligible for article generation at `REWRITE_VOTE_THRESHOLD` cumulative votes. `POST /api/summary-rating` sets, changes or removes one quality rating per user and published summary. `POST /api/comments` validates and authorizes comment creation, replies, owner edits/deletes, helpful votes and reports. Comments are readable without login and always rendered as plaintext.
 
 ### 4. Structured summary generation
 
-`bun rewrite:run --story <slug>` runs:
+Once a source-diverse topic reaches `REWRITE_VOTE_THRESHOLD`, the automatic worker path runs:
 1. Load all articles in the cluster (headline + teaser from RSS — no body scraping).
 2. Build a structured input: per-outlet headline + teaser + political lean, ordered left → public via `LEAN_ORDER`.
 3. Call Claude with the transparent-summary prompt (versioned in `packages/core/src/constants.ts`). Imported source text is explicitly untrusted.
 4. Validate headline/body, short summary, sourced facts, uncertainties, differences and annotations with JSON Schema plus Zod. On parse failure, abort — never persist partial output.
 5. Insert into `published_articles` with `published_at` set, archive the version it supersedes and back-link `stories.published_article_id` — the article is live at `/artikel/[slug]` immediately.
 
-An already-summarized story is only rewritten again once at least `REWRITE_MIN_NEW_SOURCES` new contributions have attached to its cluster; this keeps repeat AI spend bounded. `bun rewrite:publish --story <slug>` remains as a repair tool for a summary that is not live.
+An already-summarized story is only rewritten again once at least `REWRITE_MIN_NEW_SOURCES` new contributions have attached to its cluster; this keeps repeat AI spend bounded. `bun rewrite:run --story <slug>` remains an explicit operator command using the same generation path, and `bun rewrite:publish --story <slug>` remains a repair tool for a summary that is not live.
 
 ### 5. Topic and article surfaces
 
@@ -127,7 +127,7 @@ Summary and interaction tables:
 - `summary_ratings` — one `-1|1` quality rating per `(summary_id, user_id)` plus optional structured downvote reason.
 - `comments`, `comment_helpful_votes`, `comment_reports` — threaded plaintext discussion with ownership, moderation and reporting.
 - `share_events` — summary id, channel and timestamp only; no account, IP or user agent.
-- `votes` — legacy topic votes retained for migration compatibility, not surfaced.
+- `votes` — one permanent article-request upvote per `(story_id, user_id)`; cumulative counts gate automatic generation.
 - `stories.published_article_id` — nullable FK back-pointer added via migration.
 
 Better Auth tables (canonical shapes, defined in the same `schema.ts` so drizzle-kit stays single-source — note `user.id` is **text**, not uuid):

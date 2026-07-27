@@ -1,4 +1,10 @@
-import { type Annotation, AnnotationsSchema, LEAN_ORDER, leanI18nKey } from "@kebab/core";
+import {
+  type Annotation,
+  AnnotationsSchema,
+  LEAN_ORDER,
+  leanI18nKey,
+  REWRITE_VOTE_THRESHOLD,
+} from "@kebab/core";
 import { articles, db, type OutletLean, outlets, publishedArticles, stories } from "@kebab/db";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
@@ -10,7 +16,10 @@ import { getTranslations } from "next-intl/server";
 import { FiArrowRight } from "react-icons/fi";
 import { AnnotatedText } from "@/components/AnnotatedText";
 import { Badge } from "@/components/ui/badge";
+import { VoteButton } from "@/components/VoteButton";
 import { leanColor } from "@/lib/lean";
+import { getSession } from "@/lib/session";
+import { countVotes } from "@/lib/vote";
 
 type StoryArticle = {
   id: string;
@@ -96,6 +105,7 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
 
   const t = await getTranslations("radar");
   const { story, items, published } = data;
+  const [voteCount, session] = await Promise.all([countVotes(story.id), getSession()]);
 
   // Group articles by lean, in LEAN_ORDER. Filter empty leans into the
   // "blind spots" list.
@@ -124,6 +134,14 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
           <p className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]">
             {t("article_count", { count: story.articleCount })}
           </p>
+          {!published ? (
+            <VoteButton
+              storyId={story.id}
+              initialCount={voteCount}
+              threshold={REWRITE_VOTE_THRESHOLD}
+              isAuthenticated={session !== null}
+            />
+          ) : null}
         </div>
 
         {published ? (

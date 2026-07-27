@@ -15,7 +15,7 @@ kebab.news bündelt Originalbeiträge zum selben Thema und veröffentlicht darau
 - `/ueber-uns` — Haltung und Produktidee
 - `/redaktion` — server-authorized review dashboard for moderators, editors and admins
 
-Die Themenauswahl ist eine System-/Redaktionsentscheidung. Leser stimmen nicht über die Abdeckung ab; angemeldete Leser bewerten die Qualität veröffentlichter Artikel und können Kontext kommentieren.
+Themen erscheinen automatisch im Quellenvergleich. Ein Artikel wird aber erst generiert, sobald das Thema mindestens einen Upvote von einem angemeldeten Leser erhalten hat. Veröffentlichte Artikel können anschließend bewertet und kommentiert werden.
 
 ## Architecture
 

@@ -20,21 +20,26 @@ const steps = [
   ],
   [
     "3",
+    "Interesse bestätigen",
+    "Ein angemeldeter Leser kann ein Thema upvoten. Erst ab einem Upvote darf daraus ein Artikel generiert werden, damit die kostenpflichtige Erstellung nur für Themen mit erkennbarem Interesse läuft.",
+  ],
+  [
+    "4",
     "Aussagen belegen",
     "Das System extrahiert Aussagen und verknüpft sie mit konkreten Originalbeiträgen. Ohne Beleg wird eine Aussage als unsicher markiert oder verworfen.",
   ],
   [
-    "4",
+    "5",
     "Unterschiede zeigen",
     "Abweichende Zahlen, Ursachen, Begriffe, Gewichtungen und fehlender Kontext werden nicht künstlich aufgelöst, sondern nebeneinander dargestellt.",
   ],
   [
-    "5",
+    "6",
     "Framing einordnen",
     "Markierungen sind vorsichtige Analysen mit Konfidenz und Prüfstatus. Sie beschreiben mögliche Wirkungen und sind keine objektiven Urteile über ein Medium.",
   ],
   [
-    "6",
+    "7",
     "Veröffentlichen",
     "Zusammenfassungen werden automatisch veröffentlicht. Veröffentlichung, Aktualisierung und Korrektur werden versioniert und nachvollziehbar dokumentiert.",
   ],
@@ -85,9 +90,10 @@ export default function MethodPage() {
         <div>
           <h2 className="font-display text-2xl">Rolle von Menschen</h2>
           <p className="mt-3 text-ink-soft text-sm leading-6">
-            Die Verarbeitung läuft automatisch, von der Bündelung bis zur Veröffentlichung. Menschen
-            greifen nachträglich ein: bei gemeldeten Fehlern, Korrekturen und der Moderation von
-            Kommentaren. Maßgeblich bleiben die verlinkten Originalbeiträge.
+            Nach der automatischen Bündelung bestätigt ein Leser per Upvote das Interesse an einem
+            Artikel. Die anschließende Erstellung und Veröffentlichung läuft automatisch. Menschen
+            greifen außerdem nachträglich ein: bei gemeldeten Fehlern, Korrekturen und der
+            Moderation von Kommentaren. Maßgeblich bleiben die verlinkten Originalbeiträge.
           </p>
         </div>
       </section>
