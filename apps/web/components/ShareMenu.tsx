@@ -92,7 +92,7 @@ export function ShareMenu({
       <button
         type="button"
         onClick={nativeShare}
-        className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm text-white hover:bg-brand-ink focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
+        className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 font-semibold text-primary-foreground text-sm hover:bg-brand-ink focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 dark:hover:bg-brand/85"
       >
         <FiShare2 aria-hidden /> {t("native")}
       </button>

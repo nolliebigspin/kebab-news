@@ -12,10 +12,11 @@ type Props = {
  */
 export function PageHero({ title, subtitle }: Props) {
   return (
-    <header className="mb-10">
-      <h1 className="font-display text-4xl leading-tight sm:text-5xl">{title}</h1>
+    <header className="mb-9 max-w-3xl">
+      <div className="mb-4 h-1 w-12 rounded-full bg-brand" aria-hidden />
+      <h1 className="text-balance font-display text-4xl leading-[1.05] sm:text-6xl">{title}</h1>
       {subtitle ? (
-        <p className="mt-3 max-w-2xl text-base text-ink-soft leading-relaxed">{subtitle}</p>
+        <p className="mt-5 max-w-2xl text-base text-ink-soft leading-7 sm:text-lg">{subtitle}</p>
       ) : null}
     </header>
   );

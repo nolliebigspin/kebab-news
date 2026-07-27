@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { FiSearch } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -69,24 +70,32 @@ export function FilterBar<F extends { q: string }>({
   }
 
   return (
-    <div className="mb-8 flex flex-col gap-4">
-      <Input
-        type="search"
-        value={query}
-        onChange={(e) => onSearch(e.target.value)}
-        placeholder={labels.searchPlaceholder}
-        aria-label={labels.searchLabel}
-        className="h-9 max-w-md"
-      />
+    <div className="mb-8 rounded-2xl border border-line-soft bg-bg-warm/55 p-4 sm:p-5">
+      <div className="grid gap-4 lg:grid-cols-[minmax(16rem,1fr)_auto] lg:items-end">
+        <div className="relative max-w-xl">
+          <FiSearch
+            className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-mute"
+            aria-hidden
+          />
+          <Input
+            type="search"
+            value={query}
+            onChange={(e) => onSearch(e.target.value)}
+            placeholder={labels.searchPlaceholder}
+            aria-label={labels.searchLabel}
+            className="h-11 pl-10"
+          />
+        </div>
 
-      <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
-        {controls(update)}
+        <div className="flex flex-wrap items-end gap-3">
+          {controls(update)}
 
-        {!isDefault && (
-          <Button type="button" variant="ghost" size="sm" onClick={reset}>
-            {labels.reset}
-          </Button>
-        )}
+          {!isDefault && (
+            <Button type="button" variant="ghost" size="sm" onClick={reset}>
+              {labels.reset}
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -104,14 +113,12 @@ export function FilterSelect({
   options: { value: string; label: string }[];
 }) {
   return (
-    <label className="flex flex-col gap-1">
-      <span className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]">
-        {label}
-      </span>
+    <label className="flex flex-col gap-1.5">
+      <span className="font-medium text-[11px] text-ink-mute">{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-8 cursor-pointer rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="h-9 cursor-pointer rounded-xl border border-input bg-surface-raised px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>

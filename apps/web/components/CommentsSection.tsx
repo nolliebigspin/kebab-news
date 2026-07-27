@@ -116,7 +116,7 @@ export function CommentsSection({
             <button
               type="submit"
               disabled={pending || content.trim().length < 3}
-              className="rounded-full bg-brand px-4 py-2 text-sm text-white disabled:opacity-50"
+              className="rounded-xl bg-brand px-4 py-2 font-semibold text-primary-foreground text-sm disabled:opacity-50"
             >
               {t("submit")}
             </button>

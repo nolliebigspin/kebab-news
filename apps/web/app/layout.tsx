@@ -8,6 +8,7 @@ import { Suspense } from "react";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { LoginToast } from "@/components/LoginToast";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { getSession } from "@/lib/session";
 import "./globals.css";
@@ -76,31 +77,37 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const [messages, session] = await Promise.all([getMessages(), getSession()]);
 
   return (
-    <html lang="de" className={`${inter.variable} ${ibmPlexMono.variable}`}>
+    <html
+      lang="de"
+      suppressHydrationWarning
+      className={`${inter.variable} ${ibmPlexMono.variable}`}
+    >
       <body
         className="flex min-h-screen flex-col antialiased"
         style={{ background: "var(--bg)", color: "var(--ink)" }}
       >
-        <NextIntlClientProvider messages={messages}>
-          {/* Skip link: first focusable element, lets keyboard/AT users jump
-              past the header straight to content (WCAG 2.4.1). */}
-          <a
-            href="#main"
-            className="sr-only fixed top-2 left-2 z-50 -translate-y-full rounded-md bg-brand px-4 py-2 font-medium text-sm text-white transition-transform focus:not-sr-only focus:translate-y-0"
-          >
-            Zum Inhalt springen
-          </a>
-          <Header isAuthenticated={session !== null} />
-          <main id="main" className="flex-1">
-            {children}
-          </main>
-          <Footer />
-          <Toaster />
-          {/* useSearchParams needs a Suspense boundary to keep the build static. */}
-          <Suspense fallback={null}>
-            <LoginToast />
-          </Suspense>
-        </NextIntlClientProvider>
+        <ThemeProvider>
+          <NextIntlClientProvider messages={messages}>
+            {/* Skip link: first focusable element, lets keyboard/AT users jump
+                past the header straight to content (WCAG 2.4.1). */}
+            <a
+              href="#main"
+              className="sr-only fixed top-2 left-2 z-50 -translate-y-full rounded-md bg-brand px-4 py-2 font-medium text-primary-foreground text-sm transition-transform focus:not-sr-only focus:translate-y-0"
+            >
+              Zum Inhalt springen
+            </a>
+            <Header isAuthenticated={session !== null} />
+            <main id="main" className="flex-1">
+              {children}
+            </main>
+            <Footer />
+            <Toaster />
+            {/* useSearchParams needs a Suspense boundary to keep the build static. */}
+            <Suspense fallback={null}>
+              <LoginToast />
+            </Suspense>
+          </NextIntlClientProvider>
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

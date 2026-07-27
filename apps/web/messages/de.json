@@ -5,6 +5,8 @@
     "nav_label": "Hauptnavigation",
     "menu_label": "Menü öffnen",
     "menu_close_label": "Menü schließen",
+    "theme_to_dark": "Dunkles Farbschema verwenden",
+    "theme_to_light": "Helles Farbschema verwenden",
     "topics": "Themen",
     "learn": "Lernen",
     "method": "Methodik",

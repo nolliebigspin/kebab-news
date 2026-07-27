@@ -5,6 +5,7 @@ import { and, desc, eq, isNotNull, type SQL, sql } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { FiArrowRight, FiCalendar } from "react-icons/fi";
 import { ArticleFilters } from "@/components/ArticleFilters";
 import { PageHero } from "@/components/PageHero";
 import { Card } from "@/components/ui/card";
@@ -70,7 +71,7 @@ export default async function ArticlesPage({
   const articles_ = await loadPublished(filters);
 
   return (
-    <section className="mx-auto max-w-5xl px-6 py-12">
+    <section className="mx-auto max-w-6xl px-5 py-10 sm:px-6 sm:py-16">
       <PageHero title={t("page_title")} subtitle={t("page_subtitle")} />
 
       <ArticleFilters filters={filters} />
@@ -78,25 +79,37 @@ export default async function ArticlesPage({
       {articles_.length === 0 ? (
         <p className="text-ink-mute">{filters.q ? t("empty_search") : t("empty")}</p>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2">
+        <ul className="grid gap-5 md:grid-cols-2">
           {articles_.map((article) => (
             <li key={article.slug}>
-              <Card className="h-full gap-0 py-0 transition-shadow focus-within:ring-2 focus-within:ring-brand/40 hover:ring-foreground/20">
+              <Card className="h-full gap-0 py-0 focus-within:border-brand/50 hover:-translate-y-0.5 hover:border-brand/35 hover:shadow-lg">
                 <Link
                   href={`/artikel/${article.slug}`}
-                  className="group flex h-full flex-col gap-3 rounded-xl p-5 outline-none"
+                  className="group flex h-full min-h-56 flex-col rounded-2xl p-5 outline-none focus-visible:ring-3 focus-visible:ring-brand/35 sm:p-6"
                 >
-                  <h2 className="font-display text-lg leading-snug transition-colors group-hover:text-brand-ink group-focus-visible:text-brand-ink sm:text-xl">
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="font-mono text-[10px] text-brand-ink uppercase tracking-[0.1em]">
+                      Artikel
+                    </span>
+                    <span className="rounded-full bg-bg-warm px-2.5 py-1 text-ink-mute text-xs">
+                      {t("source_count", { count: article.sourceCount })}
+                    </span>
+                  </div>
+                  <h2 className="mt-5 text-balance font-display text-2xl leading-snug transition-colors group-hover:text-brand-ink group-focus-visible:text-brand-ink">
                     {article.neutralHeadline}
                   </h2>
-                  <div className="mt-auto flex flex-wrap items-center gap-2 font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]">
+                  <div className="mt-auto flex flex-wrap items-center justify-between gap-4 border-line-soft border-t pt-5 text-ink-mute text-xs">
                     {article.publishedAt ? (
-                      <time dateTime={article.publishedAt.toISOString()}>
-                        {format(article.publishedAt, "d. MMM yyyy", { locale: de })}
-                      </time>
+                      <span className="inline-flex items-center gap-2">
+                        <FiCalendar aria-hidden />
+                        <time dateTime={article.publishedAt.toISOString()}>
+                          {format(article.publishedAt, "d. MMM yyyy", { locale: de })}
+                        </time>
+                      </span>
                     ) : null}
-                    <span aria-hidden>·</span>
-                    <span>{t("source_count", { count: article.sourceCount })}</span>
+                    <span className="inline-flex items-center gap-2 font-semibold text-brand-ink">
+                      Lesen <FiArrowRight aria-hidden />
+                    </span>
                   </div>
                 </Link>
               </Card>

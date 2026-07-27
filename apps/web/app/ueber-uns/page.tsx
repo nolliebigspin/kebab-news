@@ -43,7 +43,10 @@ export default function AboutPage() {
         „Viele Quellen. Eine verständliche Zusammenfassung. Alle Unterschiede transparent.“
       </blockquote>
       <div className="mt-10 flex flex-wrap gap-4">
-        <Link href="/methodik" className="rounded-full bg-brand px-5 py-3 text-sm text-white">
+        <Link
+          href="/methodik"
+          className="rounded-xl bg-brand px-5 py-3 font-semibold text-primary-foreground text-sm"
+        >
           Methodik lesen
         </Link>
         <Link href="/lernen" className="rounded-full border border-line px-5 py-3 text-sm">

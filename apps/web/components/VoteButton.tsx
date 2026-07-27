@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
+import { FiArrowUp, FiCheckCircle, FiLogIn } from "react-icons/fi";
 import { toast } from "sonner";
 
 type Props = {
@@ -17,7 +18,26 @@ type Props = {
 type Status = "idle" | "voted" | "duplicate" | "error" | "login";
 
 const PILL_CLASS =
-  "inline-flex cursor-pointer items-center gap-2 rounded-full border border-line bg-bg-warm px-3 py-1 font-mono text-[11px] text-ink uppercase tracking-[0.12em] outline-none transition-colors hover:border-brand hover:bg-brand hover:text-white focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-card disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-line disabled:hover:bg-bg-warm disabled:hover:text-ink";
+  "inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-xl border border-line bg-surface-raised px-3.5 py-2 font-semibold text-ink text-xs outline-none transition-all hover:border-brand/60 hover:bg-brand-wash hover:text-brand-ink focus-visible:ring-3 focus-visible:ring-brand/35 disabled:cursor-not-allowed disabled:opacity-60";
+
+function VoteProgress({
+  count,
+  threshold,
+  reached,
+}: {
+  count: number;
+  threshold?: number;
+  reached: boolean;
+}) {
+  const t = useTranslations("radar");
+  if (threshold === undefined) return null;
+
+  return (
+    <span className="text-[11px] text-ink-mute leading-4">
+      {reached ? t("vote.threshold_reached") : t("vote.threshold_progress", { count, threshold })}
+    </span>
+  );
+}
 
 export function VoteButton({ storyId, initialCount, threshold, isAuthenticated }: Props) {
   const t = useTranslations("radar");
@@ -72,19 +92,15 @@ export function VoteButton({ storyId, initialCount, threshold, isAuthenticated }
   // the vote button. The server gates /api/vote regardless; this is UX only.
   if (!isAuthenticated || status === "login") {
     return (
-      <div className="flex flex-col items-end gap-1">
+      <div className="flex flex-col items-start gap-1.5">
         <Link href="/anmelden" className={PILL_CLASS}>
-          <span aria-hidden>▲</span>
+          <FiLogIn aria-hidden />
           <span>{t("vote.login_cta")}</span>
-          <span className="font-mono tabular-nums">{count}</span>
-        </Link>
-        {threshold !== undefined && (
-          <span className="font-mono text-[10px] text-ink-mute uppercase tracking-[0.12em]">
-            {reached
-              ? t("vote.threshold_reached")
-              : t("vote.threshold_progress", { count, threshold })}
+          <span className="rounded-md bg-brand-wash px-1.5 py-0.5 font-mono text-[10px] text-brand-ink tabular-nums">
+            {count}
           </span>
-        )}
+        </Link>
+        <VoteProgress count={count} threshold={threshold} reached={reached} />
       </div>
     );
   }
@@ -99,7 +115,7 @@ export function VoteButton({ storyId, initialCount, threshold, isAuthenticated }
           : t("vote.cta");
 
   return (
-    <div className="flex flex-col items-end gap-1">
+    <div className="flex flex-col items-start gap-1.5">
       <button
         type="button"
         onClick={onClick}
@@ -107,17 +123,13 @@ export function VoteButton({ storyId, initialCount, threshold, isAuthenticated }
         aria-busy={pending}
         className={PILL_CLASS}
       >
-        <span aria-hidden>▲</span>
+        {locked ? <FiCheckCircle aria-hidden /> : <FiArrowUp aria-hidden />}
         <span>{label}</span>
-        <span className="font-mono tabular-nums">{count}</span>
-      </button>
-      {threshold !== undefined && (
-        <span className="font-mono text-[10px] text-ink-mute uppercase tracking-[0.12em]">
-          {reached
-            ? t("vote.threshold_reached")
-            : t("vote.threshold_progress", { count, threshold })}
+        <span className="rounded-md bg-brand-wash px-1.5 py-0.5 font-mono text-[10px] text-brand-ink tabular-nums">
+          {count}
         </span>
-      )}
+      </button>
+      <VoteProgress count={count} threshold={threshold} reached={reached} />
     </div>
   );
 }

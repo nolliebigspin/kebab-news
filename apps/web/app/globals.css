@@ -1,59 +1,40 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  /* Fonts */
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-mono: var(--font-mono), ui-monospace, monospace;
-
-  /* Brand palette (consumed by our own components and tokens below) */
-  --color-ink: oklch(0.22 0.03 250);
-  --color-ink-soft: oklch(0.42 0.025 250);
-  /* ink-mute darkened to L0.53 so meta text clears WCAG AA (4.5:1) on both
-     bg and bg-warm; brand/warn likewise deepened (see :root note). */
-  --color-ink-mute: oklch(0.53 0.02 250);
-  --color-bg: oklch(0.985 0.004 85);
-  --color-bg-warm: oklch(0.965 0.008 75);
-  --color-line: oklch(0.88 0.01 250);
-  --color-line-soft: oklch(0.93 0.008 250);
-  --color-brand: oklch(0.52 0.09 190);
-  --color-brand-ink: oklch(0.38 0.07 190);
-  --color-brand-wash: oklch(0.94 0.025 190);
-  --color-warn: oklch(0.52 0.1 45);
-  --color-warn-wash: oklch(0.95 0.025 45);
-  --color-oerr: oklch(0.55 0.06 280);
-  --color-left: oklch(0.58 0.08 25);
-  --color-right: oklch(0.55 0.08 240);
 }
 
 :root {
-  /* Brand tokens (CSS-var aliases, used by our hand-rolled utility classes) */
-  --bg: oklch(0.985 0.004 85);
-  --bg-warm: oklch(0.965 0.008 75);
-  --ink: oklch(0.22 0.03 250);
-  --ink-soft: oklch(0.42 0.025 250);
-  /* WCAG: ink-mute, brand and warn are deepened from their original
-     lightness so that — as text on bg/bg-warm, and (for brand) as a fill
-     under white button text — they all clear AA 4.5:1. Hues are unchanged. */
-  --ink-mute: oklch(0.53 0.02 250);
-  --line: oklch(0.88 0.01 250);
-  --line-soft: oklch(0.93 0.008 250);
-  --brand: oklch(0.52 0.09 190);
-  --brand-ink: oklch(0.38 0.07 190);
-  --brand-wash: oklch(0.94 0.025 190);
-  --warn: oklch(0.52 0.1 45);
-  --warn-wash: oklch(0.95 0.025 45);
+  color-scheme: light;
+  --bg: oklch(0.975 0.005 220);
+  --bg-warm: oklch(0.948 0.011 205);
+  --surface: oklch(0.995 0.002 220);
+  --surface-raised: oklch(1 0 0);
+  --ink: oklch(0.205 0.032 248);
+  --ink-soft: oklch(0.42 0.03 245);
+  --ink-mute: oklch(0.52 0.025 245);
+  --line: oklch(0.84 0.016 235);
+  --line-soft: oklch(0.91 0.012 230);
+  --brand: oklch(0.52 0.105 190);
+  --brand-ink: oklch(0.37 0.09 190);
+  --brand-wash: oklch(0.925 0.035 190);
+  --brand-glow: oklch(0.78 0.08 190 / 0.14);
+  --warn: oklch(0.5 0.13 45);
+  --warn-wash: oklch(0.94 0.035 45);
   --oerr: oklch(0.55 0.06 280);
   --left: oklch(0.58 0.08 25);
   --right: oklch(0.55 0.08 240);
+  --shadow-color: oklch(0.18 0.025 245 / 0.09);
 
-  /* shadcn/ui semantic tokens — mapped onto the brand palette so shadcn
-     primitives match the rest of the site without introducing a second theme */
   --background: var(--bg);
   --foreground: var(--ink);
-  --card: var(--bg);
+  --card: var(--surface);
   --card-foreground: var(--ink);
-  --popover: var(--bg);
+  --popover: var(--surface-raised);
   --popover-foreground: var(--ink);
   --primary: var(--brand);
   --primary-foreground: oklch(0.99 0 0);
@@ -67,11 +48,53 @@
   --border: var(--line);
   --input: var(--line);
   --ring: var(--brand);
-  --radius: 0.5rem;
+  --radius: 0.75rem;
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: oklch(0.16 0.022 248);
+  --bg-warm: oklch(0.195 0.025 245);
+  --surface: oklch(0.205 0.025 245);
+  --surface-raised: oklch(0.235 0.028 243);
+  --ink: oklch(0.94 0.012 225);
+  --ink-soft: oklch(0.76 0.022 225);
+  --ink-mute: oklch(0.65 0.024 225);
+  --line: oklch(0.34 0.025 238);
+  --line-soft: oklch(0.275 0.022 240);
+  --brand: oklch(0.7 0.105 185);
+  --brand-ink: oklch(0.79 0.09 185);
+  --brand-wash: oklch(0.29 0.055 190);
+  --brand-glow: oklch(0.65 0.11 185 / 0.11);
+  --warn: oklch(0.73 0.12 55);
+  --warn-wash: oklch(0.27 0.05 45);
+  --oerr: oklch(0.72 0.07 285);
+  --left: oklch(0.7 0.09 25);
+  --right: oklch(0.7 0.09 240);
+  --shadow-color: oklch(0.04 0.018 245 / 0.34);
+  --primary-foreground: oklch(0.15 0.025 245);
+  --destructive: oklch(0.7 0.18 25);
 }
 
 @theme inline {
   --font-heading: var(--font-sans);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-mute: var(--ink-mute);
+  --color-bg: var(--bg);
+  --color-bg-warm: var(--bg-warm);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-wash: var(--brand-wash);
+  --color-warn: var(--warn);
+  --color-warn-wash: var(--warn-wash);
+  --color-oerr: var(--oerr);
+  --color-left: var(--left);
+  --color-right: var(--right);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -103,16 +126,29 @@ body {
   scrollbar-gutter: stable;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: "Inter", system-ui, sans-serif;
   font-feature-settings: "ss01", "cv11";
+  background-image: radial-gradient(circle at 50% -12rem, var(--brand-glow), transparent 36rem);
+  background-attachment: fixed;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
 }
 
-/* Display/heading variant */
+::selection {
+  background: var(--brand-wash);
+  color: var(--ink);
+}
+
 .font-display {
   font-family: "Inter", system-ui, sans-serif;
-  letter-spacing: -0.02em;
-  font-weight: 600;
+  letter-spacing: -0.035em;
+  font-weight: 650;
 }
 
 .font-mono {
@@ -125,6 +161,12 @@ body {
 }
 .hairline-soft {
   border-color: var(--line-soft);
+}
+
+.surface-shadow {
+  box-shadow:
+    0 1px 2px var(--shadow-color),
+    0 16px 40px -28px var(--shadow-color);
 }
 
 /* Brand utility classes (hand-rolled components consume these) */

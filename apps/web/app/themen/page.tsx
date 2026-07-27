@@ -4,6 +4,7 @@ import { and, desc, type SQL, sql } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { FiClock } from "react-icons/fi";
 import { PageHero } from "@/components/PageHero";
 import { RadarFilters } from "@/components/RadarFilters";
 import { Card } from "@/components/ui/card";
@@ -97,7 +98,7 @@ export default async function TopicsPage({
   ]);
 
   return (
-    <section className="mx-auto max-w-5xl px-6 py-12">
+    <section className="mx-auto max-w-6xl px-5 py-10 sm:px-6 sm:py-16">
       <PageHero title={t("page_title")} subtitle={t("page_subtitle")} />
 
       <RadarFilters filters={filters} leanOptions={LEAN_ORDER} />
@@ -105,57 +106,60 @@ export default async function TopicsPage({
       {stories_.length === 0 ? (
         <p className="text-ink-mute">{filters.q ? t("empty_search") : t("empty")}</p>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2">
+        <ul className="grid gap-5 md:grid-cols-2">
           {stories_.map((story) => (
             <li key={story.id}>
-              <Card className="h-full gap-0 py-0 transition-shadow focus-within:ring-2 focus-within:ring-brand/40 hover:ring-foreground/20">
-                <div className="relative flex h-full flex-col gap-4 p-5">
+              <Card className="h-full gap-0 py-0 focus-within:border-brand/50 hover:-translate-y-0.5 hover:border-brand/35 hover:shadow-lg">
+                <div className="relative flex h-full min-h-60 flex-col p-5 sm:p-6">
                   {/* The whole card is clickable via the headline's stretched link. */}
-                  <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2 text-ink-mute text-xs">
+                      <FiClock className="size-3.5" aria-hidden />
+                      <time dateTime={story.firstSeenAt.toISOString()}>
+                        {formatDate(story.firstSeenAt)}
+                      </time>
+                    </div>
+                    <span className="font-mono text-[10px] text-brand-ink uppercase tracking-[0.1em]">
+                      Thema
+                    </span>
+                  </div>
+                  <div className="mt-4">
                     <Link
                       href={`/themen/${story.slug}`}
                       className="group/headline rounded-sm outline-none after:absolute after:inset-0 focus-visible:[&>h2]:text-brand-ink"
                     >
-                      <h2 className="font-display text-lg leading-snug transition-colors group-hover/headline:text-brand-ink sm:text-xl">
+                      <h2 className="text-balance font-display text-xl leading-snug transition-colors group-hover/headline:text-brand-ink sm:text-2xl">
                         {story.label}
                       </h2>
                     </Link>
-                    <time
-                      dateTime={story.firstSeenAt.toISOString()}
-                      className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]"
-                    >
-                      {formatDate(story.firstSeenAt)}
-                    </time>
                   </div>
 
-                  {/* If an article is available, surface it directly on the topic
-                      card. It sits above the stretched topic link (z-10). */}
-                  {story.publishedSlug ? (
-                    <Link
-                      href={`/artikel/${story.publishedSlug}`}
-                      className="relative z-10 inline-flex w-fit items-center gap-1.5 rounded-full border border-brand/40 bg-brand-wash/60 px-3 py-1 font-mono text-[11px] text-brand-ink uppercase tracking-[0.12em] outline-none transition-colors hover:bg-brand-wash focus-visible:ring-2 focus-visible:ring-brand"
-                    >
-                      {t("published_rewrite_cta")}
-                    </Link>
-                  ) : null}
-
-                  <div className="mt-auto flex flex-wrap items-center justify-between gap-3">
+                  <div className="mt-auto pt-6">
                     <div className="flex items-center gap-3">
                       <SpectrumStrip covered={story.leans} t={t} />
-                      <span className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]">
+                      <span className="text-ink-mute text-xs">
                         {t("article_count", { count: story.articleCount })}
                       </span>
                     </div>
-                    {!story.publishedSlug ? (
-                      <div className="relative z-10">
-                        <VoteButton
-                          storyId={story.id}
-                          initialCount={voteCounts.get(story.id) ?? 0}
-                          threshold={REWRITE_VOTE_THRESHOLD}
-                          isAuthenticated={session !== null}
-                        />
-                      </div>
-                    ) : null}
+                    <div className="mt-4 border-line-soft border-t pt-4">
+                      {story.publishedSlug ? (
+                        <Link
+                          href={`/artikel/${story.publishedSlug}`}
+                          className="relative z-10 inline-flex items-center gap-2 font-semibold text-brand-ink text-sm outline-none hover:text-brand focus-visible:ring-2 focus-visible:ring-brand"
+                        >
+                          {t("published_rewrite_cta")}
+                        </Link>
+                      ) : (
+                        <div className="relative z-10">
+                          <VoteButton
+                            storyId={story.id}
+                            initialCount={voteCounts.get(story.id) ?? 0}
+                            threshold={REWRITE_VOTE_THRESHOLD}
+                            isAuthenticated={session !== null}
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -193,7 +197,7 @@ function SpectrumStrip({
     .join(", ");
   return (
     <span
-      className="inline-flex items-center gap-1.5"
+      className="inline-flex items-center gap-1"
       role="img"
       aria-label={t("spectrum_label", { leans: coveredNames })}
     >

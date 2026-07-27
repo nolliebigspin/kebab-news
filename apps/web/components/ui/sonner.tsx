@@ -1,15 +1,15 @@
 "use client";
 
+import { useTheme } from "next-themes";
 import { FiAlertTriangle, FiCheckCircle, FiInfo, FiLoader, FiXOctagon } from "react-icons/fi";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
 
-// The site ships a single light theme (no theme switcher / next-themes
-// provider), so the toaster is pinned to light. Icons come from react-icons
-// to avoid pulling in a second icon library.
 const Toaster = ({ ...props }: ToasterProps) => {
+  const { resolvedTheme } = useTheme();
+
   return (
     <Sonner
-      theme="light"
+      theme={resolvedTheme === "dark" ? "dark" : "light"}
       className="toaster group"
       icons={{
         success: <FiCheckCircle className="size-4" />,

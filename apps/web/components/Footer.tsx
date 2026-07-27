@@ -6,10 +6,10 @@ export const Footer = () => {
   const t = useTranslations("footer");
 
   return (
-    <footer className="hairline border-t">
-      <div className="mx-auto flex max-w-5xl flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
+    <footer className="border-line-soft border-t bg-bg-warm/55">
+      <div className="mx-auto flex max-w-6xl flex-col gap-5 px-6 py-8 sm:flex-row sm:items-center sm:justify-between">
         <Wordmark />
-        <div className="flex flex-wrap items-center gap-4 text-ink-mute text-xs">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-ink-mute text-xs">
           <Link
             href="/methodik"
             className="rounded-sm hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"

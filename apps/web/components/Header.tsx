@@ -4,21 +4,21 @@ import { useTranslations } from "next-intl";
 import { FaGithub } from "react-icons/fa6";
 import { LogoutButton } from "@/components/LogoutButton";
 import { MobileNav } from "@/components/MobileNav";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/Wordmark";
 
-// Nav links: quiet, uppercase, mono — and a visible focus ring for keyboard
-// users (WCAG 2.4.7). The login action is deliberately NOT styled like these;
-// it's a filled primary button below so it reads as the main call to action.
+// Nav links stay visually quiet beside the filled login action and retain a
+// visible focus ring for keyboard users (WCAG 2.4.7).
 const NAV_LINK =
-  "rounded-sm font-mono text-ink-soft text-xs uppercase tracking-[0.12em] transition-colors hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-4";
+  "rounded-md px-1 py-2 font-medium text-ink-soft text-sm transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-3";
 
 export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   const t = useTranslations("header");
 
   return (
-    <header className="hairline border-b px-6 py-4">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-x-8">
+    <header className="sticky top-0 z-40 border-line-soft border-b bg-bg/86 px-5 py-3 backdrop-blur-xl supports-[backdrop-filter]:bg-bg/76">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-x-8">
         <div className="flex items-center gap-6 md:gap-10">
           <Wordmark />
           {/* Primary nav. Below `md` it is replaced by the drawer in
@@ -39,11 +39,12 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
             </Link>
           </nav>
         </div>
-        <div className="flex items-center gap-4 md:gap-5">
+        <div className="flex items-center gap-1.5 md:gap-2">
           {/* The about link sits beside the account actions on wider screens. */}
           <Link href="/ueber-uns" className={`${NAV_LINK} hidden md:inline`}>
             {t("about")}
           </Link>
+          <ThemeToggle />
           <Button
             variant="ghost"
             size="icon-sm"
