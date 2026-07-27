@@ -23,7 +23,7 @@ Themen erscheinen automatisch im Quellenvergleich. Ein Artikel wird aber erst ge
 - **Data:** Postgres, Drizzle ORM and pgvector
 - **Auth:** Better Auth passwordless magic links
 - **Worker:** long-running Bun process for RSS ingest, embeddings, clustering, framing analysis and structured summary generation
-- **AI seams:** Voyage embeddings, batched Gemini framing analysis and Claude article generation
+- **AI seams:** Voyage embeddings plus Gemini for batched framing analysis and article generation
 - **Quality:** Vitest, TypeScript and Biome
 
 The structured summary contract lives in `packages/core/src/story-summary.ts`. Important module seams, versioning and safety decisions are documented in [`docs/architecture/product-mvp.md`](docs/architecture/product-mvp.md).

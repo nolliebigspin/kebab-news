@@ -26,7 +26,7 @@ const LINKS = [
 /**
  * `githubUrl` is passed in rather than imported: `@kebab/core`'s barrel
  * re-exports the rewrite pipeline, and pulling it across the client boundary
- * drags the Anthropic SDK and the Postgres driver into the browser bundle.
+ * drags server-only model and Postgres code into the browser bundle.
  */
 export function MobileNav({
   isAuthenticated,

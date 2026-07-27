@@ -35,7 +35,7 @@ async function main() {
 
   const sources = await loadSources(story.id);
   console.log(`→ ${sources.length} sources for "${story.label}"`);
-  console.log(`→ calling Claude (${REWRITE_MODEL}, prompt ${REWRITE_PROMPT_VERSION})...`);
+  console.log(`→ calling Gemini (${REWRITE_MODEL}, prompt ${REWRITE_PROMPT_VERSION})...`);
 
   const outcome = await rewriteStory(story);
   if (outcome.kind === "no-sources") {

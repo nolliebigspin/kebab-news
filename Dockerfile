@@ -34,6 +34,6 @@ COPY apps/worker ./apps/worker
 ENV NODE_ENV=production
 WORKDIR /app/apps/worker
 
-# DATABASE_URL, ANTHROPIC_API_KEY, GEMINI_API_KEY, VOYAGE_API_KEY,
+# DATABASE_URL, GEMINI_API_KEY, VOYAGE_API_KEY,
 # AI_DAILY_BUDGET_USD and CRON_SECRET are injected by Dokploy at runtime.
 CMD ["bun", "run", "src/index.ts"]

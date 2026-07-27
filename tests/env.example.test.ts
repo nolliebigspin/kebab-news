@@ -6,7 +6,6 @@ describe(".env.example", () => {
     const example = readFileSync(".env.example", "utf-8");
     const required = [
       "DATABASE_URL",
-      "ANTHROPIC_API_KEY",
       "GEMINI_API_KEY",
       "VOYAGE_API_KEY",
       "AI_DAILY_BUDGET_USD",

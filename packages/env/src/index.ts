@@ -15,7 +15,6 @@ export const env = createEnv({
     // never by the web app. They are optional here so the web build doesn't
     // fail without them; the AI modules validate presence when they build
     // their client (and throw a clear error there if missing).
-    ANTHROPIC_API_KEY: z.string().min(1).optional(),
     GEMINI_API_KEY: z.string().min(1).optional(),
     VOYAGE_API_KEY: z.string().min(1).optional(),
     AI_DAILY_BUDGET_USD: z.coerce.number().positive().max(10).default(0.18),

@@ -12,7 +12,6 @@ config({ path: ".env", quiet: true });
 
 // Empty strings are treated as undefined by env.ts (emptyStringAsUndefined: true),
 // so we must overwrite empty values too — not just unset ones.
-if (!process.env.ANTHROPIC_API_KEY) process.env.ANTHROPIC_API_KEY = "test-anthropic-key";
 if (!process.env.GEMINI_API_KEY) process.env.GEMINI_API_KEY = "test-gemini-key";
 if (!process.env.VOYAGE_API_KEY) process.env.VOYAGE_API_KEY = "test-voyage-key";
 if (!process.env.CRON_SECRET) process.env.CRON_SECRET = "test-cron-secret-test-cron-secret";

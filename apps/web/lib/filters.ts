@@ -7,7 +7,7 @@
  *
  * Kept free of any runtime `@kebab/*` imports: it's pulled into the FilterBar
  * Client Component, and the @kebab/core/@kebab/db barrels transitively bundle
- * server-only deps (postgres, the Anthropic SDK) which break the Turbopack
+ * server-only deps (including postgres) which break the Turbopack
  * client build.
  */
 

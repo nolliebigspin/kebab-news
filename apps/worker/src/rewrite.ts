@@ -3,7 +3,7 @@
  * source-diversity trigger (see `runAutoRewrites` below).
  *
  * Keeping it here means the auto-trigger and the manual command produce
- * identical drafts — same sources query, same Claude call, same persistence.
+ * identical drafts — same sources query, same Gemini call, same persistence.
  */
 
 import {
@@ -186,7 +186,7 @@ export async function rewriteStory(story: StoryRow): Promise<RewriteOutcome> {
   const previousSummary = previousRows[0] ?? null;
 
   const reservation = await reserveAiBudget({
-    provider: "anthropic",
+    provider: "google",
     task: "article-rewrite",
     model: REWRITE_MODEL,
     maximumCostMicroUsd: estimateRewriteMaximumCostMicroUsd(story.label, sources, previousSummary),

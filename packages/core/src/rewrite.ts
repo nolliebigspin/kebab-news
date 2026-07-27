@@ -3,7 +3,7 @@
  * `{ neutral_headline, neutral_body }` from the headlines + teasers of every
  * outlet that covers a story.
  *
- * No DB writes here — pure orchestration around the Claude call. The script
+ * No DB writes here — pure orchestration around the Gemini call. The script
  * is responsible for picking the story, loading the sources, and persisting
  * the result into `published_articles`.
  *
@@ -11,10 +11,15 @@
  * `null` and the caller must abort — partial garbage never reaches the DB
  * (per CLAUDE.md §VI rule 6).
  */
-import Anthropic from "@anthropic-ai/sdk";
 import type { OutletLean, SourceKind } from "@kebab/db";
+import { env } from "@kebab/env";
 import { z } from "zod";
-import { REWRITE_MAX_OUTPUT_TOKENS, REWRITE_MODEL, REWRITE_SYSTEM_PROMPT } from "./constants";
+import {
+  GEMINI_GENERATE_CONTENT_URL,
+  REWRITE_MAX_OUTPUT_TOKENS,
+  REWRITE_MODEL,
+  REWRITE_SYSTEM_PROMPT,
+} from "./constants";
 import { LEAN_ORDER } from "./lean";
 import type { ModelUsage } from "./model-usage";
 import { StorySummarySchema } from "./story-summary";
@@ -167,7 +172,7 @@ export type SourceItem = {
   sourceKind: SourceKind;
 };
 
-/** Order sources left → public so the Claude prompt sees a consistent layout. */
+/** Order sources left → public so the model prompt sees a consistent layout. */
 export function sortSourcesByLean(sources: SourceItem[]): SourceItem[] {
   return [...sources].sort((a, b) => LEAN_ORDER.indexOf(a.lean) - LEAN_ORDER.indexOf(b.lean));
 }
@@ -263,38 +268,31 @@ export function estimateRewriteMaximumCostMicroUsd(
     `${REWRITE_SYSTEM_PROMPT}\n${buildUserMessage(label, sources, previousSummary)}\n${JSON.stringify(REWRITE_JSON_SCHEMA)}`
   ).length;
   const maximumInputTokens = requestBytes + 2_048;
-  // Conservative standard Sonnet 5 rates after introductory pricing:
-  // $3/MTok input, $3.75/MTok cache writes, $15/MTok output.
-  return Math.ceil(maximumInputTokens * 3.75 + REWRITE_MAX_OUTPUT_TOKENS * 15);
+  return geminiRewriteCostMicroUsd(maximumInputTokens, REWRITE_MAX_OUTPUT_TOKENS);
 }
 
-function anthropicCostMicroUsd(usage: {
-  input_tokens?: number;
-  output_tokens?: number;
-  cache_creation_input_tokens?: number | null;
-  cache_read_input_tokens?: number | null;
-}): number {
-  const inputTokens = usage.input_tokens ?? 0;
-  const outputTokens = usage.output_tokens ?? 0;
-  const cacheCreationTokens = usage.cache_creation_input_tokens ?? 0;
-  const cacheReadTokens = usage.cache_read_input_tokens ?? 0;
-  return Math.ceil(
-    inputTokens * 3 + outputTokens * 15 + cacheCreationTokens * 3.75 + cacheReadTokens * 0.3
-  );
+function geminiRewriteCostMicroUsd(inputTokens: number, outputTokens: number): number {
+  // Gemini 3.6 Flash paid-tier rates: $1.50 input / $7.50 output per MTok.
+  // Google bills thinking tokens at the output rate.
+  return Math.ceil(inputTokens * 1.5 + outputTokens * 7.5);
 }
 
-let cachedClient: Anthropic | null = null;
-function getClient(): Anthropic {
-  if (!cachedClient) {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) throw new Error("ANTHROPIC_API_KEY is required to call generateRewrite()");
-    cachedClient = new Anthropic({ apiKey });
-  }
-  return cachedClient;
-}
+type GeminiResponse = {
+  candidates?: Array<{
+    finishReason?: string;
+    content?: { parts?: Array<{ text?: string; thought?: boolean }> };
+  }>;
+  promptFeedback?: { blockReason?: string };
+  usageMetadata?: {
+    promptTokenCount?: number;
+    candidatesTokenCount?: number;
+    thoughtsTokenCount?: number;
+  };
+  error?: { message?: string };
+};
 
 /**
- * One Claude call → one parsed rewrite. Returns null on API failure or
+ * One Gemini call → one parsed rewrite. Returns null on API failure or
  * schema-parse failure; caller aborts. Never persists partial output.
  */
 export async function generateRewrite(
@@ -302,49 +300,61 @@ export async function generateRewrite(
   sources: SourceItem[],
   previousSummary: PreviousSummary | null = null
 ): Promise<RewriteGenerationResult | null> {
-  const client = getClient();
   const userMessage = buildUserMessage(label, sources, previousSummary);
 
   try {
-    const response = await client.messages
-      .stream({
-        model: REWRITE_MODEL,
-        max_tokens: REWRITE_MAX_OUTPUT_TOKENS,
-        thinking: { type: "disabled" },
-        // The system prompt is identical on every call and is by far the
-        // largest fixed input. Caching it bills repeat reads at 10%.
-        system: [
-          {
-            type: "text",
-            text: REWRITE_SYSTEM_PROMPT,
-            cache_control: { type: "ephemeral" },
-          },
-        ],
-        output_config: {
-          format: { type: "json_schema", schema: REWRITE_JSON_SCHEMA },
+    if (!env.GEMINI_API_KEY) {
+      console.error("[rewrite] GEMINI_API_KEY is required");
+      return null;
+    }
+    const response = await fetch(
+      `${GEMINI_GENERATE_CONTENT_URL}/${REWRITE_MODEL}:generateContent`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": env.GEMINI_API_KEY,
         },
-        messages: [{ role: "user", content: userMessage }],
-      })
-      .finalMessage();
-
-    // If Claude hit the token cap, the JSON is truncated mid-string.
-    // JSON.parse would throw; abort cleanly instead.
-    if (response.stop_reason === "max_tokens") {
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: REWRITE_SYSTEM_PROMPT }] },
+          contents: [{ role: "user", parts: [{ text: userMessage }] }],
+          generationConfig: {
+            maxOutputTokens: REWRITE_MAX_OUTPUT_TOKENS,
+            thinkingConfig: { thinkingLevel: "medium" },
+            responseMimeType: "application/json",
+            responseJsonSchema: REWRITE_JSON_SCHEMA,
+          },
+        }),
+      }
+    );
+    const body = (await response.json().catch(() => null)) as GeminiResponse | null;
+    if (!response.ok) {
       console.error(
-        `[rewrite] response truncated at max_tokens (${REWRITE_MAX_OUTPUT_TOKENS}). Shorten the requested output.`
+        `[rewrite] Gemini ${response.status} ${body?.error?.message ?? response.statusText}`
       );
       return null;
     }
 
-    const block = response.content.find((b) => b.type === "text");
-    if (!block || block.type !== "text") return null;
+    const candidate = body?.candidates?.[0];
+    if (!candidate || candidate.finishReason !== "STOP") {
+      console.error(
+        `[rewrite] Gemini stopped without a complete result (${candidate?.finishReason ?? body?.promptFeedback?.blockReason ?? "unknown"})`
+      );
+      return null;
+    }
+    const text = candidate.content?.parts
+      ?.filter((part) => !part.thought)
+      .map((part) => part.text ?? "")
+      .join("")
+      .trim();
+    if (!text) return null;
 
     let raw: unknown;
     try {
-      raw = JSON.parse(block.text);
+      raw = JSON.parse(text);
     } catch (parseErr) {
       console.error(
-        `[rewrite] JSON parse failed (${(parseErr as Error).message}). First 200 chars: ${block.text.slice(0, 200)}`
+        `[rewrite] JSON parse failed (${(parseErr as Error).message}). First 200 chars: ${text.slice(0, 200)}`
       );
       return null;
     }
@@ -362,27 +372,22 @@ export async function generateRewrite(
       console.error("[rewrite] update output is missing change_summary");
       return null;
     }
-    const usage = response.usage;
-    const inputTokens =
-      usage.input_tokens +
-      (usage.cache_creation_input_tokens ?? 0) +
-      (usage.cache_read_input_tokens ?? 0);
+    const inputTokens = body?.usageMetadata?.promptTokenCount ?? 0;
+    const outputTokens =
+      (body?.usageMetadata?.candidatesTokenCount ?? 0) +
+      (body?.usageMetadata?.thoughtsTokenCount ?? 0);
     return {
       rewrite: parsed.data,
       usage: {
-        provider: "anthropic",
+        provider: "google",
         model: REWRITE_MODEL,
         inputTokens,
-        outputTokens: usage.output_tokens,
-        costMicroUsd: anthropicCostMicroUsd(usage),
+        outputTokens,
+        costMicroUsd: geminiRewriteCostMicroUsd(inputTokens, outputTokens),
       },
     };
   } catch (err) {
-    if (err instanceof Anthropic.APIError) {
-      console.error(`[rewrite] Anthropic ${err.status} ${err.message}`);
-    } else {
-      console.error("[rewrite] unexpected error", err);
-    }
+    console.error("[rewrite] unexpected error", err);
     return null;
   }
 }

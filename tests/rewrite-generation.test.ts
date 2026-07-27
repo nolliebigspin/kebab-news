@@ -1,17 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 
-const { createMessageMock, streamMessageMock } = vi.hoisted(() => ({
-  createMessageMock: vi.fn(),
-  streamMessageMock: vi.fn(),
-}));
-
-vi.mock("@anthropic-ai/sdk", () => ({
-  default: class FakeAnthropic {
-    static APIError = class extends Error {};
-    messages = { create: createMessageMock, stream: streamMessageMock };
-  },
-}));
-
 const { generateRewrite } = await import("../packages/core/src/rewrite");
 
 const SOURCES = [
@@ -60,43 +48,61 @@ const COMPLETE_REWRITE = {
   annotations: [],
 };
 
-describe("generateRewrite output budget", () => {
-  it("streams the complete structured article when the output ceiling exceeds the SDK sync limit", async () => {
-    createMessageMock.mockImplementation(() => {
-      throw new Error("Streaming is required for operations that may take longer than 10 minutes");
+describe("generateRewrite", () => {
+  it("generates and prices a complete structured article with Gemini 3.6 Flash", async () => {
+    const fetchMock = vi.fn(async (_input: string | URL | Request, _init?: RequestInit) => {
+      return new Response(
+        JSON.stringify({
+          candidates: [
+            {
+              finishReason: "STOP",
+              content: { parts: [{ text: JSON.stringify(COMPLETE_REWRITE) }] },
+            },
+          ],
+          usageMetadata: {
+            promptTokenCount: 1_000,
+            candidatesTokenCount: 500,
+            thoughtsTokenCount: 200,
+          },
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     });
-    streamMessageMock.mockReturnValue({
-      finalMessage: async () => ({
-        stop_reason: "end_turn",
-        content: [{ type: "text", text: JSON.stringify(COMPLETE_REWRITE) }],
-        usage: {
-          input_tokens: 1_000,
-          output_tokens: 500,
-          cache_creation_input_tokens: 0,
-          cache_read_input_tokens: 0,
-        },
-      }),
-    });
+    vi.stubGlobal("fetch", fetchMock);
 
     const result = await generateRewrite("EU-Strafe gegen Google", SOURCES);
 
     expect(result).toEqual({
       rewrite: COMPLETE_REWRITE,
       usage: {
-        provider: "anthropic",
-        model: "claude-sonnet-5",
+        provider: "google",
+        model: "gemini-3.6-flash",
         inputTokens: 1_000,
-        outputTokens: 500,
-        costMicroUsd: 10_500,
+        outputTokens: 700,
+        costMicroUsd: 6_750,
       },
     });
-    expect(createMessageMock).not.toHaveBeenCalled();
-    expect(streamMessageMock).toHaveBeenCalledOnce();
-    expect(streamMessageMock.mock.calls[0][0]).toEqual(
+    expect(fetchMock).toHaveBeenCalledOnce();
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent"
+    );
+    expect(init?.headers).toEqual(expect.objectContaining({ "x-goog-api-key": "test-gemini-key" }));
+    const request = JSON.parse(String(init?.body));
+    expect(request.generationConfig).toEqual(
       expect.objectContaining({
-        max_tokens: 8_000,
-        thinking: { type: "disabled" },
+        maxOutputTokens: 8_000,
+        thinkingConfig: { thinkingLevel: "medium" },
+        responseMimeType: "application/json",
+        responseJsonSchema: expect.objectContaining({
+          type: "object",
+          required: expect.arrayContaining(["neutral_headline", "neutral_body", "confirmed_facts"]),
+        }),
       })
     );
+    expect(request.generationConfig).not.toHaveProperty("temperature");
   });
 });

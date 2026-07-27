@@ -78,7 +78,7 @@ Source headline annotations retain the legacy offset format. Story Summary annot
 Once a source-diverse topic reaches `REWRITE_VOTE_THRESHOLD`, the automatic worker may generate its first article:
 1. Load all articles in the cluster (headline + teaser from RSS — no body scraping).
 2. Build a structured input: per-outlet headline + teaser + political lean, ordered left → public via `LEAN_ORDER`.
-3. Call Claude with the transparent-summary prompt (versioned in `packages/core/src/constants.ts`). Imported source text is explicitly untrusted.
+3. Call the configured Gemini Flash model with the transparent-summary prompt (model and prompt version live in `packages/core/src/constants.ts`). Imported source text is explicitly untrusted.
 4. Validate headline/body, short summary, sourced facts, uncertainties, differences and annotations with JSON Schema plus Zod. On parse failure, abort — never persist partial output.
 5. Insert into `published_articles` with `published_at` set, archive the version it supersedes and back-link `stories.published_article_id` — the article is live at `/artikel/[slug]` immediately.
 
@@ -104,7 +104,7 @@ Versions are pinned in `mise.toml`, `package.json`, and `bun.lock`. Do not write
 - **Scheduled jobs:** long-running ingest worker (`apps/worker`) with an in-process scheduler (`RUN_HOURS_UTC`), deployed as a container (Dokploy). No HTTP route, no Vercel-Cron, no external queue.
 - **AI — Embeddings:** Voyage AI (`voyage-3-lite`, 512 dims, direct HTTP).
 - **AI — Framing annotation:** Gemini Flash-Lite (Google API, direct HTTP, one batch per topic).
-- **AI — Transparent summary:** Claude Sonnet (Anthropic API).
+- **AI — Transparent summary:** Gemini Flash (Google API, direct HTTP; model pinned in constants).
 - **Auth:** Better Auth (passwordless magic-link), Drizzle adapter on the shared Postgres, email sent via SMTP (`nodemailer`). Encapsulated in `@kebab/auth`. Note: `kysely` is marked `serverExternalPackages` in `apps/web/next.config.ts` — it's a dead transitive dep of better-auth (we use the Drizzle adapter) whose sqlite dialects break Turbopack's build trace; externalizing stops it being parsed (see §IX).
 - **Hosting:** Vercel (web app, root dir `apps/web`) + Dokploy (ingest worker container).
 - **Quality:** Biome (lint + format), Vitest (tests).
@@ -150,7 +150,7 @@ These are non-negotiable. Violating them is the most common mistake — see Sect
 3. **Finishing a step requires `mise exec -- bun check:all`.** Before declaring any coding step complete, run it. Fix what it reports.
 4. **DB migrations are generated, never hand-edited.** Run `mise exec -- bun db:generate` after schema changes, then `mise exec -- bun db:migrate`. Do not edit the generated SQL files in `packages/db/drizzle/` by hand. The metadata snapshots in `packages/db/drizzle/meta/` are also generated; the only time you touch them is to repair a known-broken chain (see §IX).
 5. **No AI calls in the web app.** All AI work runs in the worker or operator commands. Page renders and reader-interaction routes never call a model.
-6. **Rewrite output is structured.** Claude is called with `output_config.format: { type: "json_schema", ... }`. The output is Zod-validated before persistence. On parse failure, the rewrite is aborted and logged — never saved as partial garbage.
+6. **Rewrite output is structured.** Gemini is called with `responseMimeType: "application/json"` and `responseJsonSchema`. The output is Zod-validated before persistence. On parse failure, the rewrite is aborted and logged — never saved as partial garbage.
 7. **The pipeline is autonomous — no review gate.** Generation publishes directly (`published_at` set on insert). There is no draft state, no review receipt and no generation/review disclosure on the article surface. Do not reintroduce a manual approval step, a "Ungeprüft" badge or an origin label unless the operator asks for it.
 8. **Original sources are always visible.** Every published article has a "Quellen" section listing every outlet that fed the rewrite, with link-outs. No rewrite ships without sources.
 9. **No body scraping.** v1 uses only RSS headlines + teasers — for the rewrite input, for the radar UI, for everything. Same pattern as Ground News. Removing this constraint requires editing this rule and reopening the DE press-law question in §VII first.
@@ -207,13 +207,13 @@ Append-only. When the user corrects me, **I ask** whether to add a lesson here. 
 - **German content only, but next-intl stays — English was removed to focus on the German-speaking market.** Reason: operator decision (commit 91c1a12). Only `messages/de.json` ships and the locale resolves to `de`, but the next-intl plumbing is kept intentionally so other languages can be added later. New strings go into `messages/de.json`.
 - **No body scraping in v1 — RSS headlines + teasers only, like Ground News.** Reason: the operator confirmed after a second Ground News check that they also don't ingest bodies. Removes the open DE derivative-work question entirely, keeps paywalled outlets (NZZ, FAZ) in the spectrum, and skips per-outlet scraper maintenance. If the rewrite quality feels thin in practice, bodies become the upgrade path — but we need evidence first, not speculation.
 - **German URL routes — `/articles` was renamed to `/artikel`.** Reason: operator decision — with English content gone, all routes are German for a consistent German-only surface (`/artikel`, `/radar`, `/vision`, `/impressum`, `/datenschutz`). This **deliberately reverses** the earlier "English URL routes" lesson. The DB table/variable `articles` is unrelated code and stays as-is.
-- **Pivoted from "annotate, never rewrite" (Product A) to "AI-rewritten neutral German news" (Product B).** Reason: the operator explicitly chose Product B after seeing Product A built and after seeing a Ground News screenshot showing Ground News *does not* do AI rewrites. Accepted: bias-substitution risk (Claude's neutral is its training-data neutral) and Presserecht risk (disclaimer-only, personal liability). The old "AI annotates framing, AI does not rewrite" lesson is **deliberately reversed** by this decision.
+- **Pivoted from "annotate, never rewrite" (Product A) to "AI-rewritten neutral German news" (Product B).** Reason: the operator explicitly chose Product B after seeing Product A built and after seeing a Ground News screenshot showing Ground News *does not* do AI rewrites. Accepted: bias-substitution risk (a model's neutral is its training-data neutral) and Presserecht risk (disclaimer-only, personal liability). The old "AI annotates framing, AI does not rewrite" lesson is **deliberately reversed** by this decision.
 - **Run bun via mise, not bare.** Reason: Bun version is pinned in `mise.toml`; bare `bun` may resolve to a different installed version.
 - **Don't write version numbers into CLAUDE.md.** Reason: they rot. The lockfiles and `mise.toml` are the source of truth.
 - **Run `mise exec -- bun check:all` before declaring a step done.** Reason: this is the project's definition of "ready".
 - **Drizzle-kit metadata snapshots can need hand-fixes for parent-id collisions.** Reason: a previous hand-rolled 0000 migration had a zero-UUID `id`, which collided with the 0001 snapshot's `prevId`. The fix is metadata only (snapshot JSON), not the generated SQL — never hand-edit the SQL.
 - **The voyageai Node SDK ESM build is broken under Next.js bundling.** Reason: directory imports without extensions throw at page-data collection. Use direct fetch against `https://api.voyageai.com/v1/embeddings` instead.
-- **Cap per-outlet article ingest tightly.** Reason: each article triggers 3 sequential AI calls (1 Voyage + 2 Claude). Without a per-run cap, ingest exceeds Vercel function timeouts on cold DBs. `MAX_NEW_ARTICLES_PER_OUTLET` in `packages/core/src/constants.ts` is the lever.
+- **Cap per-outlet article ingest tightly.** Reason: each article incurs embedding and annotation work, while reader-requested topics can additionally trigger a full rewrite. Without a per-run cap, cold databases create unnecessary cost and long worker runs. `MAX_NEW_ARTICLES_PER_OUTLET` in `packages/core/src/constants.ts` is the lever.
 
 <!-- LESSONS:END -->
 

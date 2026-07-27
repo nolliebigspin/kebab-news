@@ -60,7 +60,7 @@ export const REWRITE_VOTE_THRESHOLD = 1;
  * How many NEW sources must attach to an already-summarized story before it is
  * eligible for another reader-requested rewrite. A fresh post-version upvote
  * is also required. Without the source threshold, every ingest pass that moved `last_seen_at`
- * triggered a fresh full-cost Claude call — by far the largest AI spend in the
+ * triggered a fresh full-cost rewrite call — by far the largest AI spend in the
  * pipeline. A re-summary is only worth its cost when the cluster actually
  * gained substance, not when one more outlet echoed the same report.
  */
@@ -120,25 +120,25 @@ export const ANNOTATION_SYSTEM_PROMPT = [
 ].join("\n");
 
 // ============================================================================
-// Radar — neutral rewrite (Claude)
+// Radar — neutral rewrite (Gemini)
 // ============================================================================
 
-export const REWRITE_MODEL = "claude-sonnet-5";
+export const REWRITE_MODEL = "gemini-3.6-flash";
 
 /**
  * Version stamp persisted on every generated rewrite. Bump whenever the
  * REWRITE_SYSTEM_PROMPT changes meaningfully — lets us identify outputs
  * that came from a prior prompt and re-run them if needed.
  */
-export const REWRITE_PROMPT_VERSION = "v3-transparent-summary-2026-07";
+export const REWRITE_PROMPT_VERSION = "v4-gemini-3.6-transparent-summary-2026-07";
 
-/** Target length of the neutral body in words. Claude is told this. */
+/** Target length of the neutral body in words. The rewrite model is told this. */
 export const REWRITE_TARGET_WORDS_MIN = 300;
 export const REWRITE_TARGET_WORDS_MAX = 600;
 
 /**
- * Hard ceiling for the complete structured response. Sonnet 5 counts adaptive
- * thinking and visible JSON against max_tokens, so keep generous headroom.
+ * Hard ceiling for the complete structured response. Gemini counts thinking
+ * and visible JSON against maxOutputTokens, so keep generous headroom.
  * Billing is based on tokens actually generated, not this configured ceiling.
  */
 export const REWRITE_MAX_OUTPUT_TOKENS = 8_000;

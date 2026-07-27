@@ -30,7 +30,7 @@ Gemini analysiert die Schlagzeilen und Teaser eines Themas gebündelt und markie
 Der Quellenvergleich zeigt die wichtigsten Themen des Tages. Angemeldete Lesende stimmen ab, welches Thema einen vollständigen Artikel bekommen soll. Ein Upvote schaltet die erste Generierung frei; eine spätere automatische Aktualisierung braucht erneut einen Upvote nach der letzten Artikelversion sowie genügend neue Originalbeiträge.
 
 ### 4. Es schreibt den Gewinner neutral um
-Für die ausgewählte Geschichte holt das Werkzeug die Schlagzeilen + Teaser aller Outlets, die darüber berichtet haben, schickt sie durch Claude mit einem strikten Prompt für neutrales Deutsch und erzeugt eine Schlagzeile und einen Text (Ziellänge in `src/lib/constants.ts`). Aussagen über identifizierbare Personen werden ihrer Quelle zugeordnet und konjunktivisch formuliert („laut X"), nie als eigene Tatsache des Werkzeugs behauptet. Das Ergebnis wird unter `/artikel/[slug]` veröffentlicht. Artikeltexte scrapen wir bewusst nicht — selbes Muster wie Ground News.
+Für die ausgewählte Geschichte holt das Werkzeug die Schlagzeilen + Teaser aller Outlets, die darüber berichtet haben, schickt sie durch Gemini mit einem strikten Prompt für neutrales Deutsch und erzeugt eine Schlagzeile und einen Text (Ziellänge in `src/lib/constants.ts`). Aussagen über identifizierbare Personen werden ihrer Quelle zugeordnet und konjunktivisch formuliert („laut X"), nie als eigene Tatsache des Werkzeugs behauptet. Das Ergebnis wird unter `/artikel/[slug]` veröffentlicht. Artikeltexte scrapen wir bewusst nicht — selbes Muster wie Ground News.
 
 ### 5. Quellen bleiben sichtbar
 Jeder erzeugte Artikel hat unterhalb der Umschreibung einen „Quellen"-Bereich — jeder Originalartikel der Outlets, sein Lean-Label, seine Framing-Markierungen und ein Link nach außen. Wenn die Fassung schräg klingt, kannst du das prüfen.
@@ -46,7 +46,7 @@ Jeder erzeugte Artikel hat unterhalb der Umschreibung einen „Quellen"-Bereich 
 - **Geplante Jobs:** Vercel Cron
 - **KI — Embeddings:** [Voyage AI](https://www.voyageai.com/) (`voyage-3-lite`, 512 Dimensionen) fürs Clustern
 - **KI — Framing-Annotation:** [Gemini](https://ai.google.dev/) (`gemini-2.5-flash-lite`, pro Thema gebündelt)
-- **KI — Artikelgenerierung:** [Claude](https://www.anthropic.com/) (`claude-sonnet-5`)
+- **KI — Artikelgenerierung:** [Gemini](https://ai.google.dev/) (`gemini-3.6-flash`)
 - **Hosting:** [Vercel](https://vercel.com/)
 - **Werkzeuge:** [Bun](https://bun.sh/) (verwaltet über [mise](https://mise.jdx.dev/)), [Biome](https://biomejs.dev/), [Vitest](https://vitest.dev/)
 
@@ -87,7 +87,7 @@ mise exec -- bun run test       # Vitest-Suite (NICHT `bun test`)
 
 kebab.news versteht sich als **Informations-Werkzeug**, nicht als Medienpublikation — rechtlich knüpfen die Pflichten aber an das an, was das Werkzeug tut, nicht an seine Bezeichnung. Zwei ehrliche Hinweise:
 
-- **Claudes „neutral" ist das Neutral seiner Trainingsdaten.** Deutsche KI-Umschreibungen tendieren stilistisch in Richtung öffentlich-rechtlicher Berichterstattung und übersetzter angelsächsischer Texte. Wir tun nicht so, als wäre das nicht so — die Original-Outlet-Fassungen sind immer einen Klick entfernt.
+- **Das „neutral" des Modells ist das „neutral" seiner Trainingsdaten.** Deutsche KI-Umschreibungen können stilistisch in Richtung öffentlich-rechtlicher Berichterstattung und übersetzter angelsächsischer Texte tendieren. Wir tun nicht so, als wäre das nicht so — die Original-Outlet-Fassungen sind immer einen Klick entfernt.
 - **Das Erzeugen von Umschreibungen über identifizierbare Personen kann presserechtliche Pflichten auslösen** (Sorgfaltspflicht, Persönlichkeitsrechte). Der Hinweis ist Ehrlichkeitsgebot, kein Rechtsschutz. Die Plattform soll über ein Unternehmen laufen, damit Haftung und Finanzen bei der juristischen Person liegen statt bei einer Privatperson — vor dem öffentlichen Livegang die Deployment-Hinweise beachten.
 
 ---

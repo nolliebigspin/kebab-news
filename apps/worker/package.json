@@ -14,7 +14,6 @@
     "seed:outlets": "bun run scripts/seed-outlets.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.97.0",
     "@kebab/core": "workspace:*",
     "@kebab/db": "workspace:*",
     "@kebab/env": "workspace:*",
