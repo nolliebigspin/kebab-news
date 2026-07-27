@@ -55,6 +55,7 @@
     "page_subtitle": "Ein Thema, viele Originalbeiträge. Vergleiche Schlagzeilen, Perspektiven und mögliche Rahmungen – oder öffne den fertigen Artikel.",
     "empty": "Noch keine Themen. Die Übersicht füllt sich, sobald mehrere Medien über dasselbe Ereignis berichten.",
     "empty_search": "Keine Themen für diese Filter. Passe Suche oder Zeitraum an.",
+    "card_label": "Thema",
     "filters": {
       "search_placeholder": "Themen durchsuchen …",
       "search_label": "Nach Thema oder Originalbeitrag suchen",
@@ -126,6 +127,8 @@
     "page_subtitle": "Veröffentlichte Zusammenfassungen mit Belegen, offenen Fragen und Unterschieden zwischen Quellen.",
     "empty": "Noch kein Artikel veröffentlicht.",
     "empty_search": "Keine Artikel für diese Filter. Passe Suche oder Zeitraum an.",
+    "card_label": "Artikel",
+    "read_cta": "Lesen",
     "filters": {
       "search_placeholder": "Artikel durchsuchen …",
       "search_label": "Nach Titel oder Inhalt suchen",

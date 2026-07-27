@@ -89,7 +89,7 @@ export default async function ArticlesPage({
                 >
                   <div className="flex items-center justify-between gap-4">
                     <span className="font-mono text-[10px] text-brand-ink uppercase tracking-[0.1em]">
-                      Artikel
+                      {t("card_label")}
                     </span>
                     <span className="rounded-full bg-bg-warm px-2.5 py-1 text-ink-mute text-xs">
                       {t("source_count", { count: article.sourceCount })}
@@ -108,7 +108,7 @@ export default async function ArticlesPage({
                       </span>
                     ) : null}
                     <span className="inline-flex items-center gap-2 font-semibold text-brand-ink">
-                      Lesen <FiArrowRight aria-hidden />
+                      {t("read_cta")} <FiArrowRight aria-hidden />
                     </span>
                   </div>
                 </Link>

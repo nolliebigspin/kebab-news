@@ -59,7 +59,7 @@ export default async function LandingPage() {
                 </span>
                 <span>
                   <strong className="mb-1 block text-ink">Quellen zuerst</strong>
-                  Jede wesentliche Aussage bleibt zum Original rückverfolgbar.
+                  Jede wesentliche Aussage bleibt zu Quellen rückverfolgbar.
                 </span>
               </li>
               <li className="flex gap-4">
@@ -68,7 +68,7 @@ export default async function LandingPage() {
                 </span>
                 <span>
                   <strong className="mb-1 block text-ink">Keine falsche Neutralität</strong>
-                  Unsicherheiten und Unterschiede bleiben sichtbar.
+                  Unsicherheit und Auswahlentscheidungen werden sichtbar.
                 </span>
               </li>
               <li className="flex gap-4">
@@ -77,7 +77,7 @@ export default async function LandingPage() {
                 </span>
                 <span>
                   <strong className="mb-1 block text-ink">Framing untersuchen</strong>
-                  Wortwahl, Kontext und Auslassungen werden eingeordnet.
+                  Markierungen erklären Wortwahl, Kontext und Auslassungen.
                 </span>
               </li>
             </ul>

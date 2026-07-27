@@ -120,7 +120,7 @@ export default async function TopicsPage({
                       </time>
                     </div>
                     <span className="font-mono text-[10px] text-brand-ink uppercase tracking-[0.1em]">
-                      Thema
+                      {t("card_label")}
                     </span>
                   </div>
                   <div className="mt-4">
