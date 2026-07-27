@@ -173,6 +173,10 @@ export async function loadPublishedStoryCards(limit = 12) {
     .from(publishedArticles)
     .innerJoin(stories, eq(stories.publishedArticleId, publishedArticles.id))
     .where(isNotNull(publishedArticles.publishedAt))
-    .orderBy(desc(publishedArticles.publishedAt))
+    .orderBy(
+      desc(publishedArticles.rewrittenAt),
+      desc(publishedArticles.publishedAt),
+      desc(publishedArticles.id)
+    )
     .limit(limit);
 }
