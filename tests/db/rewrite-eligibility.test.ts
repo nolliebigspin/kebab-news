@@ -1,11 +1,15 @@
-import { articles, db, outlets, stories, user, votes } from "@kebab/db";
+import { articles, db, outlets, publishedArticles, stories, user, votes } from "@kebab/db";
 import { eq, inArray } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { findStoriesReadyForRewrite } from "../../apps/worker/src/rewrite";
 
 const PREFIX = "__rewrite_eligibility__";
 const OUTLET_SLUGS = [`${PREFIX}left`, `${PREFIX}center`, `${PREFIX}right`];
-const STORY_SLUGS = [`${PREFIX}without_vote`, `${PREFIX}with_vote`];
+const STORY_SLUGS = [
+  `${PREFIX}without_vote`,
+  `${PREFIX}with_vote`,
+  `${PREFIX}published_without_vote`,
+];
 const USER_ID = `${PREFIX}user`;
 
 let storyIds: string[] = [];
@@ -14,6 +18,7 @@ let outletIds: string[] = [];
 async function cleanup() {
   if (storyIds.length > 0) {
     await db.delete(votes).where(inArray(votes.storyId, storyIds));
+    await db.delete(publishedArticles).where(inArray(publishedArticles.storyId, storyIds));
     await db.delete(articles).where(inArray(articles.storyId, storyIds));
   }
   await db.delete(stories).where(inArray(stories.slug, STORY_SLUGS));
@@ -64,12 +69,35 @@ beforeAll(async () => {
         outletId,
         url: `https://rewrite-eligibility.test/${storyIndex}/${outletIndex}`,
         headline: `Rewrite eligibility ${storyIndex}/${outletIndex}`,
-        publishedAt: new Date("2026-07-27T12:00:00Z"),
+        publishedAt:
+          storyIndex === 2 ? new Date("2026-07-26T12:00:00Z") : new Date("2026-07-27T12:00:00Z"),
       }))
     )
   );
 
   await db.insert(votes).values({ storyId: storyIds[1], userId: USER_ID });
+  await db.insert(publishedArticles).values({
+    storyId: storyIds[2],
+    slug: `${PREFIX}published_article`,
+    neutralHeadline: "Already published",
+    neutralBody: "Already published body",
+    sourceCount: outletIds.length,
+    sourceOutletSlugs: OUTLET_SLUGS,
+    model: "test",
+    promptVersion: "test",
+    status: "published",
+    rewrittenAt: new Date("2026-07-27T00:00:00Z"),
+    publishedAt: new Date("2026-07-27T00:00:00Z"),
+  });
+  await db.insert(articles).values(
+    Array.from({ length: 4 }, (_, index) => ({
+      storyId: storyIds[2],
+      outletId: outletIds[index % outletIds.length],
+      url: `https://rewrite-eligibility.test/published/new/${index}`,
+      headline: `New source for published article ${index}`,
+      publishedAt: new Date(`2026-07-27T0${index + 1}:00:00Z`),
+    }))
+  );
 });
 
 afterAll(cleanup);
@@ -80,5 +108,11 @@ describe("automatic article generation eligibility", () => {
 
     expect(readyIds.has(storyIds[0])).toBe(false);
     expect(readyIds.has(storyIds[1])).toBe(true);
+  });
+
+  it("does not require a new upvote to update an existing article", async () => {
+    const readyIds = new Set((await findStoriesReadyForRewrite()).map((story) => story.id));
+
+    expect(readyIds.has(storyIds[2])).toBe(true);
   });
 });

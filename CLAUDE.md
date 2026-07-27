@@ -75,14 +75,14 @@ Source headline annotations retain the legacy offset format. Story Summary annot
 
 ### 4. Structured summary generation
 
-Once a source-diverse topic reaches `REWRITE_VOTE_THRESHOLD`, the automatic worker path runs:
+Once a source-diverse topic reaches `REWRITE_VOTE_THRESHOLD`, the automatic worker may generate its first article:
 1. Load all articles in the cluster (headline + teaser from RSS — no body scraping).
 2. Build a structured input: per-outlet headline + teaser + political lean, ordered left → public via `LEAN_ORDER`.
 3. Call Claude with the transparent-summary prompt (versioned in `packages/core/src/constants.ts`). Imported source text is explicitly untrusted.
 4. Validate headline/body, short summary, sourced facts, uncertainties, differences and annotations with JSON Schema plus Zod. On parse failure, abort — never persist partial output.
 5. Insert into `published_articles` with `published_at` set, archive the version it supersedes and back-link `stories.published_article_id` — the article is live at `/artikel/[slug]` immediately.
 
-An already-summarized story is only rewritten again once at least `REWRITE_MIN_NEW_SOURCES` new contributions have attached to its cluster; this keeps repeat AI spend bounded. `bun rewrite:run --story <slug>` remains an explicit operator command using the same generation path, and `bun rewrite:publish --story <slug>` remains a repair tool for a summary that is not live.
+An already-summarized story does not need another upvote, but is only rewritten again once at least `REWRITE_MIN_NEW_SOURCES` new contributions have attached to its cluster; this keeps repeat AI spend bounded. `bun rewrite:run --story <slug>` remains an explicit operator command using the same generation path, and `bun rewrite:publish --story <slug>` remains a repair tool for a summary that is not live.
 
 ### 5. Topic and article surfaces
 

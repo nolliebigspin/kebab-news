@@ -234,8 +234,9 @@ export async function rewriteStory(story: StoryRow): Promise<RewriteOutcome> {
 }
 
 /**
- * Upvoted, source-diverse stories without a summary, plus upvoted stories that
- * gained at least REWRITE_MIN_NEW_SOURCES sources since their last rewrite.
+ * Upvoted, source-diverse stories without a summary, plus already-summarized
+ * stories that gained at least REWRITE_MIN_NEW_SOURCES sources since their
+ * last rewrite.
  *
  * The re-summary condition counts articles newer than the latest rewrite
  * rather than comparing `stories.lastSeenAt` to it. `lastSeenAt` moves on
@@ -247,21 +248,26 @@ export async function findStoriesReadyForRewrite(): Promise<StoryRow[]> {
     .select({ story: stories })
     .from(stories)
     .innerJoin(articles, eq(articles.storyId, stories.id))
-    .innerJoin(votes, eq(votes.storyId, stories.id))
+    .leftJoin(votes, eq(votes.storyId, stories.id))
     .leftJoin(publishedArticles, eq(publishedArticles.storyId, stories.id))
     .groupBy(stories.id)
     .having(
       sql`count(DISTINCT ${articles.outletId}) >= ${RADAR_MIN_OUTLETS}
-        and count(DISTINCT ${votes.id}) >= ${REWRITE_VOTE_THRESHOLD}
         and (
-          count(DISTINCT ${publishedArticles.id}) = 0
-          or count(DISTINCT ${articles.id}) filter (
-            where ${articles.publishedAt} > (
-              select max(prev.rewritten_at)
-              from ${publishedArticles} prev
-              where prev.story_id = ${stories.id}
-            )
-          ) >= ${REWRITE_MIN_NEW_SOURCES}
+          (
+            count(DISTINCT ${publishedArticles.id}) = 0
+            and count(DISTINCT ${votes.id}) >= ${REWRITE_VOTE_THRESHOLD}
+          )
+          or (
+            count(DISTINCT ${publishedArticles.id}) > 0
+            and count(DISTINCT ${articles.id}) filter (
+              where ${articles.publishedAt} > (
+                select max(prev.rewritten_at)
+                from ${publishedArticles} prev
+                where prev.story_id = ${stories.id}
+              )
+            ) >= ${REWRITE_MIN_NEW_SOURCES}
+          )
         )`
     )
     .orderBy(desc(stories.lastSeenAt));
@@ -271,8 +277,9 @@ export async function findStoriesReadyForRewrite(): Promise<StoryRow[]> {
 export type AutoRewriteResult = { triggered: number; saved: number; failed: number };
 
 /**
- * Worker hook: write every upvoted, source-diverse story that is ready. Called
- * once per ingest pass. AI calls stay in the worker process (CLAUDE.md rule #5).
+ * Worker hook: write every source-diverse story that is ready. A first article
+ * additionally requires an upvote. Called once per ingest pass; AI calls stay
+ * in the worker process (CLAUDE.md rule #5).
  */
 export async function runAutoRewrites(
   log: (event: string, fields?: Record<string, unknown>) => void = () => {}
