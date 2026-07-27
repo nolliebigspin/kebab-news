@@ -23,7 +23,7 @@ Themen erscheinen automatisch im Quellenvergleich. Ein Artikel wird aber erst ge
 - **Data:** Postgres, Drizzle ORM and pgvector
 - **Auth:** Better Auth passwordless magic links
 - **Worker:** long-running Bun process for RSS ingest, embeddings, clustering, framing analysis and structured summary generation
-- **AI seams:** Voyage embeddings and Claude structured outputs
+- **AI seams:** Voyage embeddings, batched Gemini framing analysis and Claude article generation
 - **Quality:** Vitest, TypeScript and Biome
 
 The structured summary contract lives in `packages/core/src/story-summary.ts`. Important module seams, versioning and safety decisions are documented in [`docs/architecture/product-mvp.md`](docs/architecture/product-mvp.md).
@@ -32,6 +32,7 @@ The structured summary contract lives in `packages/core/src/story-summary.ts`. I
 
 - Original sources stay visible and linked.
 - AI output is JSON-schema constrained and Zod validated before persistence.
+- Paid generative work is reserved against a persistent $0.20 UTC-day budget before it starts.
 - Imported source text is untrusted input; embedded instructions never override the worker prompt.
 - Public story reads require a publication timestamp; drafts remain private.
 - User content is validated plaintext and rendered without raw HTML.

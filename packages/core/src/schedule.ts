@@ -1,7 +1,7 @@
 /**
  * Worker schedule — kept dependency-free on purpose. The web app imports this
  * into a client component (the "next ingest" countdown), so it must not pull
- * in @kebab/db or the Anthropic SDK. No imports here beyond the standard Date.
+ * in @kebab/db or any model adapter. No imports here beyond the standard Date.
  */
 
 /**

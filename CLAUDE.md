@@ -59,7 +59,7 @@ The published article lives at `/artikel/[slug]`. Articles are generated and pub
 
 ### 1. Ingest pipeline (existing, manual)
 
-`bun ingest:run` → fetch RSS feeds → embed each new contribution (Voyage `voyage-3-lite`, 512 dims) → cluster into stories by cosine similarity ≥ `DEFAULT_CLUSTER_THRESHOLD` within a `STORY_WINDOW_HOURS` window. Once a story has enough distinct sources to become reader-visible, its headlines and teasers are annotated with exact, quote-anchored passages (Claude Sonnet 5). A persisted annotation prompt version makes this step idempotent and backfills older annotation formats after prompt upgrades. The hard cap of `MAX_NEW_ARTICLES_PER_OUTLET` new articles per outlet per run keeps cost bounded.
+`bun ingest:run` → fetch RSS feeds → embed each new contribution (Voyage `voyage-3-lite`, 512 dims) → cluster into stories by cosine similarity ≥ `DEFAULT_CLUSTER_THRESHOLD` within a `STORY_WINDOW_HOURS` window. Once a story has enough distinct sources to become reader-visible, all of its stale headlines and teasers are annotated together with exact, quote-anchored passages (Gemini Flash-Lite; one structured request per topic). A persisted annotation prompt version makes this step idempotent and backfills older annotation formats after prompt upgrades. The hard cap of `MAX_NEW_ARTICLES_PER_OUTLET` new articles per outlet per run keeps cost bounded.
 
 All tunables live in `packages/core/src/constants.ts`. The ingest pipeline lives in `apps/worker/src/ingest.ts` (`runIngest()`), driven by the long-running worker's in-process scheduler (`apps/worker/src/index.ts`, `RUN_HOURS_UTC = [6,12,18]` — 07/13/19 CET, 08/14/20 CEST; we accept the 1h DST drift). There is no HTTP route and no Vercel-Cron anymore — the worker process *is* the trigger. `bun ingest:run` (→ `@kebab/worker ingest:once`) runs one pass manually against the same DB.
 
@@ -82,7 +82,7 @@ Once a source-diverse topic reaches `REWRITE_VOTE_THRESHOLD`, the automatic work
 4. Validate headline/body, short summary, sourced facts, uncertainties, differences and annotations with JSON Schema plus Zod. On parse failure, abort — never persist partial output.
 5. Insert into `published_articles` with `published_at` set, archive the version it supersedes and back-link `stories.published_article_id` — the article is live at `/artikel/[slug]` immediately.
 
-An already-summarized story does not need another upvote, but is only rewritten again once at least `REWRITE_MIN_NEW_SOURCES` new contributions have attached to its cluster; this keeps repeat AI spend bounded. `bun rewrite:run --story <slug>` remains an explicit operator command using the same generation path, and `bun rewrite:publish --story <slug>` remains a repair tool for a summary that is not live.
+An already-summarized story is rewritten automatically only after both a fresh upvote newer than the current version and at least `REWRITE_MIN_NEW_SOURCES` new contributions. `bun rewrite:run --story <slug>` is the explicit operator override and uses the same generation path. Every generative call first reserves its conservative maximum cost in `ai_usage`; the default $0.20 UTC-day budget blocks optional work before it can exceed the target. `bun rewrite:publish --story <slug>` remains a repair tool for a summary that is not live.
 
 ### 5. Topic and article surfaces
 
@@ -103,7 +103,8 @@ Versions are pinned in `mise.toml`, `package.json`, and `bun.lock`. Do not write
 - **Database:** Postgres + Drizzle ORM + `pgvector` (semantic clustering). Driver is `postgres-js` (standard wire protocol), so it runs against Neon today and any self-hosted Postgres later — switching providers is a `DATABASE_URL` change. The driver is encapsulated in `packages/db`; nothing else knows it.
 - **Scheduled jobs:** long-running ingest worker (`apps/worker`) with an in-process scheduler (`RUN_HOURS_UTC`), deployed as a container (Dokploy). No HTTP route, no Vercel-Cron, no external queue.
 - **AI — Embeddings:** Voyage AI (`voyage-3-lite`, 512 dims, direct HTTP).
-- **AI — Framing annotation + transparent summary:** Claude (Anthropic API).
+- **AI — Framing annotation:** Gemini Flash-Lite (Google API, direct HTTP, one batch per topic).
+- **AI — Transparent summary:** Claude Sonnet (Anthropic API).
 - **Auth:** Better Auth (passwordless magic-link), Drizzle adapter on the shared Postgres, email sent via SMTP (`nodemailer`). Encapsulated in `@kebab/auth`. Note: `kysely` is marked `serverExternalPackages` in `apps/web/next.config.ts` — it's a dead transitive dep of better-auth (we use the Drizzle adapter) whose sqlite dialects break Turbopack's build trace; externalizing stops it being parsed (see §IX).
 - **Hosting:** Vercel (web app, root dir `apps/web`) + Dokploy (ingest worker container).
 - **Quality:** Biome (lint + format), Vitest (tests).
@@ -128,6 +129,7 @@ Summary and interaction tables:
 - `comments`, `comment_helpful_votes`, `comment_reports` — threaded plaintext discussion with ownership, moderation and reporting.
 - `share_events` — summary id, channel and timestamp only; no account, IP or user agent.
 - `votes` — one permanent article-request upvote per `(story_id, user_id)`; cumulative counts gate automatic generation.
+- `ai_usage` — UTC-day generative-AI budget reservations and actual provider token costs; failed requests keep their conservative reservation for that day.
 - `stories.published_article_id` — nullable FK back-pointer added via migration.
 
 Better Auth tables (canonical shapes, defined in the same `schema.ts` so drizzle-kit stays single-source — note `user.id` is **text**, not uuid):

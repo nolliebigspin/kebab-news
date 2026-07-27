@@ -2,14 +2,24 @@ import { articles, db, EMBEDDING_DIMENSIONS, outlets, publishedArticles, stories
 import { eq, inArray } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
-const { annotateTextMock } = vi.hoisted(() => ({
-  annotateTextMock: vi.fn(),
-}));
+const { annotateTextsMock, completeAiUsageMock, failAiUsageReservationMock, reserveAiBudgetMock } =
+  vi.hoisted(() => ({
+    annotateTextsMock: vi.fn(),
+    completeAiUsageMock: vi.fn(),
+    failAiUsageReservationMock: vi.fn(),
+    reserveAiBudgetMock: vi.fn().mockResolvedValue({ id: "reservation", maximumCostMicroUsd: 100 }),
+  }));
 
 vi.mock("@kebab/core", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@kebab/core")>();
-  return { ...actual, annotateText: annotateTextMock };
+  return { ...actual, annotateTexts: annotateTextsMock };
 });
+
+vi.mock("../apps/worker/src/ai-budget", () => ({
+  completeAiUsage: completeAiUsageMock,
+  failAiUsageReservation: failAiUsageReservationMock,
+  reserveAiBudget: reserveAiBudgetMock,
+}));
 
 const { annotateReadyStories } = await import("../apps/worker/src/rewrite");
 
@@ -72,23 +82,44 @@ afterAll(cleanup);
 
 describe("annotateReadyStories", () => {
   it("annotates every source as soon as its story is reader-visible and only once per prompt version", async () => {
-    annotateTextMock.mockImplementation(async (text: string) => {
-      const quote = text.includes("Rekordstrafe") ? "Rekordstrafe" : "heftige Kritik";
-      const start = text.indexOf(quote);
-      return [
-        {
-          start,
-          end: start + quote.length,
-          quote,
-          type: "loaded-term",
-          note: "wertende Zuspitzung",
+    reserveAiBudgetMock.mockResolvedValue({
+      id: "reservation",
+      maximumCostMicroUsd: 100,
+    });
+    annotateTextsMock.mockImplementation(async (inputs: Array<{ id: string; text: string }>) => {
+      return {
+        annotations: Object.fromEntries(
+          inputs.map(({ id, text }) => {
+            const quote = text.includes("Rekordstrafe") ? "Rekordstrafe" : "heftige Kritik";
+            const start = text.indexOf(quote);
+            return [
+              id,
+              [
+                {
+                  start,
+                  end: start + quote.length,
+                  quote,
+                  type: "loaded-term",
+                  note: "wertende Zuspitzung",
+                },
+              ],
+            ];
+          })
+        ),
+        usage: {
+          provider: "google",
+          model: "test",
+          inputTokens: 100,
+          outputTokens: 50,
+          costMicroUsd: 30,
         },
-      ];
+      };
     });
 
     const first = await annotateReadyStories({ storyIds: [storyId] });
     expect(first).toEqual({ stories: 1, articles: 3 });
-    expect(annotateTextMock).toHaveBeenCalledTimes(6);
+    expect(annotateTextsMock).toHaveBeenCalledOnce();
+    expect(completeAiUsageMock).toHaveBeenCalledOnce();
 
     const rows = await db.select().from(articles).where(eq(articles.storyId, storyId));
     expect(rows).toHaveLength(3);
@@ -98,10 +129,10 @@ describe("annotateReadyStories", () => {
       expect(row.teaserAnnotations).toEqual([expect.objectContaining({ quote: "heftige Kritik" })]);
     }
 
-    annotateTextMock.mockClear();
+    annotateTextsMock.mockClear();
     const second = await annotateReadyStories({ storyIds: [storyId] });
     expect(second).toEqual({ stories: 0, articles: 0 });
-    expect(annotateTextMock).not.toHaveBeenCalled();
+    expect(annotateTextsMock).not.toHaveBeenCalled();
   });
 
   it("preserves the last valid annotations when the AI request fails", async () => {
@@ -125,7 +156,7 @@ describe("annotateReadyStories", () => {
         annotationVersion: "previous-prompt-version",
       })
       .where(eq(articles.id, row.id));
-    annotateTextMock.mockReset().mockResolvedValue(null);
+    annotateTextsMock.mockReset().mockResolvedValue(null);
 
     const result = await annotateReadyStories({ storyIds: [storyId] });
 
@@ -133,5 +164,27 @@ describe("annotateReadyStories", () => {
     const [unchanged] = await db.select().from(articles).where(eq(articles.id, row.id));
     expect(unchanged.headlineAnnotations).toEqual([previousAnnotation]);
     expect(unchanged.annotationVersion).toBe("previous-prompt-version");
+    expect(failAiUsageReservationMock).toHaveBeenCalled();
+  });
+
+  it("does not call the model after the daily budget is exhausted", async () => {
+    const [row] = await db
+      .select({ id: articles.id })
+      .from(articles)
+      .where(eq(articles.storyId, storyId))
+      .limit(1);
+    await db
+      .update(articles)
+      .set({ annotationVersion: "budget-test-previous-version" })
+      .where(eq(articles.id, row.id));
+    reserveAiBudgetMock.mockResolvedValueOnce(null);
+    annotateTextsMock.mockClear();
+
+    const result = await annotateReadyStories({ storyIds: [storyId] });
+
+    expect(result).toEqual({ stories: 1, articles: 0 });
+    expect(annotateTextsMock).not.toHaveBeenCalled();
+    const [unchanged] = await db.select().from(articles).where(eq(articles.id, row.id));
+    expect(unchanged.annotationVersion).toBe("budget-test-previous-version");
   });
 });

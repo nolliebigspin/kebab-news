@@ -7,8 +7,11 @@
  */
 
 import {
+  ANNOTATION_MODEL,
   ANNOTATION_PROMPT_VERSION,
-  annotateText,
+  annotateTexts,
+  estimateAnnotationMaximumCostMicroUsd,
+  estimateRewriteMaximumCostMicroUsd,
   generateRewrite,
   generateStorySlug,
   RADAR_MIN_OUTLETS,
@@ -28,6 +31,7 @@ import {
   votes,
 } from "@kebab/db";
 import { and, desc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
+import { completeAiUsage, failAiUsageReservation, reserveAiBudget } from "./ai-budget";
 
 export type StoryRow = typeof stories.$inferSelect;
 
@@ -83,26 +87,44 @@ export async function annotateStory(
           )
     );
 
-  let annotatedArticles = 0;
-  for (const row of rows) {
-    const [headlineAnnotations, teaserAnnotations] = await Promise.all([
-      annotateText(row.headline),
-      row.teaser ? annotateText(row.teaser) : Promise.resolve([]),
-    ]);
-    if (headlineAnnotations === null || teaserAnnotations === null) continue;
+  if (rows.length === 0) return 0;
 
-    await db
-      .update(articles)
-      .set({
-        headlineAnnotations,
-        teaserAnnotations,
-        annotationVersion: ANNOTATION_PROMPT_VERSION,
-      })
-      .where(eq(articles.id, row.id));
-    annotatedArticles += 1;
+  const inputs = rows.flatMap((row) => [
+    { id: `${row.id}:headline`, text: row.headline },
+    ...(row.teaser ? [{ id: `${row.id}:teaser`, text: row.teaser }] : []),
+  ]);
+  const reservation = await reserveAiBudget({
+    provider: "google",
+    task: "source-annotation",
+    model: ANNOTATION_MODEL,
+    maximumCostMicroUsd: estimateAnnotationMaximumCostMicroUsd(inputs),
+  });
+  if (!reservation) {
+    console.warn("[annotate] daily AI budget exhausted; skipping source annotations");
+    return 0;
   }
 
-  return annotatedArticles;
+  const generated = await annotateTexts(inputs);
+  if (!generated) {
+    await failAiUsageReservation(reservation.id);
+    return 0;
+  }
+  await completeAiUsage(reservation.id, generated.usage);
+
+  await db.transaction(async (tx) => {
+    for (const row of rows) {
+      await tx
+        .update(articles)
+        .set({
+          headlineAnnotations: generated.annotations[`${row.id}:headline`] ?? [],
+          teaserAnnotations: generated.annotations[`${row.id}:teaser`] ?? [],
+          annotationVersion: ANNOTATION_PROMPT_VERSION,
+        })
+        .where(eq(articles.id, row.id));
+    }
+  });
+
+  return rows.length;
 }
 
 /**
@@ -141,7 +163,8 @@ export async function annotateReadyStories(
 export type RewriteOutcome =
   | { kind: "saved"; slug: string; headline: string }
   | { kind: "no-sources" }
-  | { kind: "generation-failed" };
+  | { kind: "generation-failed" }
+  | { kind: "budget-exhausted" };
 
 /**
  * Generate + persist a summary for one story and publish it immediately.
@@ -167,12 +190,31 @@ export async function rewriteStory(story: StoryRow): Promise<RewriteOutcome> {
     : [];
   const previousSummary = previousRows[0] ?? null;
 
+  const reservation = await reserveAiBudget({
+    provider: "anthropic",
+    task: "article-rewrite",
+    model: REWRITE_MODEL,
+    maximumCostMicroUsd: estimateRewriteMaximumCostMicroUsd(story.label, sources, previousSummary),
+  });
+  if (!reservation) return { kind: "budget-exhausted" };
+
   // Ensure the sources use the current prompt version. This is normally a
   // no-op because reader-visible topics are annotated directly after ingest.
   await annotateStory(story.id);
 
-  const rewrite = await generateRewrite(story.label, sources, previousSummary);
-  if (!rewrite) return { kind: "generation-failed" };
+  let generated: Awaited<ReturnType<typeof generateRewrite>> = null;
+  try {
+    generated = await generateRewrite(story.label, sources, previousSummary);
+  } catch (error) {
+    await failAiUsageReservation(reservation.id);
+    throw error;
+  }
+  if (!generated) {
+    await failAiUsageReservation(reservation.id);
+    return { kind: "generation-failed" };
+  }
+  await completeAiUsage(reservation.id, generated.usage);
+  const { rewrite } = generated;
 
   const sourceOutletSlugs = [...new Set(sources.map((s) => s.outletSlug))].sort();
   const versions = await db
@@ -235,13 +277,12 @@ export async function rewriteStory(story: StoryRow): Promise<RewriteOutcome> {
 
 /**
  * Upvoted, source-diverse stories without a summary, plus already-summarized
- * stories that gained at least REWRITE_MIN_NEW_SOURCES sources since their
- * last rewrite.
+ * stories that gained both a fresh post-version upvote and at least
+ * REWRITE_MIN_NEW_SOURCES sources since their last rewrite.
  *
- * The re-summary condition counts articles newer than the latest rewrite
- * rather than comparing `stories.lastSeenAt` to it. `lastSeenAt` moves on
- * every cluster touch, so the old comparison re-summarized a live story on
- * essentially every ingest pass — the dominant AI cost in the pipeline.
+ * The re-summary condition counts votes and articles newer than the latest
+ * rewrite rather than comparing `stories.lastSeenAt` to it. `lastSeenAt`
+ * moves on every cluster touch and is not reader demand.
  */
 export async function findStoriesReadyForRewrite(): Promise<StoryRow[]> {
   const rows = await db
@@ -260,6 +301,13 @@ export async function findStoriesReadyForRewrite(): Promise<StoryRow[]> {
           )
           or (
             count(DISTINCT ${publishedArticles.id}) > 0
+            and count(DISTINCT ${votes.id}) filter (
+              where ${votes.createdAt} > (
+                select max(prev.rewritten_at)
+                from ${publishedArticles} prev
+                where prev.story_id = ${stories.id}
+              )
+            ) >= ${REWRITE_VOTE_THRESHOLD}
             and count(DISTINCT ${articles.id}) filter (
               where ${articles.publishedAt} > (
                 select max(prev.rewritten_at)
@@ -274,7 +322,12 @@ export async function findStoriesReadyForRewrite(): Promise<StoryRow[]> {
   return rows.map((r) => r.story);
 }
 
-export type AutoRewriteResult = { triggered: number; saved: number; failed: number };
+export type AutoRewriteResult = {
+  triggered: number;
+  saved: number;
+  failed: number;
+  skippedBudget: number;
+};
 
 /**
  * Worker hook: write every source-diverse story that is ready. A first article
@@ -285,7 +338,12 @@ export async function runAutoRewrites(
   log: (event: string, fields?: Record<string, unknown>) => void = () => {}
 ): Promise<AutoRewriteResult> {
   const ready = await findStoriesReadyForRewrite();
-  const result: AutoRewriteResult = { triggered: ready.length, saved: 0, failed: 0 };
+  const result: AutoRewriteResult = {
+    triggered: ready.length,
+    saved: 0,
+    failed: 0,
+    skippedBudget: 0,
+  };
 
   for (const story of ready) {
     log("worker.auto_rewrite_start", { storySlug: story.slug, label: story.label });
@@ -293,6 +351,12 @@ export async function runAutoRewrites(
     if (outcome.kind === "saved") {
       result.saved += 1;
       log("worker.auto_rewrite_saved", { storySlug: story.slug, draftSlug: outcome.slug });
+    } else if (outcome.kind === "budget-exhausted") {
+      result.skippedBudget += 1;
+      log("worker.auto_rewrite_skipped", {
+        storySlug: story.slug,
+        reason: outcome.kind,
+      });
     } else {
       result.failed += 1;
       log("worker.auto_rewrite_failed", { storySlug: story.slug, reason: outcome.kind });

@@ -69,17 +69,32 @@ describe("generateRewrite output budget", () => {
       finalMessage: async () => ({
         stop_reason: "end_turn",
         content: [{ type: "text", text: JSON.stringify(COMPLETE_REWRITE) }],
+        usage: {
+          input_tokens: 1_000,
+          output_tokens: 500,
+          cache_creation_input_tokens: 0,
+          cache_read_input_tokens: 0,
+        },
       }),
     });
 
     const result = await generateRewrite("EU-Strafe gegen Google", SOURCES);
 
-    expect(result).toEqual(COMPLETE_REWRITE);
+    expect(result).toEqual({
+      rewrite: COMPLETE_REWRITE,
+      usage: {
+        provider: "anthropic",
+        model: "claude-sonnet-5",
+        inputTokens: 1_000,
+        outputTokens: 500,
+        costMicroUsd: 10_500,
+      },
+    });
     expect(createMessageMock).not.toHaveBeenCalled();
     expect(streamMessageMock).toHaveBeenCalledOnce();
     expect(streamMessageMock.mock.calls[0][0]).toEqual(
       expect.objectContaining({
-        max_tokens: 50_000,
+        max_tokens: 8_000,
         thinking: { type: "disabled" },
       })
     );

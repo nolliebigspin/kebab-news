@@ -10,6 +10,7 @@ kebab.news does not promise neutrality. Its reader-facing units are a **Thema** 
 2. `apps/web/lib/stories.ts` is the public read-model seam. It composes summary, cluster, source and version data and provides explicit fallbacks for legacy rows.
 3. `apps/web/lib/summary-ratings.ts` owns the one-rating-per-user invariant. The database unique index is the final concurrency guard.
 4. `apps/web/lib/comments.ts` owns validation and ownership checks. Routes do not write comment tables directly.
+5. `apps/worker/src/ai-budget.ts` owns atomic UTC-day spend reservations. Model adapters report normalized usage; callers never implement provider pricing or concurrency rules.
 
 ## Versioning
 
@@ -25,6 +26,8 @@ Annotations use a paragraph id plus exact quote and optional prefix/suffix conte
 
 - RSS text is untrusted model input. The worker prompt explicitly ignores instructions in source content.
 - AI output is JSON-schema constrained and Zod validated. Unsupported or unsourced shapes are rejected.
+- Gemini receives all stale headline/teaser texts for one topic in a single structured request; Claude is reserved for article generation.
+- Generative calls reserve their maximum cost in `ai_usage` before execution and stop when the configured daily budget is exhausted.
 - User content is plaintext, length-validated server-side and rendered through React escaping. No user HTML is accepted.
 - Rating and comment mutations require a server-side session and are rate limited.
 - Share analytics store only summary id, channel and timestamp; no account, IP or user agent.

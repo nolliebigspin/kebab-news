@@ -7,7 +7,9 @@ describe(".env.example", () => {
     const required = [
       "DATABASE_URL",
       "ANTHROPIC_API_KEY",
+      "GEMINI_API_KEY",
       "VOYAGE_API_KEY",
+      "AI_DAILY_BUDGET_USD",
       "CRON_SECRET",
       "BETTER_AUTH_SECRET",
       "BETTER_AUTH_URL",

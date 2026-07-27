@@ -397,6 +397,29 @@ export const verification = pgTable("verification", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/**
+ * Persistent generative-AI spend ledger. A row starts as a conservative
+ * reservation before a paid request and is replaced with actual token cost on
+ * success. Failed requests retain the reservation for the rest of the UTC day.
+ */
+export const aiUsage = pgTable(
+  "ai_usage",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    provider: text("provider").notNull(),
+    task: text("task").notNull(),
+    model: text("model").notNull(),
+    status: text("status").notNull().default("reserved"),
+    reservedCostMicroUsd: integer("reserved_cost_micro_usd").notNull(),
+    actualCostMicroUsd: integer("actual_cost_micro_usd"),
+    inputTokens: integer("input_tokens"),
+    outputTokens: integer("output_tokens"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("ai_usage_created_at_idx").on(t.createdAt.desc())]
+);
+
 export type Outlet = typeof outlets.$inferSelect;
 export type NewOutlet = typeof outlets.$inferInsert;
 export type Story = typeof stories.$inferSelect;
@@ -415,3 +438,5 @@ export type User = typeof user.$inferSelect;
 export type NewUser = typeof user.$inferInsert;
 export type Session = typeof session.$inferSelect;
 export type NewSession = typeof session.$inferInsert;
+export type AiUsage = typeof aiUsage.$inferSelect;
+export type NewAiUsage = typeof aiUsage.$inferInsert;

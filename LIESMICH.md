@@ -24,10 +24,10 @@ Jeder erzeugte Artikel trägt einen sichtbaren Hinweis: *„KI-generierte Zusamm
 Ein geplanter Ingest holt Schlagzeilen und Teaser von rund 25 Outlets über das Spektrum links → öffentlich-rechtlich (taz, SZ, FAZ, Welt, NZZ, Junge Freiheit, Nius, tagesschau und weitere). Artikel werden über semantische Ähnlichkeit zu Geschichten geclustert — „dieselbe Nachricht" aus verschiedenen Outlets landet in einer Gruppe, egal wie sie der jeweilige Verlag betitelt hat.
 
 ### 2. Es annotiert Framing in den Outlet-Schlagzeilen
-Die KI markiert geladene Begriffe, emotionale Trigger, vorausgesetzte Annahmen, Euphemismen und auffällige Auslassungen — direkt auf den Originalschlagzeilen der Outlets. Die Originalschlagzeile bleibt sichtbar; die Annotation erklärt, *warum* sich das Framing unterscheidet.
+Gemini analysiert die Schlagzeilen und Teaser eines Themas gebündelt und markiert vorsichtig geladene Begriffe, emotionale Trigger, vorausgesetzte Annahmen und Euphemismen. Die Originalschlagzeile bleibt sichtbar; die Annotation erklärt, *warum* sich das Framing unterscheiden kann.
 
 ### 3. Lesende stimmen ab, was neu geschrieben wird
-Das Radar zeigt die wichtigsten Cluster des Tages. Lesende stimmen ab, welche Geschichte eine vollständige neutrale Fassung bekommen soll. Eine Stimme pro IP pro Tag pro Geschichte. Die Geschichte mit den meisten Stimmen wird ausgewählt.
+Der Quellenvergleich zeigt die wichtigsten Themen des Tages. Angemeldete Lesende stimmen ab, welches Thema einen vollständigen Artikel bekommen soll. Ein Upvote schaltet die erste Generierung frei; eine spätere automatische Aktualisierung braucht erneut einen Upvote nach der letzten Fassung sowie genügend neue Originalbeiträge.
 
 ### 4. Es schreibt den Gewinner neutral um
 Für die ausgewählte Geschichte holt das Werkzeug die Schlagzeilen + Teaser aller Outlets, die darüber berichtet haben, schickt sie durch Claude mit einem strikten Prompt für neutrales Deutsch und erzeugt eine Schlagzeile und einen Text (Ziellänge in `src/lib/constants.ts`). Aussagen über identifizierbare Personen werden ihrer Quelle zugeordnet und konjunktivisch formuliert („laut X"), nie als eigene Tatsache des Werkzeugs behauptet. Das Ergebnis wird unter `/artikel/[slug]` veröffentlicht. Artikeltexte scrapen wir bewusst nicht — selbes Muster wie Ground News.
@@ -45,7 +45,8 @@ Jeder erzeugte Artikel hat unterhalb der Umschreibung einen „Quellen"-Bereich 
 - **Datenbank:** [Neon](https://neon.tech/) Postgres + [Drizzle ORM](https://orm.drizzle.team/) + `pgvector`
 - **Geplante Jobs:** Vercel Cron
 - **KI — Embeddings:** [Voyage AI](https://www.voyageai.com/) (`voyage-3-lite`, 512 Dimensionen) fürs Clustern
-- **KI — Framing-Annotation & neutrale Umschreibung:** [Claude](https://www.anthropic.com/) (`claude-sonnet-5`)
+- **KI — Framing-Annotation:** [Gemini](https://ai.google.dev/) (`gemini-2.5-flash-lite`, pro Thema gebündelt)
+- **KI — Artikelgenerierung:** [Claude](https://www.anthropic.com/) (`claude-sonnet-5`)
 - **Hosting:** [Vercel](https://vercel.com/)
 - **Werkzeuge:** [Bun](https://bun.sh/) (verwaltet über [mise](https://mise.jdx.dev/)), [Biome](https://biomejs.dev/), [Vitest](https://vitest.dev/)
 

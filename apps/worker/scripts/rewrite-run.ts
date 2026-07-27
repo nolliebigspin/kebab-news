@@ -46,6 +46,10 @@ async function main() {
     console.error("✕ rewrite generation failed (see stderr above)");
     process.exit(1);
   }
+  if (outcome.kind === "budget-exhausted") {
+    console.error("✕ daily AI budget exhausted; try again after 00:00 UTC");
+    process.exit(1);
+  }
 
   console.log(`\n✓ Published:`);
   console.log(`  slug: ${outcome.slug}`);

@@ -1,8 +1,13 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { env } from "@kebab/env";
 import { z } from "zod";
 
-import { ANNOTATION_MODEL, ANNOTATION_SYSTEM_PROMPT, MAX_ANNOTATION_SPANS } from "./constants";
+import {
+  ANNOTATION_MODEL,
+  ANNOTATION_SYSTEM_PROMPT,
+  GEMINI_GENERATE_CONTENT_URL,
+  MAX_ANNOTATION_SPANS,
+} from "./constants";
+import type { ModelUsage } from "./model-usage";
 
 export const annotationTypeValues = [
   "loaded-term",
@@ -73,96 +78,220 @@ export function anchorAnnotationQuotes(
   return anchored.sort((a, b) => a.start - b.start);
 }
 
-// Anthropic's output_config JSON-schema validator rejects validation keywords
-// like maxItems. The cap is enforced locally after schema validation.
 const JSON_SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["annotations"],
+  required: ["items"],
   properties: {
-    annotations: {
+    items: {
       type: "array",
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["quote", "type", "note"],
+        required: ["id", "annotations"],
         properties: {
-          quote: { type: "string" },
-          type: {
-            type: "string",
-            enum: inlineAnnotationTypeValues as unknown as string[],
+          id: { type: "string" },
+          annotations: {
+            type: "array",
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["quote", "type", "note"],
+              properties: {
+                quote: { type: "string" },
+                type: {
+                  type: "string",
+                  enum: inlineAnnotationTypeValues as unknown as string[],
+                },
+                note: { type: "string" },
+              },
+            },
           },
-          note: { type: "string" },
         },
       },
     },
   },
 } as const;
 
-let cachedClient: Anthropic | null = null;
+const AnnotationItemSchema = z.object({
+  id: z.string().min(1),
+  annotations: z.array(AnnotationQuoteSchema),
+});
 
-function getClient(): Anthropic {
-  if (!cachedClient) {
-    if (!env.ANTHROPIC_API_KEY) {
-      throw new Error("ANTHROPIC_API_KEY is required to call annotateText()");
-    }
-    cachedClient = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
-  }
-  return cachedClient;
+const AnnotationBatchSchema = z.object({
+  items: z.array(AnnotationItemSchema),
+});
+
+export type AnnotationInput = {
+  id: string;
+  text: string;
+};
+
+export type AnnotationBatchResult = {
+  annotations: Record<string, Annotation[]>;
+  usage: ModelUsage;
+};
+
+type GeminiResponse = {
+  candidates?: Array<{
+    finishReason?: string;
+    content?: { parts?: Array<{ text?: string }> };
+  }>;
+  promptFeedback?: { blockReason?: string };
+  usageMetadata?: {
+    promptTokenCount?: number;
+    candidatesTokenCount?: number;
+    thoughtsTokenCount?: number;
+  };
+  error?: { message?: string };
+};
+
+function maxOutputTokens(inputCount: number): number {
+  return Math.min(65_536, Math.max(256, 128 + inputCount * 192));
+}
+
+function geminiCostMicroUsd(inputTokens: number, outputTokens: number): number {
+  // Gemini 2.5 Flash-Lite paid-tier rates: $0.10 input / $0.40 output per MTok.
+  return Math.ceil(inputTokens * 0.1 + outputTokens * 0.4);
+}
+
+export function estimateAnnotationMaximumCostMicroUsd(inputs: readonly AnnotationInput[]): number {
+  const requestBytes = new TextEncoder().encode(
+    `${ANNOTATION_SYSTEM_PROMPT}\n${JSON.stringify(inputs)}\n${JSON.stringify(JSON_SCHEMA)}`
+  ).length;
+  // A token cannot contain less than one UTF-8 byte. The extra allowance covers
+  // provider-injected structured-output instructions and request framing.
+  const maximumInputTokens = requestBytes + 2_048;
+  return geminiCostMicroUsd(maximumInputTokens, maxOutputTokens(inputs.length));
+}
+
+function buildUserMessage(inputs: readonly AnnotationInput[]): string {
+  return [
+    "Analysiere jeden Text unabhängig.",
+    "Gib jeden gelieferten id-Wert genau einmal zurück, auch wenn annotations leer ist.",
+    "Texte:",
+    JSON.stringify(inputs),
+  ].join("\n");
 }
 
 /**
- * Annotate framing language in a single piece of publisher text (headline or
- * teaser). An empty array is a successful, neutral result; null means the
- * request failed and callers must preserve the last valid analysis.
+ * Annotate all headline/teaser texts for one topic in a single structured
+ * Gemini request. Results are keyed by caller-provided ids and quote-anchored
+ * locally. null means the whole request failed and callers preserve old data.
  */
-export async function annotateText(text: string): Promise<Annotation[] | null> {
-  if (!text || text.trim().length === 0) return [];
+export async function annotateTexts(
+  inputs: readonly AnnotationInput[]
+): Promise<AnnotationBatchResult | null> {
+  if (inputs.length === 0) {
+    return {
+      annotations: {},
+      usage: {
+        provider: "google",
+        model: ANNOTATION_MODEL,
+        inputTokens: 0,
+        outputTokens: 0,
+        costMicroUsd: 0,
+      },
+    };
+  }
+  const byId = new Map(inputs.map((input) => [input.id, input]));
+  if (byId.size !== inputs.length || inputs.some((input) => !input.id || !input.text.trim())) {
+    throw new Error("annotateTexts() requires unique ids and non-empty texts");
+  }
 
   try {
-    const client = getClient();
-    const response = await client.messages.create({
-      model: ANNOTATION_MODEL,
-      max_tokens: 1024,
-      // Annotation inputs are one headline or teaser; the system prompt
-      // dominates the input tokens. Caching it bills repeat reads at 10%.
-      system: [
-        {
-          type: "text",
-          text: ANNOTATION_SYSTEM_PROMPT,
-          cache_control: { type: "ephemeral" },
+    if (!env.GEMINI_API_KEY) {
+      console.error("annotate: GEMINI_API_KEY is required");
+      return null;
+    }
+    const response = await fetch(
+      `${GEMINI_GENERATE_CONTENT_URL}/${ANNOTATION_MODEL}:generateContent`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": env.GEMINI_API_KEY,
         },
-      ],
-      output_config: {
-        format: { type: "json_schema", schema: JSON_SCHEMA },
-      },
-      messages: [
-        {
-          role: "user",
-          content: `Annotiere das folgende Framing:\n\n${text}`,
-        },
-      ],
-    });
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: ANNOTATION_SYSTEM_PROMPT }] },
+          contents: [{ role: "user", parts: [{ text: buildUserMessage(inputs) }] }],
+          generationConfig: {
+            maxOutputTokens: maxOutputTokens(inputs.length),
+            temperature: 0,
+            thinkingConfig: { thinkingBudget: 0 },
+            responseMimeType: "application/json",
+            responseJsonSchema: JSON_SCHEMA,
+          },
+        }),
+      }
+    );
 
-    const block = response.content.find((b) => b.type === "text");
-    if (!block || block.type !== "text") return null;
+    const body = (await response.json().catch(() => null)) as GeminiResponse | null;
+    if (!response.ok) {
+      console.error(
+        `annotate: Gemini ${response.status} ${body?.error?.message ?? response.statusText}`
+      );
+      return null;
+    }
 
-    const raw = JSON.parse(block.text) as unknown;
-    const parsed = z
-      .array(AnnotationQuoteSchema)
-      .safeParse((raw as { annotations?: unknown })?.annotations ?? []);
+    const candidate = body?.candidates?.[0];
+    if (!candidate || candidate.finishReason !== "STOP") {
+      console.error(
+        `annotate: Gemini stopped without a complete result (${candidate?.finishReason ?? body?.promptFeedback?.blockReason ?? "unknown"})`
+      );
+      return null;
+    }
+    const text = candidate.content?.parts
+      ?.map((part) => part.text ?? "")
+      .join("")
+      .trim();
+    if (!text) return null;
+
+    const parsed = AnnotationBatchSchema.safeParse(JSON.parse(text) as unknown);
     if (!parsed.success) {
       console.error("annotate: schema parse failed", parsed.error.format());
       return null;
     }
 
-    return anchorAnnotationQuotes(text, parsed.data);
-  } catch (err) {
-    if (err instanceof Anthropic.APIError) {
-      console.error(`annotate: Anthropic ${err.status} ${err.message}`);
-    } else {
-      console.error("annotate: unexpected error", err);
+    const returnedIds = new Set(parsed.data.items.map((item) => item.id));
+    if (
+      returnedIds.size !== parsed.data.items.length ||
+      returnedIds.size !== inputs.length ||
+      [...returnedIds].some((id) => !byId.has(id))
+    ) {
+      console.error("annotate: Gemini did not return every requested id exactly once");
+      return null;
     }
+
+    const annotations = Object.fromEntries(
+      parsed.data.items.map((item) => [
+        item.id,
+        anchorAnnotationQuotes(byId.get(item.id)?.text ?? "", item.annotations),
+      ])
+    );
+    const inputTokens = body?.usageMetadata?.promptTokenCount ?? 0;
+    const outputTokens =
+      (body?.usageMetadata?.candidatesTokenCount ?? 0) +
+      (body?.usageMetadata?.thoughtsTokenCount ?? 0);
+    return {
+      annotations,
+      usage: {
+        provider: "google",
+        model: ANNOTATION_MODEL,
+        inputTokens,
+        outputTokens,
+        costMicroUsd: geminiCostMicroUsd(inputTokens, outputTokens),
+      },
+    };
+  } catch (err) {
+    console.error("annotate: unexpected error", err);
     return null;
   }
+}
+
+/** Backwards-compatible single-text convenience interface. */
+export async function annotateText(text: string): Promise<Annotation[] | null> {
+  if (!text || text.trim().length === 0) return [];
+  const result = await annotateTexts([{ id: "text", text }]);
+  return result?.annotations.text ?? null;
 }

@@ -14,9 +14,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { OutletLean, SourceKind } from "@kebab/db";
 import { z } from "zod";
-
 import { REWRITE_MAX_OUTPUT_TOKENS, REWRITE_MODEL, REWRITE_SYSTEM_PROMPT } from "./constants";
 import { LEAN_ORDER } from "./lean";
+import type { ModelUsage } from "./model-usage";
 import { StorySummarySchema } from "./story-summary";
 
 export const RewriteSchema = StorySummarySchema.extend({
@@ -214,6 +214,11 @@ export type PreviousSummary = {
   body: string;
 };
 
+export type RewriteGenerationResult = {
+  rewrite: Rewrite;
+  usage: ModelUsage;
+};
+
 export function buildUserMessage(
   label: string,
   sources: SourceItem[],
@@ -249,6 +254,35 @@ export function buildUserMessage(
   return lines.join("\n");
 }
 
+export function estimateRewriteMaximumCostMicroUsd(
+  label: string,
+  sources: SourceItem[],
+  previousSummary: PreviousSummary | null = null
+): number {
+  const requestBytes = new TextEncoder().encode(
+    `${REWRITE_SYSTEM_PROMPT}\n${buildUserMessage(label, sources, previousSummary)}\n${JSON.stringify(REWRITE_JSON_SCHEMA)}`
+  ).length;
+  const maximumInputTokens = requestBytes + 2_048;
+  // Conservative standard Sonnet 5 rates after introductory pricing:
+  // $3/MTok input, $3.75/MTok cache writes, $15/MTok output.
+  return Math.ceil(maximumInputTokens * 3.75 + REWRITE_MAX_OUTPUT_TOKENS * 15);
+}
+
+function anthropicCostMicroUsd(usage: {
+  input_tokens?: number;
+  output_tokens?: number;
+  cache_creation_input_tokens?: number | null;
+  cache_read_input_tokens?: number | null;
+}): number {
+  const inputTokens = usage.input_tokens ?? 0;
+  const outputTokens = usage.output_tokens ?? 0;
+  const cacheCreationTokens = usage.cache_creation_input_tokens ?? 0;
+  const cacheReadTokens = usage.cache_read_input_tokens ?? 0;
+  return Math.ceil(
+    inputTokens * 3 + outputTokens * 15 + cacheCreationTokens * 3.75 + cacheReadTokens * 0.3
+  );
+}
+
 let cachedClient: Anthropic | null = null;
 function getClient(): Anthropic {
   if (!cachedClient) {
@@ -267,7 +301,7 @@ export async function generateRewrite(
   label: string,
   sources: SourceItem[],
   previousSummary: PreviousSummary | null = null
-): Promise<Rewrite | null> {
+): Promise<RewriteGenerationResult | null> {
   const client = getClient();
   const userMessage = buildUserMessage(label, sources, previousSummary);
 
@@ -328,7 +362,21 @@ export async function generateRewrite(
       console.error("[rewrite] update output is missing change_summary");
       return null;
     }
-    return parsed.data;
+    const usage = response.usage;
+    const inputTokens =
+      usage.input_tokens +
+      (usage.cache_creation_input_tokens ?? 0) +
+      (usage.cache_read_input_tokens ?? 0);
+    return {
+      rewrite: parsed.data,
+      usage: {
+        provider: "anthropic",
+        model: REWRITE_MODEL,
+        inputTokens,
+        outputTokens: usage.output_tokens,
+        costMicroUsd: anthropicCostMicroUsd(usage),
+      },
+    };
   } catch (err) {
     if (err instanceof Anthropic.APIError) {
       console.error(`[rewrite] Anthropic ${err.status} ${err.message}`);

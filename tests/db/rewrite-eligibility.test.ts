@@ -110,9 +110,18 @@ describe("automatic article generation eligibility", () => {
     expect(readyIds.has(storyIds[1])).toBe(true);
   });
 
-  it("does not require a new upvote to update an existing article", async () => {
-    const readyIds = new Set((await findStoriesReadyForRewrite()).map((story) => story.id));
+  it("requires a fresh upvote to update an existing article", async () => {
+    const beforeVote = new Set((await findStoriesReadyForRewrite()).map((story) => story.id));
 
-    expect(readyIds.has(storyIds[2])).toBe(true);
+    expect(beforeVote.has(storyIds[2])).toBe(false);
+
+    await db.insert(votes).values({
+      storyId: storyIds[2],
+      userId: USER_ID,
+      createdAt: new Date("2026-07-27T05:00:00Z"),
+    });
+    const afterVote = new Set((await findStoriesReadyForRewrite()).map((story) => story.id));
+
+    expect(afterVote.has(storyIds[2])).toBe(true);
   });
 });

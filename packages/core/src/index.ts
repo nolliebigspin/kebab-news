@@ -7,6 +7,7 @@ export * from "./cluster";
 export * from "./constants";
 export * from "./embeddings";
 export * from "./lean";
+export * from "./model-usage";
 export * from "./rewrite";
 export * from "./schedule";
 export * from "./slug";

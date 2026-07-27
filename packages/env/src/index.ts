@@ -16,7 +16,9 @@ export const env = createEnv({
     // fail without them; the AI modules validate presence when they build
     // their client (and throw a clear error there if missing).
     ANTHROPIC_API_KEY: z.string().min(1).optional(),
+    GEMINI_API_KEY: z.string().min(1).optional(),
     VOYAGE_API_KEY: z.string().min(1).optional(),
+    AI_DAILY_BUDGET_USD: z.coerce.number().positive().max(10).default(0.2),
     CRON_SECRET: z.string().min(16),
 
     // Auth + email (magic-link login) are only needed by the web app via
