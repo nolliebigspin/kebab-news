@@ -69,6 +69,8 @@ beforeAll(async () => {
         outletId,
         url: `https://rewrite-eligibility.test/${storyIndex}/${outletIndex}`,
         headline: `Rewrite eligibility ${storyIndex}/${outletIndex}`,
+        fetchedAt:
+          storyIndex === 2 ? new Date("2026-07-26T12:00:00Z") : new Date("2026-07-27T12:00:00Z"),
         publishedAt:
           storyIndex === 2 ? new Date("2026-07-26T12:00:00Z") : new Date("2026-07-27T12:00:00Z"),
       }))
@@ -95,7 +97,10 @@ beforeAll(async () => {
       outletId: outletIds[index % outletIds.length],
       url: `https://rewrite-eligibility.test/published/new/${index}`,
       headline: `New source for published article ${index}`,
-      publishedAt: new Date(`2026-07-27T0${index + 1}:00:00Z`),
+      fetchedAt: new Date(`2026-07-27T0${index + 1}:00:00Z`),
+      // Publisher time predates the rewrite; eligibility follows when the
+      // contribution was actually fetched and attached to the topic.
+      publishedAt: new Date(`2026-07-26T0${index + 1}:00:00Z`),
     }))
   );
 });

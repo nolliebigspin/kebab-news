@@ -30,7 +30,7 @@ import {
   summarySources,
   votes,
 } from "@kebab/db";
-import { and, desc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
+import { desc, eq, inArray, sql } from "drizzle-orm";
 import { completeAiUsage, failAiUsageReservation, reserveAiBudget } from "./ai-budget";
 
 export type StoryRow = typeof stories.$inferSelect;
@@ -75,20 +75,15 @@ export async function annotateStory(
       annotationVersion: articles.annotationVersion,
     })
     .from(articles)
-    .where(
-      options.force
-        ? eq(articles.storyId, storyId)
-        : and(
-            eq(articles.storyId, storyId),
-            or(
-              isNull(articles.annotationVersion),
-              ne(articles.annotationVersion, ANNOTATION_PROMPT_VERSION)
-            )
-          )
-    );
+    .where(eq(articles.storyId, storyId));
 
-  if (rows.length === 0) return 0;
+  const targetRows = options.force
+    ? rows
+    : rows.filter((row) => row.annotationVersion !== ANNOTATION_PROMPT_VERSION);
+  if (targetRows.length === 0) return 0;
 
+  // Send the whole topic in one request so batching is stable regardless of
+  // which individual contributions need persistence on this pass.
   const inputs = rows.flatMap((row) => [
     { id: `${row.id}:headline`, text: row.headline },
     ...(row.teaser ? [{ id: `${row.id}:teaser`, text: row.teaser }] : []),
@@ -112,7 +107,7 @@ export async function annotateStory(
   await completeAiUsage(reservation.id, generated.usage);
 
   await db.transaction(async (tx) => {
-    for (const row of rows) {
+    for (const row of targetRows) {
       await tx
         .update(articles)
         .set({
@@ -124,7 +119,7 @@ export async function annotateStory(
     }
   });
 
-  return rows.length;
+  return targetRows.length;
 }
 
 /**
@@ -309,7 +304,7 @@ export async function findStoriesReadyForRewrite(): Promise<StoryRow[]> {
               )
             ) >= ${REWRITE_VOTE_THRESHOLD}
             and count(DISTINCT ${articles.id}) filter (
-              where ${articles.publishedAt} > (
+              where ${articles.fetchedAt} > (
                 select max(prev.rewritten_at)
                 from ${publishedArticles} prev
                 where prev.story_id = ${stories.id}

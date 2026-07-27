@@ -32,7 +32,7 @@ The structured summary contract lives in `packages/core/src/story-summary.ts`. I
 
 - Original sources stay visible and linked.
 - AI output is JSON-schema constrained and Zod validated before persistence.
-- Paid generative work is reserved against a persistent $0.20 UTC-day budget before it starts.
+- Paid generative work is reserved against a persistent $0.18 UTC-day budget before it starts, leaving headroom below €0.20 for embeddings and exchange-rate movement.
 - Imported source text is untrusted input; embedded instructions never override the worker prompt.
 - Public story reads require a publication timestamp; drafts remain private.
 - User content is validated plaintext and rendered without raw HTML.

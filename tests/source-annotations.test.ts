@@ -119,6 +119,7 @@ describe("annotateReadyStories", () => {
     const first = await annotateReadyStories({ storyIds: [storyId] });
     expect(first).toEqual({ stories: 1, articles: 3 });
     expect(annotateTextsMock).toHaveBeenCalledOnce();
+    expect(annotateTextsMock.mock.calls[0][0]).toHaveLength(6);
     expect(completeAiUsageMock).toHaveBeenCalledOnce();
 
     const rows = await db.select().from(articles).where(eq(articles.storyId, storyId));
@@ -164,6 +165,7 @@ describe("annotateReadyStories", () => {
     const [unchanged] = await db.select().from(articles).where(eq(articles.id, row.id));
     expect(unchanged.headlineAnnotations).toEqual([previousAnnotation]);
     expect(unchanged.annotationVersion).toBe("previous-prompt-version");
+    expect(annotateTextsMock.mock.calls[0][0]).toHaveLength(6);
     expect(failAiUsageReservationMock).toHaveBeenCalled();
   });
 
