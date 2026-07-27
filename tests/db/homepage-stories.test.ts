@@ -74,11 +74,20 @@ afterAll(cleanup);
 
 describe("homepage story cards", () => {
   it("shows newer rewrites before older rewrites regardless of publication backfill time", async () => {
-    const cards = await loadPublishedStoryCards(1_000);
+    const cards = await loadPublishedStoryCards(1_000, "rewritten");
     const fixtureSlugs = cards
       .map((card) => card.slug)
       .filter((slug) => STORY_SLUGS.includes(slug));
 
     expect(fixtureSlugs).toEqual([STORY_SLUGS[1], STORY_SLUGS[0]]);
+  });
+
+  it("keeps publication order for other consumers", async () => {
+    const cards = await loadPublishedStoryCards(1_000);
+    const fixtureSlugs = cards
+      .map((card) => card.slug)
+      .filter((slug) => STORY_SLUGS.includes(slug));
+
+    expect(fixtureSlugs).toEqual([STORY_SLUGS[0], STORY_SLUGS[1]]);
   });
 });

@@ -157,7 +157,23 @@ export async function loadPublishedStory(slug: string) {
   };
 }
 
-export async function loadPublishedStoryCards(limit = 12) {
+export async function loadPublishedStoryCards(
+  limit = 12,
+  sortBy: "published" | "rewritten" = "published"
+) {
+  const orderBy =
+    sortBy === "rewritten"
+      ? [
+          desc(publishedArticles.rewrittenAt),
+          desc(publishedArticles.publishedAt),
+          desc(publishedArticles.id),
+        ]
+      : [
+          desc(publishedArticles.publishedAt),
+          desc(publishedArticles.rewrittenAt),
+          desc(publishedArticles.id),
+        ];
+
   return db
     .select({
       id: publishedArticles.id,
@@ -173,10 +189,6 @@ export async function loadPublishedStoryCards(limit = 12) {
     .from(publishedArticles)
     .innerJoin(stories, eq(stories.publishedArticleId, publishedArticles.id))
     .where(isNotNull(publishedArticles.publishedAt))
-    .orderBy(
-      desc(publishedArticles.rewrittenAt),
-      desc(publishedArticles.publishedAt),
-      desc(publishedArticles.id)
-    )
+    .orderBy(...orderBy)
     .limit(limit);
 }

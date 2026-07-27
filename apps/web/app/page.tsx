@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function LandingPage() {
-  const stories = await loadPublishedStoryCards();
+  const stories = await loadPublishedStoryCards(12, "rewritten");
   return (
     <>
       <section className="overflow-hidden border-line-soft border-b bg-bg-warm/60">
