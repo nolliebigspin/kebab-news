@@ -151,8 +151,9 @@ function maxOutputTokens(inputCount: number): number {
 }
 
 function geminiCostMicroUsd(inputTokens: number, outputTokens: number): number {
-  // Gemini 2.5 Flash-Lite paid-tier rates: $0.10 input / $0.40 output per MTok.
-  return Math.ceil(inputTokens * 0.1 + outputTokens * 0.4);
+  // Gemini 3.5 Flash-Lite standard paid-tier rates:
+  // $0.30 input / $2.50 output (including thinking tokens) per MTok.
+  return Math.ceil(inputTokens * 0.3 + outputTokens * 2.5);
 }
 
 export function estimateAnnotationMaximumCostMicroUsd(inputs: readonly AnnotationInput[]): number {
@@ -217,8 +218,7 @@ export async function annotateTexts(
           contents: [{ role: "user", parts: [{ text: buildUserMessage(inputs) }] }],
           generationConfig: {
             maxOutputTokens: maxOutputTokens(inputs.length),
-            temperature: 0,
-            thinkingConfig: { thinkingBudget: 0 },
+            thinkingConfig: { thinkingLevel: "minimal" },
             responseMimeType: "application/json",
             responseJsonSchema: JSON_SCHEMA,
           },

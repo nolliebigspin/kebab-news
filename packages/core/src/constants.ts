@@ -83,7 +83,7 @@ export const VOYAGE_URL = "https://api.voyageai.com/v1/embeddings";
 // Radar — annotation (Gemini)
 // ============================================================================
 
-export const ANNOTATION_MODEL = "gemini-2.5-flash-lite";
+export const ANNOTATION_MODEL = "gemini-3.5-flash-lite";
 export const GEMINI_GENERATE_CONTENT_URL =
   "https://generativelanguage.googleapis.com/v1beta/models";
 

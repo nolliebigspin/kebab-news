@@ -45,7 +45,7 @@ Jeder erzeugte Artikel hat unterhalb der Umschreibung einen „Quellen"-Bereich 
 - **Datenbank:** [Neon](https://neon.tech/) Postgres + [Drizzle ORM](https://orm.drizzle.team/) + `pgvector`
 - **Geplante Jobs:** Vercel Cron
 - **KI — Embeddings:** [Voyage AI](https://www.voyageai.com/) (`voyage-3-lite`, 512 Dimensionen) fürs Clustern
-- **KI — Framing-Annotation:** [Gemini](https://ai.google.dev/) (`gemini-2.5-flash-lite`, pro Thema gebündelt)
+- **KI — Framing-Annotation:** [Gemini](https://ai.google.dev/) (`gemini-3.5-flash-lite`, pro Thema gebündelt)
 - **KI — Artikelgenerierung:** [Gemini](https://ai.google.dev/) (`gemini-3.6-flash`)
 - **Hosting:** [Vercel](https://vercel.com/)
 - **Werkzeuge:** [Bun](https://bun.sh/) (verwaltet über [mise](https://mise.jdx.dev/)), [Biome](https://biomejs.dev/), [Vitest](https://vitest.dev/)

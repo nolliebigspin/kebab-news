@@ -26,7 +26,7 @@ Annotations use a paragraph id plus exact quote and optional prefix/suffix conte
 
 - RSS text is untrusted model input. The worker prompt explicitly ignores instructions in source content.
 - AI output is JSON-schema constrained and Zod validated. Unsupported or unsourced shapes are rejected.
-- Gemini Flash-Lite receives all headline/teaser texts for one topic in a single structured annotation request; Gemini 3.6 Flash generates the article.
+- Gemini 3.5 Flash-Lite receives all headline/teaser texts for one topic in a single structured annotation request; Gemini 3.6 Flash generates the article.
 - Generative calls reserve their maximum cost in `ai_usage` before execution and stop when the configured $0.18 UTC-day budget is exhausted; Voyage's sub-cent embedding spend remains outside that ledger.
 - User content is plaintext, length-validated server-side and rendered through React escaping. No user HTML is accepted.
 - Rating and comment mutations require a server-side session and are rate limited.

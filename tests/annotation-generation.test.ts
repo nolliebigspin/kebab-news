@@ -69,11 +69,26 @@ describe("annotateTexts", () => {
       },
       usage: {
         provider: "google",
-        model: "gemini-2.5-flash-lite",
+        model: "gemini-3.5-flash-lite",
         inputTokens: 100,
         outputTokens: 20,
-        costMicroUsd: 18,
+        costMicroUsd: 80,
       },
     });
+
+    const request = fetchMock.mock.calls[0]?.[1] as RequestInit;
+    const body = JSON.parse(String(request.body));
+    expect(body).toEqual(
+      expect.objectContaining({
+        generationConfig: expect.objectContaining({
+          thinkingConfig: { thinkingLevel: "minimal" },
+        }),
+      })
+    );
+    expect(body.generationConfig).not.toHaveProperty("temperature");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
+      expect.anything()
+    );
   });
 });
