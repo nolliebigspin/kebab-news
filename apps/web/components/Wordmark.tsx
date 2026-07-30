@@ -14,7 +14,7 @@ export const Wordmark = () => {
         width={286}
         height={750}
         priority
-        className="h-9 w-auto dark:brightness-0 dark:invert"
+        className="h-9 w-auto"
       />
       {/* Wordmark text is hidden on mobile — the logo image stands alone there. */}
       <div className="hidden items-baseline gap-0.5 md:flex">
