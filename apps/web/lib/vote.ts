@@ -3,8 +3,8 @@
  *   - One vote per (story, user), enforced by a unique index.
  *   - Voting requires a logged-in account (see /api/vote); there is no
  *     anonymous or IP-based path anymore.
- *   - Votes accumulate across days until a story clears
- *     REWRITE_VOTE_THRESHOLD; there is no daily reset.
+ *   - Votes are a durable reader-interest signal; automatic article selection
+ *     is based on current breadth of coverage and does not wait for votes.
  */
 import { db, votes } from "@kebab/db";
 import { eq, inArray, sql } from "drizzle-orm";
@@ -40,10 +40,9 @@ export async function countVotes(storyId: string): Promise<number> {
 }
 
 /**
- * Cumulative vote counts per story, keyed by storyId. This is the tally the
- * rewrite threshold (REWRITE_VOTE_THRESHOLD) is measured against and what the
- * radar shows as "votes so far". Stories with zero votes are absent from the
- * map — callers default to 0. One round-trip; used to hydrate the radar list.
+ * Cumulative vote counts per story, keyed by storyId. Stories with zero votes
+ * are absent from the map — callers default to 0. One round-trip; used to
+ * hydrate the topic list.
  */
 export async function getCumulativeVoteCounts(storyIds: string[]): Promise<Map<string, number>> {
   if (storyIds.length === 0) return new Map();

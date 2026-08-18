@@ -20,8 +20,8 @@ const steps = [
   ],
   [
     "3",
-    "Interesse bestätigen",
-    "Ein angemeldeter Leser kann ein Thema upvoten. Erst ab einem Upvote darf daraus ein Artikel generiert werden, damit die kostenpflichtige Erstellung nur für Themen mit erkennbarem Interesse läuft.",
+    "Aktuelle Themen auswählen",
+    "Sobald mehrere unabhängige Medien ein aktuelles Thema aufgreifen, kann daraus automatisch ein Artikel entstehen. Themen mit breiterer Quellenlage werden zuerst verarbeitet.",
   ],
   [
     "4",
@@ -90,10 +90,11 @@ export default function MethodPage() {
         <div>
           <h2 className="font-display text-2xl">Rolle von Menschen</h2>
           <p className="mt-3 text-ink-soft text-sm leading-6">
-            Nach der automatischen Bündelung bestätigt ein Leser per Upvote das Interesse an einem
-            Artikel. Die anschließende Erstellung und Veröffentlichung läuft automatisch. Menschen
-            greifen außerdem nachträglich ein: bei gemeldeten Fehlern, Korrekturen und der
-            Moderation von Kommentaren. Maßgeblich bleiben die verlinkten Originalbeiträge.
+            Lesende können ihr Interesse an einem Thema zeigen und veröffentlichte Artikel bewerten.
+            Die Auswahl, Erstellung und Veröffentlichung aktueller, quellenstarker Themen läuft
+            automatisch. Menschen greifen außerdem nachträglich ein: bei gemeldeten Fehlern,
+            Korrekturen und der Moderation von Kommentaren. Maßgeblich bleiben die verlinkten
+            Originalbeiträge.
           </p>
         </div>
       </section>

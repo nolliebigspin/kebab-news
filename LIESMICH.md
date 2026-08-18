@@ -26,11 +26,11 @@ Ein geplanter Ingest holt Schlagzeilen und Teaser von rund 25 Outlets über das 
 ### 2. Es annotiert Framing in den Outlet-Schlagzeilen
 Gemini analysiert die Schlagzeilen und Teaser eines Themas gebündelt und markiert vorsichtig geladene Begriffe, emotionale Trigger, vorausgesetzte Annahmen und Euphemismen. Die Originalschlagzeile bleibt sichtbar; die Annotation erklärt, *warum* sich das Framing unterscheiden kann.
 
-### 3. Lesende stimmen ab, was neu geschrieben wird
-Der Quellenvergleich zeigt die wichtigsten Themen des Tages. Angemeldete Lesende stimmen ab, welches Thema einen vollständigen Artikel bekommen soll. Ein Upvote schaltet die erste Generierung frei; eine spätere automatische Aktualisierung braucht erneut einen Upvote nach der letzten Artikelversion sowie genügend neue Originalbeiträge.
+### 3. Es wählt aktuelle, quellenstarke Themen aus
+Der Quellenvergleich zeigt die wichtigsten Themen des Tages. Sobald mehrere unabhängige Medien ein aktuelles Thema aufgreifen, kann daraus automatisch ein Artikel entstehen. Themen mit breiterer Quellenlage werden zuerst verarbeitet; Upvotes bleiben ein zusätzliches Interessenssignal, sind aber keine Veröffentlichungsschranke.
 
-### 4. Es schreibt den Gewinner neutral um
-Für die ausgewählte Geschichte holt das Werkzeug die Schlagzeilen + Teaser aller Outlets, die darüber berichtet haben, schickt sie durch Gemini mit einem strikten Prompt für neutrales Deutsch und erzeugt eine Schlagzeile und einen Text (Ziellänge in `src/lib/constants.ts`). Aussagen über identifizierbare Personen werden ihrer Quelle zugeordnet und konjunktivisch formuliert („laut X"), nie als eigene Tatsache des Werkzeugs behauptet. Das Ergebnis wird unter `/artikel/[slug]` veröffentlicht. Artikeltexte scrapen wir bewusst nicht — selbes Muster wie Ground News.
+### 4. Es fasst das ausgewählte Thema zusammen
+Für das ausgewählte Thema holt das Werkzeug die Schlagzeilen + Teaser aller Outlets, die darüber berichtet haben, schickt sie durch Gemini mit einem strikten Prompt für transparentes Deutsch und erzeugt eine Schlagzeile und einen Text (Ziellänge in `packages/core/src/constants.ts`). Aussagen über identifizierbare Personen werden ihrer Quelle zugeordnet und konjunktivisch formuliert („laut X"), nie als eigene Tatsache des Werkzeugs behauptet. Das Ergebnis wird unter `/artikel/[slug]` veröffentlicht. Artikeltexte scrapen wir bewusst nicht — selbes Muster wie Ground News.
 
 ### 5. Quellen bleiben sichtbar
 Jeder erzeugte Artikel hat unterhalb der Umschreibung einen „Quellen"-Bereich — jeder Originalartikel der Outlets, sein Lean-Label, seine Framing-Markierungen und ein Link nach außen. Wenn die Fassung schräg klingt, kannst du das prüfen.

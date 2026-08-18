@@ -1,4 +1,4 @@
-import { LEAN_ORDER, RADAR_MIN_OUTLETS, REWRITE_VOTE_THRESHOLD } from "@kebab/core";
+import { LEAN_ORDER, RADAR_MIN_OUTLETS } from "@kebab/core";
 import { articles, db, type OutletLean, outlets, publishedArticles, stories } from "@kebab/db";
 import { and, desc, type SQL, sql } from "drizzle-orm";
 import type { Metadata } from "next";
@@ -154,7 +154,6 @@ export default async function TopicsPage({
                           <VoteButton
                             storyId={story.id}
                             initialCount={voteCounts.get(story.id) ?? 0}
-                            threshold={REWRITE_VOTE_THRESHOLD}
                             isAuthenticated={session !== null}
                           />
                         </div>

@@ -15,7 +15,7 @@ kebab.news bündelt Originalbeiträge zum selben Thema und veröffentlicht darau
 - `/ueber-uns` — Haltung und Produktidee
 - `/redaktion` — server-authorized review dashboard for moderators, editors and admins
 
-Themen erscheinen automatisch im Quellenvergleich. Ein Artikel wird aber erst generiert, sobald das Thema mindestens einen Upvote von einem angemeldeten Leser erhalten hat. Veröffentlichte Artikel können anschließend bewertet und kommentiert werden.
+Themen erscheinen automatisch im Quellenvergleich. Aus den aktuellsten Themen mit breiter Quellenlage werden automatisch Artikel generiert; eine größere Zahl unabhängiger Medien wird zuerst verarbeitet. Veröffentlichte Artikel können anschließend bewertet und kommentiert werden.
 
 ## Architecture
 

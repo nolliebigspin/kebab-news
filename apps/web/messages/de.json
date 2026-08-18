@@ -110,16 +110,14 @@
       "omission": "Auslassung"
     },
     "vote": {
-      "cta": "Upvoten",
-      "voted": "Upvote gezählt",
-      "already_voted": "Bereits upgevotet",
+      "cta": "Interesse zeigen",
+      "voted": "Interesse gezählt",
+      "already_voted": "Interesse bereits gezählt",
       "error": "Fehler — erneut versuchen",
-      "login_cta": "Anmelden zum Upvoten",
-      "toast_recorded": "Upvote gezählt. Danke!",
-      "toast_duplicate": "Du hast dieses Thema bereits upgevotet.",
-      "toast_error": "Upvote fehlgeschlagen. Bitte versuche es erneut.",
-      "threshold_progress": "{count}/{threshold} bis zum Artikel",
-      "threshold_reached": "Interesse bestätigt — Artikel folgt"
+      "login_cta": "Anmelden und Interesse zeigen",
+      "toast_recorded": "Interesse gezählt. Danke!",
+      "toast_duplicate": "Dein Interesse an diesem Thema wurde bereits gezählt.",
+      "toast_error": "Interesse konnte nicht gezählt werden. Bitte versuche es erneut."
     }
   },
   "articles": {
@@ -242,9 +240,9 @@
     "step1_body": "Mehrmals täglich liest das Werkzeug die RSS-Feeds deutschsprachiger Medien quer durch das politische Spektrum (links bis öffentlich-rechtlich). Schlagzeile und Teaser jedes neuen Artikels werden eingelesen — Artikeltexte werden bewusst nicht gespeichert.",
     "step2_title": "2 · Beiträge werden zu Themen gebündelt",
     "step2_body": "Berichten mehrere Medien über dasselbe Ereignis, werden ihre Originalbeiträge automatisch zu einem Thema gruppiert. In der Themenübersicht stehen die Schlagzeilen und möglichen Rahmungen nebeneinander.",
-    "step3_title": "3 · Interesse wird bestätigt",
-    "step3_body_before": "Sobald ein Thema genügend unabhängige Quellen hat und mindestens ",
-    "step3_body_after": " Upvote erhalten hat, darf daraus ein Artikel generiert werden.",
+    "step3_title": "3 · Die stärksten aktuellen Themen werden ausgewählt",
+    "step3_body_before": "Sobald ein aktuelles Thema von genügend unabhängigen Medien aufgegriffen wurde, kann daraus automatisch ein Artikel entstehen. Themen mit breiterer Quellenlage werden zuerst verarbeitet.",
+    "step3_body_after": "",
     "step4_title": "4 · Der Artikel entsteht",
     "step4_body": "Erfüllt ein Thema die Quellenkriterien, erstellt eine KI beim nächsten Lauf aus allen Schlagzeilen und Teasern einen transparenten Artikel. Er zeigt seinen tatsächlichen Prüfstatus und verlinkt alle verwendeten Originalbeiträge.",
     "schedule_title": "Wann werden neue Quellen geladen?",
@@ -253,8 +251,7 @@
     "countdown_days": "T",
     "countdown_hours": "Std",
     "countdown_minutes": "Min",
-    "countdown_seconds": "Sek",
-    "threshold_note": "Artikelschwelle: {threshold} Upvote pro Thema."
+    "countdown_seconds": "Sek"
   },
   "impressum": {
     "page_title": "Impressum",

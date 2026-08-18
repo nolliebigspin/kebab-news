@@ -18,19 +18,11 @@ import {
   REWRITE_MIN_NEW_SOURCES,
   REWRITE_MODEL,
   REWRITE_PROMPT_VERSION,
-  REWRITE_VOTE_THRESHOLD,
   type SourceItem,
+  STORY_WINDOW_HOURS,
 } from "@kebab/core";
-import {
-  articles,
-  db,
-  outlets,
-  publishedArticles,
-  stories,
-  summarySources,
-  votes,
-} from "@kebab/db";
-import { desc, eq, inArray, sql } from "drizzle-orm";
+import { articles, db, outlets, publishedArticles, stories, summarySources } from "@kebab/db";
+import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
 import { completeAiUsage, failAiUsageReservation, reserveAiBudget } from "./ai-budget";
 
 export type StoryRow = typeof stories.$inferSelect;
@@ -271,38 +263,40 @@ export async function rewriteStory(story: StoryRow): Promise<RewriteOutcome> {
 }
 
 /**
- * Upvoted, source-diverse stories without a summary, plus already-summarized
- * stories that gained both a fresh post-version upvote and at least
- * REWRITE_MIN_NEW_SOURCES sources since their last rewrite.
+ * Current, source-diverse stories without a summary, plus already-summarized
+ * stories that gained at least REWRITE_MIN_NEW_SOURCES sources since their
+ * last rewrite.
  *
- * The re-summary condition counts votes and articles newer than the latest
- * rewrite rather than comparing `stories.lastSeenAt` to it. `lastSeenAt`
- * moves on every cluster touch and is not reader demand.
+ * Stronger coverage wins: distinct outlets sort ahead of recency so the daily
+ * AI budget is spent on the most broadly covered current news first. The
+ * recency window prevents an old, never-summarized cluster from displacing a
+ * current topic indefinitely.
  */
-export async function findStoriesReadyForRewrite(): Promise<StoryRow[]> {
+export async function findStoriesReadyForRewrite(
+  options: { now?: Date; storyIds?: readonly string[] } = {}
+): Promise<StoryRow[]> {
+  const now = options.now ?? new Date();
+  const currentWindowStart = new Date(now.getTime() - STORY_WINDOW_HOURS * 60 * 60 * 1_000);
   const rows = await db
     .select({ story: stories })
     .from(stories)
     .innerJoin(articles, eq(articles.storyId, stories.id))
-    .leftJoin(votes, eq(votes.storyId, stories.id))
     .leftJoin(publishedArticles, eq(publishedArticles.storyId, stories.id))
+    .where(
+      and(
+        gte(stories.lastSeenAt, currentWindowStart),
+        options.storyIds && options.storyIds.length > 0
+          ? inArray(stories.id, [...options.storyIds])
+          : undefined
+      )
+    )
     .groupBy(stories.id)
     .having(
       sql`count(DISTINCT ${articles.outletId}) >= ${RADAR_MIN_OUTLETS}
         and (
-          (
-            count(DISTINCT ${publishedArticles.id}) = 0
-            and count(DISTINCT ${votes.id}) >= ${REWRITE_VOTE_THRESHOLD}
-          )
+          count(DISTINCT ${publishedArticles.id}) = 0
           or (
             count(DISTINCT ${publishedArticles.id}) > 0
-            and count(DISTINCT ${votes.id}) filter (
-              where ${votes.createdAt} > (
-                select max(prev.rewritten_at)
-                from ${publishedArticles} prev
-                where prev.story_id = ${stories.id}
-              )
-            ) >= ${REWRITE_VOTE_THRESHOLD}
             and count(DISTINCT ${articles.id}) filter (
               where ${articles.fetchedAt} > (
                 select max(prev.rewritten_at)
@@ -313,7 +307,7 @@ export async function findStoriesReadyForRewrite(): Promise<StoryRow[]> {
           )
         )`
     )
-    .orderBy(desc(stories.lastSeenAt));
+    .orderBy(desc(sql`count(DISTINCT ${articles.outletId})`), desc(stories.lastSeenAt));
   return rows.map((r) => r.story);
 }
 
@@ -325,9 +319,9 @@ export type AutoRewriteResult = {
 };
 
 /**
- * Worker hook: write every source-diverse story that is ready. A first article
- * additionally requires an upvote. Called once per ingest pass; AI calls stay
- * in the worker process (CLAUDE.md rule #5).
+ * Worker hook: write every current, source-diverse story that is ready,
+ * strongest coverage first. Called once per ingest pass; AI calls stay in the
+ * worker process (CLAUDE.md rule #5).
  */
 export async function runAutoRewrites(
   log: (event: string, fields?: Record<string, unknown>) => void = () => {}

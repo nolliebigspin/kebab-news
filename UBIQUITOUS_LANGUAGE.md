@@ -10,7 +10,7 @@
 | **Quelle** | Der konkrete Beleg für eine Aussage; im Produkt meist ein Originalbeitrag oder eine darin erkennbare Primärquelle. | Outlet, Medium |
 | **Medium** | Die veröffentlichende Organisation eines Originalbeitrags. | Publisher, Outlet, Quelle |
 | **Quellenvergleich** | Die nach Medienperspektiven gruppierte Ansicht der Originalbeiträge eines Themas. | Radar |
-| **Upvote** | Ein dauerhaftes, kontobasiertes Interessenssignal für ein Thema. Der erste Upvote schaltet die automatische Artikelgenerierung frei. | Stimme, Bewertung |
+| **Upvote** | Ein dauerhaftes, kontobasiertes Interessenssignal für ein Thema. Es ist keine Voraussetzung für die automatische Artikelgenerierung. | Stimme, Bewertung |
 
 ## Analyse und Transparenz
 
@@ -26,7 +26,7 @@
 - Ein **Thema** enthält mehrere **Originalbeiträge**.
 - Ein **Originalbeitrag** gehört zu genau einem **Medium**.
 - Ein **Thema** kann keinen oder genau einen aktuell veröffentlichten **Artikel** haben.
-- Ein **Thema** benötigt mindestens einen **Upvote**, bevor daraus automatisch ein **Artikel** generiert werden darf.
+- Aktuelle **Themen** mit mehreren unabhängigen Medien können automatisch zu **Artikeln** werden; eine breitere Quellenlage wird zuerst verarbeitet.
 - Ein **Artikel** besitzt eine oder mehrere **Quellen** und kann mehrere Versionen haben.
 - Der **Quellenvergleich** gehört zu einem **Thema**, die **Zusammenfassung** zu einem **Artikel**.
 

@@ -155,9 +155,9 @@ export const articleAuthors = pgTable(
 
 /**
  * Reader votes on radar stories. One vote per (story, user) — the unique
- * constraint enforces "one vote per account per story", permanently (votes
- * accumulate across days until a story clears REWRITE_VOTE_THRESHOLD). Voting
- * requires a logged-in account; there is no anonymous/IP path anymore.
+ * constraint enforces "one vote per account per story", permanently. Votes
+ * express reader interest but do not gate automatic article generation.
+ * Voting requires a logged-in account; there is no anonymous/IP path.
  */
 export const votes = pgTable(
   "votes",

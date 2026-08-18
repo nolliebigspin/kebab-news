@@ -16,7 +16,7 @@ kebab.news is a German-language news platform that clusters multiple reports abo
 
 **Why now:** Aggregators expose many links but rarely connect individual claims to evidence or explain uncertainty and framing in a readable German product.
 
-**The product flow in one sentence:** outlets publish → we cluster contributions into a topic → one reader upvote unlocks automatic creation and publication of a sourced, versioned article → readers rate its quality and discuss context.
+**The product flow in one sentence:** outlets publish → we cluster contributions into a topic → the worker prioritizes current topics with the broadest independent coverage for automatic creation and publication of a sourced, versioned article → readers rate its quality and discuss context.
 
 ---
 
@@ -35,7 +35,7 @@ The homepage and `/artikel` are the primary article-discovery surfaces. `/themen
 
 ### Piece 2 — Versioned article
 
-Each public article includes a headline, short summary, longer paragraphs, sourced facts, uncertainties, source differences, framing annotations, original contributions, quality ratings, sharing, comments and version/correction metadata. Topics form automatically, but article generation requires at least one account-based topic upvote so AI spend follows demonstrated reader interest.
+Each public article includes a headline, short summary, longer paragraphs, sourced facts, uncertainties, source differences, framing annotations, original contributions, quality ratings, sharing, comments and version/correction metadata. Topics form automatically; current source-diverse topics qualify for generation without waiting for reader votes, and broader independent coverage is processed first.
 
 ### Piece 3 — Learning and editorial workflow
 
@@ -71,18 +71,18 @@ Source headline annotations retain the legacy offset format. Story Summary annot
 
 ### 3. Reader interactions
 
-`POST /api/vote` records one permanent topic upvote per account; a topic becomes eligible for article generation at `REWRITE_VOTE_THRESHOLD` cumulative votes. `POST /api/summary-rating` sets, changes or removes one quality rating per user and published summary. `POST /api/comments` validates and authorizes comment creation, replies, owner edits/deletes, helpful votes and reports. Comments are readable without login and always rendered as plaintext.
+`POST /api/vote` records one permanent topic-interest signal per account; it does not gate article generation. `POST /api/summary-rating` sets, changes or removes one quality rating per user and published summary. `POST /api/comments` validates and authorizes comment creation, replies, owner edits/deletes, helpful votes and reports. Comments are readable without login and always rendered as plaintext.
 
 ### 4. Structured summary generation
 
-Once a source-diverse topic reaches `REWRITE_VOTE_THRESHOLD`, the automatic worker may generate its first article:
+Once a current topic reaches the distinct-outlet threshold, the automatic worker may generate its first article. Eligible topics are ordered by distinct outlet count and then recency so the strongest current coverage gets the AI budget first:
 1. Load all articles in the cluster (headline + teaser from RSS — no body scraping).
 2. Build a structured input: per-outlet headline + teaser + political lean, ordered left → public via `LEAN_ORDER`.
 3. Call the configured Gemini Flash model with the transparent-summary prompt (model and prompt version live in `packages/core/src/constants.ts`). Imported source text is explicitly untrusted.
 4. Validate headline/body, short summary, sourced facts, uncertainties, differences and annotations with JSON Schema plus Zod. On parse failure, abort — never persist partial output.
 5. Insert into `published_articles` with `published_at` set, archive the version it supersedes and back-link `stories.published_article_id` — the article is live at `/artikel/[slug]` immediately.
 
-An already-summarized story is rewritten automatically only after both a fresh upvote newer than the current version and at least `REWRITE_MIN_NEW_SOURCES` newly fetched contributions. `bun rewrite:run --story <slug>` is the explicit operator override and uses the same generation path. Every generative call first reserves its conservative maximum cost in `ai_usage`; the default $0.18 UTC-day budget leaves headroom below €0.20 for Voyage embeddings and exchange-rate movement. `bun rewrite:publish --story <slug>` remains a repair tool for a summary that is not live.
+An already-summarized story is rewritten automatically after at least `REWRITE_MIN_NEW_SOURCES` newly fetched contributions, without requiring a fresh vote. `bun rewrite:run --story <slug>` is the explicit operator override and uses the same generation path. Every generative call first reserves its conservative maximum cost in `ai_usage`; the default $0.18 UTC-day budget leaves headroom below €0.20 for Voyage embeddings and exchange-rate movement. `bun rewrite:publish --story <slug>` remains a repair tool for a summary that is not live.
 
 ### 5. Topic and article surfaces
 
@@ -128,7 +128,7 @@ Summary and interaction tables:
 - `summary_ratings` — one `-1|1` quality rating per `(summary_id, user_id)` plus optional structured downvote reason.
 - `comments`, `comment_helpful_votes`, `comment_reports` — threaded plaintext discussion with ownership, moderation and reporting.
 - `share_events` — summary id, channel and timestamp only; no account, IP or user agent.
-- `votes` — one permanent article-request upvote per `(story_id, user_id)`; cumulative counts gate automatic generation.
+- `votes` — one permanent topic-interest signal per `(story_id, user_id)`; counts do not gate automatic generation.
 - `ai_usage` — UTC-day generative-AI budget reservations and actual provider token costs; failed requests keep their conservative reservation for that day.
 - `stories.published_article_id` — nullable FK back-pointer added via migration.
 

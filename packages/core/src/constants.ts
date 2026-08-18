@@ -45,24 +45,16 @@ export const DEFAULT_CLUSTER_THRESHOLD = 0.78;
 export const RADAR_MIN_OUTLETS = 3;
 
 // ============================================================================
-// Voting / rewrite trigger
+// Automatic rewrite trigger
 // ============================================================================
 
 /**
- * Minimum number of (cumulative, all-time) upvotes a radar story needs before
- * it qualifies for an automatic neutral rewrite. Once a story crosses this
- * threshold, the next worker run may generate its first article. Surfaced in
- * the topic UI as vote progress.
- */
-export const REWRITE_VOTE_THRESHOLD = 1;
-
-/**
  * How many NEW sources must attach to an already-summarized story before it is
- * eligible for another reader-requested rewrite. A fresh post-version upvote
- * is also required. Without the source threshold, every ingest pass that moved `last_seen_at`
- * triggered a fresh full-cost rewrite call — by far the largest AI spend in the
- * pipeline. A re-summary is only worth its cost when the cluster actually
- * gained substance, not when one more outlet echoed the same report.
+ * eligible for another automatic rewrite. Without the source threshold, every
+ * ingest pass that moved `last_seen_at` triggered a fresh full-cost rewrite
+ * call — by far the largest AI spend in the pipeline. A re-summary is only
+ * worth its cost when the cluster actually gained substance, not when one more
+ * outlet echoed the same report.
  */
 export const REWRITE_MIN_NEW_SOURCES = 4;
 

@@ -2,7 +2,7 @@
 
 ## Decision
 
-kebab.news does not promise neutrality. Its reader-facing units are a **Thema** (the clustered original contributions and source comparison) and a versioned **Artikel** (the published summary built from that topic). Topics form automatically; one account-based reader upvote unlocks article generation so the system only incurs that AI cost after demonstrated interest. Readers can then rate the quality of the published article.
+kebab.news does not promise neutrality. Its reader-facing units are a **Thema** (the clustered original contributions and source comparison) and a versioned **Artikel** (the published summary built from that topic). Topics form automatically; current source-diverse topics become articles automatically, with broader independent coverage processed first. Readers can signal interest in topics and rate the quality of published articles.
 
 ## Deep modules and seams
 

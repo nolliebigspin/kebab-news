@@ -1,10 +1,4 @@
-import {
-  type Annotation,
-  AnnotationsSchema,
-  LEAN_ORDER,
-  leanI18nKey,
-  REWRITE_VOTE_THRESHOLD,
-} from "@kebab/core";
+import { type Annotation, AnnotationsSchema, LEAN_ORDER, leanI18nKey } from "@kebab/core";
 import { articles, db, type OutletLean, outlets, publishedArticles, stories } from "@kebab/db";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
@@ -138,7 +132,6 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
             <VoteButton
               storyId={story.id}
               initialCount={voteCount}
-              threshold={REWRITE_VOTE_THRESHOLD}
               isAuthenticated={session !== null}
             />
           ) : null}
