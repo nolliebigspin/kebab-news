@@ -1,36 +1,12 @@
 "use client";
 
 import type { StoryAnnotation } from "@kebab/core";
+import { resolveTextAnchor } from "@kebab/core/text-anchor";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { FiX } from "react-icons/fi";
 
 type SourceRef = { id: string; name: string; headline: string; url: string };
-
-function locate(text: string, annotation: StoryAnnotation) {
-  const starts: number[] = [];
-  let cursor = 0;
-  while (cursor < text.length) {
-    const start = text.indexOf(annotation.quote, cursor);
-    if (start < 0) break;
-    starts.push(start);
-    cursor = start + Math.max(1, annotation.quote.length);
-  }
-  if (starts.length === 1) return starts[0];
-  const contextual = starts.filter((start) => {
-    const prefix = annotation.prefix
-      ? text.slice(start - annotation.prefix.length, start) === annotation.prefix
-      : true;
-    const suffix = annotation.suffix
-      ? text.slice(
-          start + annotation.quote.length,
-          start + annotation.quote.length + annotation.suffix.length
-        ) === annotation.suffix
-      : true;
-    return prefix && suffix;
-  });
-  return contextual.length === 1 ? contextual[0] : -1;
-}
 
 export function FramingText({
   paragraphs,
@@ -61,7 +37,7 @@ export function FramingText({
             .filter(
               (item) => item.paragraph_id === paragraph.id && item.review_status !== "rejected"
             )
-            .map((item) => ({ item, start: locate(paragraph.text, item) }))
+            .map((item) => ({ item, start: resolveTextAnchor(paragraph.text, item)?.start ?? -1 }))
             .filter((item) => item.start >= 0)
             .sort((a, b) => a.start - b.start);
           const nodes: React.ReactNode[] = [];

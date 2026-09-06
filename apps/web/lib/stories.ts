@@ -1,6 +1,5 @@
 import {
   ConfirmedFactSchema,
-  LegacyStoryAnnotationSchema,
   SourceDifferenceSchema,
   StoryAnnotationSchema,
   SummaryParagraphSchema,
@@ -23,8 +22,6 @@ const ParagraphsSchema = z.array(SummaryParagraphSchema);
 const FactsSchema = z.array(ConfirmedFactSchema);
 const UncertaintiesSchema = z.array(UncertaintySchema);
 const DifferencesSchema = z.array(SourceDifferenceSchema);
-const StoryAnnotationsSchema = z.array(StoryAnnotationSchema);
-const LegacyStoryAnnotationsSchema = z.array(LegacyStoryAnnotationSchema);
 
 function parseOr<T>(schema: z.ZodType<T>, value: unknown, fallback: T): T {
   const parsed = schema.safeParse(value);
@@ -40,20 +37,22 @@ function parseStoryAnnotations(
     teaser: string | null;
   }>
 ) {
-  const current = StoryAnnotationsSchema.safeParse(value);
-  if (current.success) return current.data;
-
-  const legacy = LegacyStoryAnnotationsSchema.safeParse(value);
-  if (!legacy.success) return [];
-  return legacy.data.flatMap(({ evidence_source_ids: sourceIds, ...annotation }) => {
-    const evidence = sourceIds.flatMap((sourceId) => {
-      const source = sources.find(
-        (candidate) => candidate.id === sourceId || candidate.outletSlug === sourceId
+  if (!Array.isArray(value)) return [];
+  const knownSources = new Map(sources.map((source) => [source.id, source]));
+  return value.flatMap((item) => {
+    const parsed = StoryAnnotationSchema.safeParse(item);
+    // Legacy source ids contain no evidence quote. Never manufacture a quote
+    // by presenting an arbitrary teaser as the annotation's original evidence.
+    if (!parsed.success) return [];
+    const hasExactEvidence = parsed.data.evidence.every((evidence) => {
+      const source = knownSources.get(evidence.source_id);
+      return (
+        source &&
+        evidence.quote.trim() &&
+        [source.headline, source.teaser].some((text) => text?.includes(evidence.quote))
       );
-      if (!source) return [];
-      return [{ source_id: source.id, quote: source.teaser ?? source.headline }];
     });
-    return evidence.length > 0 ? [{ ...annotation, evidence }] : [];
+    return hasExactEvidence ? [parsed.data] : [];
   });
 }
 

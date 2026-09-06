@@ -36,7 +36,7 @@ const steps = [
   [
     "6",
     "Framing einordnen",
-    "Markierungen sind vorsichtige Analysen mit Konfidenz und Prüfstatus. Sie beschreiben mögliche Wirkungen und sind keine objektiven Urteile über ein Medium.",
+    "Markierungen erklären mögliche Wirkungen konkreter Formulierungen. Zitate, Sprecherzuordnung und Verneinungen zählen zum Kontext. Sachliche Rekorde, Zahlen oder Unsicherheitsmarker sind für sich kein Framing. Ein Hinweis ist kein Urteil über ein Medium; eine fehlende Markierung ist kein Neutralitätssiegel.",
   ],
   [
     "7",

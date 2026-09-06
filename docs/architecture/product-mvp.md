@@ -20,13 +20,29 @@ Publishing requires an explicit operator choice: either `--reviewed-by <name>` (
 
 ## Annotation anchoring
 
-Annotations use a paragraph id plus exact quote and optional prefix/suffix context. Numeric offsets are intentionally not persisted as the only anchor. Ambiguous anchors do not render rather than highlighting the wrong passage.
+Annotations use a paragraph id plus exact quote and optional prefix/suffix context. The dependency-free `@kebab/core/text-anchor` resolver is shared by generation validation and the browser. It rejects empty quotes and ambiguous occurrences, including overlapping matches. Summary validation also rejects overlapping annotation ranges before persistence.
+
+Source headline/teaser annotations retain quote-backed numeric offsets. Repeated wording can be disambiguated with exact context; at most two spans survive. Explanations describe a concrete linguistic mechanism and possible effect, with speaker attribution and negation respected. Ordinary factual records, numbers, indirect speech and uncertainty markers are not automatic triggers. Missing context in a snippet does not establish omission by a publisher.
+
+The public read model checks every stored evidence quote against that summary version's available sources. Legacy annotations that only name source ids are hidden: an arbitrary teaser is never reconstructed as evidence. Invalid annotations do not hide other valid annotations or the article itself.
+
+## AI request efficiency
+
+- Source annotations are independent text analyses. Already-current rows are excluded before budget reservation; `force` still refreshes all rows. Exact duplicate text in the same request is sent and generated once, then restored to every caller id. No approximate matching, truncation or cross-version cache is used.
+- Both model adapters use short request-local ids. All source references in facts, uncertainties, differences and annotation evidence are validated before conversion back to persistent ids.
+- The rewrite model produces `body` paragraphs once. `neutral_body` is their exact concatenation with blank lines; it remains present in the storage/API contract. `origin: automatic` and `review_status: needs_review` are set locally, so a model cannot claim editorial verification.
+- Budget estimates use the same compact input and output schema as the actual request. Annotation output headroom allows two complete explanations rather than encouraging truncation. A token ceiling is a reservation, not a target: savings come from omitted duplicate work and content, not shorter explanations or a smaller model.
+- The prompt versions were bumped; existing source annotations are refreshed through the usual versioned worker path. No migration or paid backfill is needed to deploy the code.
+
+Provider schemas use the [documented Gemini JSON Schema subset](https://ai.google.dev/gemini-api/docs/generate-content/structured-output?hl=en#json-schema-support). String lengths, exact quotations and semantic relationships are enforced locally rather than relying on unsupported provider constraints.
+
+Validation: `mise exec -- bun check:all`, `mise exec -- bun run test` with a dedicated local PostgreSQL/pgvector database, and `mise exec -- bun run build`. Provider responses are mocked in tests. These checks establish exact id/evidence preservation and skipped duplicate work, not a measured semantic quality score or a universal token-saving percentage.
 
 ## Trust and safety
 
 - RSS text is untrusted model input. The worker prompt explicitly ignores instructions in source content.
 - AI output is JSON-schema constrained and Zod validated. Unsupported or unsourced shapes are rejected.
-- Gemini 3.5 Flash-Lite receives all headline/teaser texts for one topic in a single structured annotation request; Gemini 3.6 Flash generates the article.
+- The annotation model receives only stale headline/teaser texts for one topic; identical texts are analyzed once per request. The rewrite model generates the article. Model and prompt versions live in `packages/core/src/constants.ts`.
 - Generative calls reserve their maximum cost in `ai_usage` before execution and stop when the configured $0.18 UTC-day budget is exhausted; Voyage's sub-cent embedding spend remains outside that ledger.
 - User content is plaintext, length-validated server-side and rendered through React escaping. No user HTML is accepted.
 - Rating and comment mutations require a server-side session and are rate limited.

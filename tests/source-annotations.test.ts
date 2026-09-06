@@ -165,7 +165,7 @@ describe("annotateReadyStories", () => {
     const [unchanged] = await db.select().from(articles).where(eq(articles.id, row.id));
     expect(unchanged.headlineAnnotations).toEqual([previousAnnotation]);
     expect(unchanged.annotationVersion).toBe("previous-prompt-version");
-    expect(annotateTextsMock.mock.calls[0][0]).toHaveLength(6);
+    expect(annotateTextsMock.mock.calls[0][0]).toHaveLength(2);
     expect(failAiUsageReservationMock).toHaveBeenCalled();
   });
 

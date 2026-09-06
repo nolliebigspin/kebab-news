@@ -8,6 +8,7 @@ import {
   MAX_ANNOTATION_SPANS,
 } from "./constants";
 import type { ModelUsage } from "./model-usage";
+import { resolveTextAnchor } from "./text-anchor";
 
 export const annotationTypeValues = [
   "loaded-term",
@@ -42,6 +43,8 @@ export type Annotation = z.infer<typeof AnnotationSchema>;
 
 const AnnotationQuoteSchema = z.object({
   quote: z.string().min(1),
+  prefix: z.string().max(160).optional(),
+  suffix: z.string().max(160).optional(),
   type: z.enum(inlineAnnotationTypeValues),
   note: z.string().min(1).max(280),
 });
@@ -57,22 +60,16 @@ export function anchorAnnotationQuotes(
   candidates: readonly AnnotationQuote[]
 ): Annotation[] {
   const anchored: Annotation[] = [];
-  const seenQuotes = new Set<string>();
 
   for (const candidate of candidates) {
     if (anchored.length >= MAX_ANNOTATION_SPANS) break;
-    if (seenQuotes.has(candidate.quote)) continue;
 
-    const start = text.indexOf(candidate.quote);
-    if (start < 0 || text.indexOf(candidate.quote, start + candidate.quote.length) >= 0) {
-      continue;
-    }
-
-    const end = start + candidate.quote.length;
+    const range = resolveTextAnchor(text, candidate);
+    if (!range) continue;
+    const { start, end } = range;
     if (anchored.some((item) => start < item.end && end > item.start)) continue;
 
     anchored.push({ ...candidate, start, end });
-    seenQuotes.add(candidate.quote);
   }
 
   return anchored.sort((a, b) => a.start - b.start);
@@ -93,12 +90,15 @@ const JSON_SCHEMA = {
           id: { type: "string" },
           annotations: {
             type: "array",
+            maxItems: MAX_ANNOTATION_SPANS,
             items: {
               type: "object",
               additionalProperties: false,
               required: ["quote", "type", "note"],
               properties: {
                 quote: { type: "string" },
+                prefix: { type: "string" },
+                suffix: { type: "string" },
                 type: {
                   type: "string",
                   enum: inlineAnnotationTypeValues as unknown as string[],
@@ -135,7 +135,7 @@ export type AnnotationBatchResult = {
 type GeminiResponse = {
   candidates?: Array<{
     finishReason?: string;
-    content?: { parts?: Array<{ text?: string }> };
+    content?: { parts?: Array<{ text?: string; thought?: boolean }> };
   }>;
   promptFeedback?: { blockReason?: string };
   usageMetadata?: {
@@ -147,7 +147,7 @@ type GeminiResponse = {
 };
 
 function maxOutputTokens(inputCount: number): number {
-  return Math.min(65_536, Math.max(256, 128 + inputCount * 192));
+  return Math.min(65_536, Math.max(512, 128 + inputCount * 512));
 }
 
 function geminiCostMicroUsd(inputTokens: number, outputTokens: number): number {
@@ -157,13 +157,32 @@ function geminiCostMicroUsd(inputTokens: number, outputTokens: number): number {
 }
 
 export function estimateAnnotationMaximumCostMicroUsd(inputs: readonly AnnotationInput[]): number {
+  if (inputs.length === 0) return 0;
+  const { unique } = prepareAnnotationInputs(inputs);
   const requestBytes = new TextEncoder().encode(
-    `${ANNOTATION_SYSTEM_PROMPT}\n${JSON.stringify(inputs)}\n${JSON.stringify(JSON_SCHEMA)}`
+    `${ANNOTATION_SYSTEM_PROMPT}\n${buildUserMessage(unique)}\n${JSON.stringify(JSON_SCHEMA)}`
   ).length;
   // A token cannot contain less than one UTF-8 byte. The extra allowance covers
   // provider-injected structured-output instructions and request framing.
   const maximumInputTokens = requestBytes + 2_048;
-  return geminiCostMicroUsd(maximumInputTokens, maxOutputTokens(inputs.length));
+  return geminiCostMicroUsd(maximumInputTokens, maxOutputTokens(unique.length));
+}
+
+/** Exact-text reuse is safe because the prompt evaluates every text independently. */
+function prepareAnnotationInputs(inputs: readonly AnnotationInput[]) {
+  const unique: AnnotationInput[] = [];
+  const textIds = new Map<string, string>();
+  const aliases = new Map<string, string>();
+  for (const input of inputs) {
+    let id = textIds.get(input.text);
+    if (id === undefined) {
+      id = String(unique.length);
+      textIds.set(input.text, id);
+      unique.push({ id, text: input.text });
+    }
+    aliases.set(input.id, id);
+  }
+  return { unique, aliases };
 }
 
 function buildUserMessage(inputs: readonly AnnotationInput[]): string {
@@ -200,6 +219,9 @@ export async function annotateTexts(
     throw new Error("annotateTexts() requires unique ids and non-empty texts");
   }
 
+  const { unique, aliases } = prepareAnnotationInputs(inputs);
+  const uniqueById = new Map(unique.map((input) => [input.id, input]));
+
   try {
     if (!env.GEMINI_API_KEY) {
       console.error("annotate: GEMINI_API_KEY is required");
@@ -215,9 +237,9 @@ export async function annotateTexts(
         },
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: ANNOTATION_SYSTEM_PROMPT }] },
-          contents: [{ role: "user", parts: [{ text: buildUserMessage(inputs) }] }],
+          contents: [{ role: "user", parts: [{ text: buildUserMessage(unique) }] }],
           generationConfig: {
-            maxOutputTokens: maxOutputTokens(inputs.length),
+            maxOutputTokens: maxOutputTokens(unique.length),
             thinkingConfig: { thinkingLevel: "minimal" },
             responseMimeType: "application/json",
             responseJsonSchema: JSON_SCHEMA,
@@ -242,6 +264,7 @@ export async function annotateTexts(
       return null;
     }
     const text = candidate.content?.parts
+      ?.filter((part) => !part.thought)
       ?.map((part) => part.text ?? "")
       .join("")
       .trim();
@@ -256,17 +279,17 @@ export async function annotateTexts(
     const returnedIds = new Set(parsed.data.items.map((item) => item.id));
     if (
       returnedIds.size !== parsed.data.items.length ||
-      returnedIds.size !== inputs.length ||
-      [...returnedIds].some((id) => !byId.has(id))
+      returnedIds.size !== unique.length ||
+      [...returnedIds].some((id) => !uniqueById.has(id))
     ) {
       console.error("annotate: Gemini did not return every requested id exactly once");
       return null;
     }
 
-    const annotations = Object.fromEntries(
+    const uniqueAnnotations = new Map(
       parsed.data.items.map((item) => [
         item.id,
-        anchorAnnotationQuotes(byId.get(item.id)?.text ?? "", item.annotations),
+        anchorAnnotationQuotes(uniqueById.get(item.id)?.text ?? "", item.annotations),
       ])
     );
     const inputTokens = body?.usageMetadata?.promptTokenCount ?? 0;
@@ -274,7 +297,9 @@ export async function annotateTexts(
       (body?.usageMetadata?.candidatesTokenCount ?? 0) +
       (body?.usageMetadata?.thoughtsTokenCount ?? 0);
     return {
-      annotations,
+      annotations: Object.fromEntries(
+        inputs.map((input) => [input.id, uniqueAnnotations.get(aliases.get(input.id) ?? "") ?? []])
+      ),
       usage: {
         provider: "google",
         model: ANNOTATION_MODEL,

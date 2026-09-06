@@ -74,9 +74,8 @@ export async function annotateStory(
     : rows.filter((row) => row.annotationVersion !== ANNOTATION_PROMPT_VERSION);
   if (targetRows.length === 0) return 0;
 
-  // Send the whole topic in one request so batching is stable regardless of
-  // which individual contributions need persistence on this pass.
-  const inputs = rows.flatMap((row) => [
+  // Texts are evaluated independently; current rows need no further AI work.
+  const inputs = targetRows.flatMap((row) => [
     { id: `${row.id}:headline`, text: row.headline },
     ...(row.teaser ? [{ id: `${row.id}:teaser`, text: row.teaser }] : []),
   ]);

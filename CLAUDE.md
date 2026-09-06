@@ -59,7 +59,7 @@ The published article lives at `/artikel/[slug]`. Articles are generated and pub
 
 ### 1. Ingest pipeline (existing, manual)
 
-`bun ingest:run` → fetch RSS feeds → embed each new contribution (Voyage `voyage-3-lite`, 512 dims) → cluster into stories by cosine similarity ≥ `DEFAULT_CLUSTER_THRESHOLD` within a `STORY_WINDOW_HOURS` window. Once a story has enough distinct sources to become reader-visible and any contribution needs analysis, all of the topic's headlines and teasers are sent together for exact, quote-anchored annotation (Gemini Flash-Lite; one structured request per topic); only stale rows are persisted. A persisted annotation prompt version makes this step idempotent and backfills older annotation formats after prompt upgrades. The hard cap of `MAX_NEW_ARTICLES_PER_OUTLET` new articles per outlet per run keeps cost bounded.
+`bun ingest:run` → fetch RSS feeds → embed each new contribution (Voyage `voyage-3-lite`, 512 dims) → cluster into stories by cosine similarity ≥ `DEFAULT_CLUSTER_THRESHOLD` within a `STORY_WINDOW_HOURS` window. Once a story has enough distinct sources to become reader-visible and any contribution needs analysis, only stale contributions' headlines and teasers are sent for exact, quote-anchored annotation (Gemini Flash-Lite; one structured request per topic). Identical texts within that request are evaluated once and mapped back to every contribution; only stale rows are persisted. A persisted annotation prompt version makes this step idempotent and backfills older annotation formats after prompt upgrades. The hard cap of `MAX_NEW_ARTICLES_PER_OUTLET` new articles per outlet per run keeps cost bounded.
 
 All tunables live in `packages/core/src/constants.ts`. The ingest pipeline lives in `apps/worker/src/ingest.ts` (`runIngest()`), driven by the long-running worker's in-process scheduler (`apps/worker/src/index.ts`, `RUN_HOURS_UTC = [6,12,18]` — 07/13/19 CET, 08/14/20 CEST; we accept the 1h DST drift). There is no HTTP route and no Vercel-Cron anymore — the worker process *is* the trigger. `bun ingest:run` (→ `@kebab/worker ingest:once`) runs one pass manually against the same DB.
 
@@ -67,7 +67,7 @@ Cross-run story matching is built into the same ingest pass: when a new article 
 
 ### 2. Framing annotation
 
-Source headline annotations retain the legacy offset format. Story Summary annotations use paragraph id + quote + optional prefix/suffix context so small text edits do not silently move a marker. Every annotation has evidence, confidence, origin and review status.
+Source headline/teaser annotations store exact quotes, locally computed offsets, type and a short explanation. Optional prefix/suffix disambiguates repeated quotes during generation. Story Summary annotations use paragraph id + quote + optional prefix/suffix context, exact source evidence, confidence, origin and review status. A shared resolver rejects empty or ambiguous anchors, including overlapping occurrences. Summary validation rejects missing or overlapping markers before persistence. Legacy summary annotations without stored evidence quotes remain in the database but are not displayed as evidenced hints.
 
 ### 3. Reader interactions
 
@@ -79,7 +79,7 @@ Once a current topic reaches the distinct-outlet threshold, the automatic worker
 1. Load all articles in the cluster (headline + teaser from RSS — no body scraping).
 2. Build a structured input: per-outlet headline + teaser + political lean, ordered left → public via `LEAN_ORDER`.
 3. Call the configured Gemini Flash model with the transparent-summary prompt (model and prompt version live in `packages/core/src/constants.ts`). Imported source text is explicitly untrusted.
-4. Validate headline/body, short summary, sourced facts, uncertainties, differences and annotations with JSON Schema plus Zod. On parse failure, abort — never persist partial output.
+4. Use short request-local source ids and generate the body only as paragraphs. Derive the legacy `neutral_body` field locally, restore original source ids, and set annotation origin/review metadata in code. Validate headline/body, short summary, sourced facts, uncertainties, differences and annotations with JSON Schema plus Zod. On parse failure, abort — never persist partial output.
 5. Insert into `published_articles` with `published_at` set, archive the version it supersedes and back-link `stories.published_article_id` — the article is live at `/artikel/[slug]` immediately.
 
 An already-summarized story is rewritten automatically after at least `REWRITE_MIN_NEW_SOURCES` newly fetched contributions, without requiring a fresh vote. `bun rewrite:run --story <slug>` is the explicit operator override and uses the same generation path. Every generative call first reserves its conservative maximum cost in `ai_usage`; the default $0.18 UTC-day budget leaves headroom below €0.20 for Voyage embeddings and exchange-rate movement. `bun rewrite:publish --story <slug>` remains a repair tool for a summary that is not live.

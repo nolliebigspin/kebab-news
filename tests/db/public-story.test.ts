@@ -131,12 +131,8 @@ describe("public story read model", () => {
       "Second paragraph.",
     ]);
     expect(story?.sources.map((source) => source.headline)).toEqual(["Used by this version"]);
-    expect(story?.annotations[0]?.evidence).toEqual([
-      {
-        source_id: includedArticleId,
-        quote: "A short attributed source excerpt.",
-      },
-    ]);
+    // A legacy source id must not turn an arbitrary teaser into quoted evidence.
+    expect(story?.annotations).toEqual([]);
 
     const live = await db
       .select({ id: publishedArticles.id })
@@ -153,5 +149,37 @@ describe("public story read model", () => {
     expect(legacyFallback?.sources.map((source) => source.headline)).toEqual([
       "Used by this version",
     ]);
+  });
+
+  it("shows only annotations with exact evidence from the version's sources", async () => {
+    const annotation = {
+      paragraph_id: "legacy-context",
+      quote: "First",
+      category: "word-choice",
+      title: "Marker",
+      explanation: "Possible framing",
+      possible_effect: "Possible effect",
+      alternatives: [],
+      confidence: "medium",
+      origin: "automatic",
+      review_status: "needs_review",
+      evidence: [{ source_id: includedArticleId, quote: "attributed source excerpt" }],
+    };
+    await db
+      .update(publishedArticles)
+      .set({
+        bodyAnnotations: [
+          annotation,
+          { ...annotation, evidence: [{ source_id: includedArticleId, quote: "invented quote" }] },
+          {
+            ...annotation,
+            evidence: [{ source_id: "not-in-this-version", quote: "attributed source excerpt" }],
+          },
+          { malformed: true },
+        ],
+      })
+      .where(eq(publishedArticles.slug, LIVE_SLUG));
+    const loaded = await loadPublishedStory(LIVE_SLUG);
+    expect(loaded?.annotations).toEqual([annotation]);
   });
 });

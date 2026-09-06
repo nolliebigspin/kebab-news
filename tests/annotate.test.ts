@@ -104,3 +104,34 @@ describe("anchorAnnotationQuotes", () => {
     expect(anchorAnnotationQuotes(text, annotations)).toHaveLength(MAX_ANNOTATION_SPANS);
   });
 });
+
+describe("annotation anchor regressions", () => {
+  const candidate = { quote: "aba", type: "loaded-term" as const, note: "Mögliche Wertung." };
+
+  it("rejects overlapping occurrences of the same quote as ambiguous", () => {
+    expect(anchorAnnotationQuotes("ababa", [candidate])).toEqual([]);
+  });
+
+  it("uses context to disambiguate repeated wording and keeps exact Unicode offsets", () => {
+    const text = "🌯 Harte Kritik, später erneut harte Kritik.";
+    const quote = "Kritik";
+    expect(
+      anchorAnnotationQuotes(text, [
+        { ...candidate, quote, prefix: "Harte " },
+        { ...candidate, quote, prefix: "harte " },
+      ]).map(({ start, end }) => text.slice(start, end))
+    ).toEqual([quote, quote]);
+    expect(anchorAnnotationQuotes(text, [{ ...candidate, quote, prefix: "Harte " }])[0].start).toBe(
+      9
+    );
+  });
+
+  it("rejects empty and whitespace-only quotes", () => {
+    expect(
+      anchorAnnotationQuotes("A B", [
+        { ...candidate, quote: "" },
+        { ...candidate, quote: " " },
+      ])
+    ).toEqual([]);
+  });
+});

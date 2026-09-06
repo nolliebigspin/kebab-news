@@ -22,21 +22,39 @@ import {
 } from "./constants";
 import { LEAN_ORDER } from "./lean";
 import type { ModelUsage } from "./model-usage";
-import { StorySummarySchema } from "./story-summary";
+import { StoryAnnotationSchema, StorySummarySchema } from "./story-summary";
 
-export const RewriteSchema = StorySummarySchema.extend({
+export const RewriteSchema = StorySummarySchema.safeExtend({
   neutral_headline: z.string().min(1).max(200),
   neutral_body: z.string().max(8000),
   change_summary: z.string().min(1).max(800).nullable(),
 });
 export type Rewrite = z.infer<typeof RewriteSchema>;
 
+const GeneratedRewriteSchema = z
+  .object({
+    ...RewriteSchema.shape,
+    annotations: z
+      .array(StoryAnnotationSchema.omit({ origin: true, review_status: true, created_at: true }))
+      .max(50),
+  })
+  .omit({ neutral_body: true });
+
+function compactSources(sources: SourceItem[]): SourceItem[] {
+  if (
+    new Set(sources.map((source) => source.id)).size !== sources.length ||
+    sources.some((source) => !source.id)
+  ) {
+    throw new Error("generateRewrite() requires unique, non-empty source ids");
+  }
+  return sources.map((source, index) => ({ ...source, id: String(index) }));
+}
+
 const REWRITE_JSON_SCHEMA = {
   type: "object",
   additionalProperties: false,
   required: [
     "neutral_headline",
-    "neutral_body",
     "change_summary",
     "short_summary",
     "body",
@@ -47,7 +65,6 @@ const REWRITE_JSON_SCHEMA = {
   ],
   properties: {
     neutral_headline: { type: "string" },
-    neutral_body: { type: "string" },
     change_summary: { type: ["string", "null"] },
     short_summary: { type: "string" },
     body: {
@@ -127,8 +144,6 @@ const REWRITE_JSON_SCHEMA = {
           "alternatives",
           "evidence",
           "confidence",
-          "origin",
-          "review_status",
         ],
         properties: {
           paragraph_id: { type: "string" },
@@ -153,8 +168,6 @@ const REWRITE_JSON_SCHEMA = {
             },
           },
           confidence: { type: "string", enum: ["low", "medium", "high"] },
-          origin: { type: "string", enum: ["automatic", "manual"] },
-          review_status: { type: "string", enum: ["needs_review", "verified", "rejected"] },
         },
       },
     },
@@ -265,7 +278,7 @@ export function estimateRewriteMaximumCostMicroUsd(
   previousSummary: PreviousSummary | null = null
 ): number {
   const requestBytes = new TextEncoder().encode(
-    `${REWRITE_SYSTEM_PROMPT}\n${buildUserMessage(label, sources, previousSummary)}\n${JSON.stringify(REWRITE_JSON_SCHEMA)}`
+    `${REWRITE_SYSTEM_PROMPT}\n${buildUserMessage(label, compactSources(sources), previousSummary)}\n${JSON.stringify(REWRITE_JSON_SCHEMA)}`
   ).length;
   const maximumInputTokens = requestBytes + 2_048;
   return geminiRewriteCostMicroUsd(maximumInputTokens, REWRITE_MAX_OUTPUT_TOKENS);
@@ -300,7 +313,8 @@ export async function generateRewrite(
   sources: SourceItem[],
   previousSummary: PreviousSummary | null = null
 ): Promise<RewriteGenerationResult | null> {
-  const userMessage = buildUserMessage(label, sources, previousSummary);
+  const requestSources = compactSources(sources);
+  const userMessage = buildUserMessage(label, requestSources, previousSummary);
 
   try {
     if (!env.GEMINI_API_KEY) {
@@ -359,13 +373,33 @@ export async function generateRewrite(
       return null;
     }
 
-    const parsed = RewriteSchema.safeParse(raw);
+    const generated = GeneratedRewriteSchema.safeParse(raw);
+    if (!generated.success) {
+      console.error("[rewrite] model schema parse failed:", generated.error.format());
+      return null;
+    }
+    const sourceIds = new Map(
+      requestSources.map((source, index) => [source.id, sources[index].id])
+    );
+    // Unknown transport ids must fail before expanding them into persisted ids.
+    const normalized = {
+      ...generated.data,
+      neutral_body: generated.data.body.map((paragraph) => paragraph.text).join("\n\n"),
+      annotations: generated.data.annotations.map((annotation) => ({
+        ...annotation,
+        origin: "automatic" as const,
+        review_status: "needs_review" as const,
+      })),
+    };
+    const parsed = RewriteSchema.safeParse(normalized);
     if (!parsed.success) {
       console.error("[rewrite] schema parse failed:", parsed.error.format());
       return null;
     }
-    if (!validateRewriteSources(parsed.data, sources)) {
-      console.error("[rewrite] output references a source_id that was not provided");
+    if (!validateRewriteSources(parsed.data, requestSources)) {
+      console.error(
+        "[rewrite] output contains invalid source references, evidence quotes or insufficient fact support"
+      );
       return null;
     }
     if (previousSummary && !parsed.data.change_summary) {
@@ -377,7 +411,31 @@ export async function generateRewrite(
       (body?.usageMetadata?.candidatesTokenCount ?? 0) +
       (body?.usageMetadata?.thoughtsTokenCount ?? 0);
     return {
-      rewrite: parsed.data,
+      rewrite: {
+        ...parsed.data,
+        confirmed_facts: parsed.data.confirmed_facts.map((fact) => ({
+          ...fact,
+          source_ids: fact.source_ids.map((id) => sourceIds.get(id) ?? id),
+        })),
+        uncertainties: parsed.data.uncertainties.map((item) => ({
+          ...item,
+          source_ids: item.source_ids.map((id) => sourceIds.get(id) ?? id),
+        })),
+        differences: parsed.data.differences.map((difference) => ({
+          ...difference,
+          positions: difference.positions.map((position) => ({
+            ...position,
+            source_ids: position.source_ids.map((id) => sourceIds.get(id) ?? id),
+          })),
+        })),
+        annotations: parsed.data.annotations.map((annotation) => ({
+          ...annotation,
+          evidence: annotation.evidence.map((evidence) => ({
+            ...evidence,
+            source_id: sourceIds.get(evidence.source_id) ?? evidence.source_id,
+          })),
+        })),
+      },
       usage: {
         provider: "google",
         model: REWRITE_MODEL,

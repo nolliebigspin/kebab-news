@@ -97,3 +97,37 @@ describe("resolveTextAnchor", () => {
     expect(resolveTextAnchor("Plan A und Plan B", { quote: "Plan" })).toBeNull();
   });
 });
+
+describe("summary anchor integrity", () => {
+  it.each(["", " ", "aba"])("rejects empty or overlapping ambiguous quote %j", (quote) => {
+    expect(resolveTextAnchor("ababa", { quote })).toBeNull();
+  });
+
+  it("rejects a quote missing from its paragraph", () => {
+    expect(
+      StorySummarySchema.safeParse({
+        ...validSummary,
+        annotations: [{ ...validSummary.annotations[0], quote: "erfunden" }],
+      }).success
+    ).toBe(false);
+  });
+
+  it("rejects overlapping markers before persistence", () => {
+    expect(
+      StorySummarySchema.safeParse({
+        ...validSummary,
+        annotations: [
+          validSummary.annotations[0],
+          { ...validSummary.annotations[0], quote: "Programm" },
+        ],
+      }).success
+    ).toBe(false);
+  });
+
+  it("resolves overlapping occurrences when exact context identifies one", () => {
+    expect(resolveTextAnchor("ababa", { quote: "aba", prefix: "ab" })).toEqual({
+      start: 2,
+      end: 5,
+    });
+  });
+});

@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./text-anchor": "./src/text-anchor.ts",
     "./schedule": "./src/schedule.ts"
   },
   "dependencies": {
