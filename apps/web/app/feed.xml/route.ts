@@ -1,5 +1,7 @@
-import { BASE_URL } from "@kebab/core";
+import { absoluteUrl, SITE } from "@/lib/site";
 import { loadPublishedStoryCards } from "@/lib/stories";
+
+export const revalidate = 900;
 
 function escapeXml(value: string) {
   return value.replace(
@@ -12,13 +14,14 @@ function escapeXml(value: string) {
 
 export async function GET() {
   const stories = await loadPublishedStoryCards(50);
+  const lastBuild = stories[0]?.updatedAt ?? new Date();
   const items = stories
     .map((story) => {
-      const description = story.shortSummary.trim() || story.body.slice(0, 400);
-      return `<item><title>${escapeXml(story.headline)}</title><link>${BASE_URL}/artikel/${encodeURIComponent(story.slug)}</link><guid isPermaLink="true">${BASE_URL}/artikel/${encodeURIComponent(story.slug)}</guid><pubDate>${(story.publishedAt ?? story.updatedAt).toUTCString()}</pubDate><description>${escapeXml(description)}</description></item>`;
+      const url = absoluteUrl(`/artikel/${encodeURIComponent(story.slug)}`);
+      return `<item><title>${escapeXml(story.headline)}</title><link>${url}</link><guid isPermaLink="true">${url}</guid><pubDate>${(story.publishedAt ?? story.updatedAt).toUTCString()}</pubDate><description>${escapeXml(story.summary)}</description><category>${story.sourceCount} Quellen</category></item>`;
     })
     .join("");
-  const xml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>kebab.news</title><link>${BASE_URL}</link><description>Viele Quellen. Eine verständliche Zusammenfassung.</description><language>de</language>${items}</channel></rss>`;
+  const xml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>${SITE.name}</title><link>${SITE.url}</link><atom:link href="${absoluteUrl("/feed.xml")}" rel="self" type="application/rss+xml"/><description>${escapeXml(SITE.claim)}</description><language>de</language><lastBuildDate>${lastBuild.toUTCString()}</lastBuildDate><image><url>${absoluteUrl("/apple-icon")}</url><title>${SITE.name}</title><link>${SITE.url}</link></image>${items}</channel></rss>`;
   return new Response(xml, {
     headers: {
       "content-type": "application/rss+xml; charset=utf-8",
