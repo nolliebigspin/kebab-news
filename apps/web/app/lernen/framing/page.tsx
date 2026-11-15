@@ -1,45 +1,60 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { Container } from "@/components/layout/Container";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { pageMetadata } from "@/lib/seo";
+import { faqSchema } from "@/lib/structured-data";
 
-export const metadata: Metadata = {
-  title: "Wie Wortwahl Verantwortung verteilt — kebab.news",
-  description: "Eine interaktive Einführung in aktives, passives und wertendes Framing.",
-};
+const TITLE = "Wie Wortwahl Verantwortung verteilt";
+
+export const metadata: Metadata = pageMetadata({
+  title: `${TITLE}: Aktiv, Passiv und Framing`,
+  description:
+    "Eine kurze Lektion über aktive und passive Formulierungen: Wie Grammatik bestimmt, ob Leser eine handelnde Person sehen oder nur ein Ereignis.",
+  path: "/lernen/framing",
+  openGraph: { type: "article" },
+});
+
+const QUESTION = "Welche Information fehlt in der passiven Variante?";
+const ANSWER =
+  "Wer die Entscheidung getroffen hat. Das kann unbeabsichtigt sein, Platz sparen oder Verantwortung sprachlich verschleiern. Erst der Kontext erlaubt eine belastbare Einordnung.";
 
 export default function FramingLessonPage() {
   return (
-    <article className="mx-auto max-w-3xl px-6 py-14 sm:py-20">
-      <Link
-        href="/lernen"
-        className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]"
-      >
-        ← Lernbereich
-      </Link>
-      <header className="mt-10">
-        <p className="font-mono text-[11px] text-brand-ink uppercase tracking-[0.14em]">
-          Lektion · Sprache
-        </p>
-        <h1 className="mt-3 text-balance font-display text-4xl sm:text-5xl">
-          Wie Wortwahl Verantwortung verteilt
-        </h1>
-        <p className="mt-6 text-ink-soft text-lg leading-8">
+    <Container width="prose" as="article" className="py-10 sm:py-14">
+      <JsonLd data={faqSchema([{ question: QUESTION, answer: ANSWER }])} />
+      <Breadcrumbs
+        items={[
+          { name: "Lernen", path: "/lernen" },
+          { name: TITLE, path: "/lernen/framing" },
+        ]}
+      />
+      <header className="mt-8">
+        <p className="font-semibold text-ink-soft text-sm">Lektion Sprache, etwa 6 Minuten</p>
+        <h1 className="mt-3 font-display text-display">{TITLE}</h1>
+        <p className="mt-5 font-serif text-ink-soft text-lede">
           Grammatik wirkt unscheinbar. Doch schon Aktiv und Passiv entscheiden, ob wir eine
-          handelnde Person sehen – oder nur ein Ereignis.
+          handelnde Person sehen oder nur ein Ereignis.
         </p>
       </header>
-      <section className="mt-12 space-y-5 text-base leading-8">
+
+      <section className="prose-serif mt-10 space-y-5">
         <p>
           Vergleiche zwei hypothetische Formulierungen. Sie behaupten kein reales Ereignis und
           dienen ausschließlich als Sprachbeispiel:
         </p>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <blockquote className="rounded-xl border border-line p-5">
-            <span className="font-mono text-[10px] text-ink-mute uppercase">Aktiv</span>
-            <p className="mt-2 text-lg">„Die Behörde stoppte die Veranstaltung.“</p>
+        <div className="grid gap-3 font-sans sm:grid-cols-2">
+          <blockquote className="rounded-2xl border border-line p-5">
+            <p className="font-semibold text-ink-mute text-sm">Aktiv</p>
+            <p className="mt-2 font-serif text-xl leading-snug">
+              „Die Behörde <span className="mark-highlight">stoppte</span> die Veranstaltung.“
+            </p>
           </blockquote>
-          <blockquote className="rounded-xl border border-line p-5">
-            <span className="font-mono text-[10px] text-ink-mute uppercase">Passiv</span>
-            <p className="mt-2 text-lg">„Die Veranstaltung wurde gestoppt.“</p>
+          <blockquote className="rounded-2xl border border-line p-5">
+            <p className="font-semibold text-ink-mute text-sm">Passiv</p>
+            <p className="mt-2 font-serif text-xl leading-snug">
+              „Die Veranstaltung <span className="mark-highlight">wurde gestoppt</span>.“
+            </p>
           </blockquote>
         </div>
         <p>
@@ -48,27 +63,39 @@ export default function FramingLessonPage() {
           Instanz bekannt und für das Verständnis wichtig ist.
         </p>
       </section>
-      <section className="mt-12 rounded-2xl bg-brand-wash p-6">
-        <h2 className="font-display text-2xl">Was fällt dir auf?</h2>
-        <details className="mt-4 rounded-xl bg-bg p-4">
-          <summary className="cursor-pointer font-medium">
-            Welche Information fehlt in der passiven Variante?
+
+      <section aria-labelledby="quiz" className="mt-12 rounded-3xl bg-bg-warm p-6 sm:p-8">
+        <h2 id="quiz" className="font-display text-title">
+          Was fällt dir auf?
+        </h2>
+        <details className="group mt-5 rounded-2xl bg-bg p-5">
+          <summary className="cursor-pointer list-none font-semibold [&::-webkit-details-marker]:hidden">
+            {QUESTION}
+            <span className="ml-2 font-normal text-brand-ink text-sm group-open:hidden">
+              Antwort zeigen
+            </span>
           </summary>
-          <p className="mt-3 text-ink-soft text-sm leading-6">
-            Wer die Entscheidung getroffen hat. Das kann unbeabsichtigt sein, Platz sparen oder
-            Verantwortung sprachlich verschleiern. Erst der Kontext erlaubt eine belastbare
-            Einordnung.
-          </p>
+          <p className="mt-3 font-serif text-[1.0625rem] text-ink-soft leading-relaxed">{ANSWER}</p>
         </details>
       </section>
-      <section className="mt-12">
-        <h2 className="font-display text-2xl">Drei Fragen für die Praxis</h2>
-        <ul className="mt-4 list-disc space-y-3 pl-5 text-ink-soft">
-          <li>Ist bekannt, wer gehandelt hat?</li>
-          <li>Würde das Benennen des Akteurs mein Verständnis verändern?</li>
-          <li>Verwenden andere Quellen Aktiv, Passiv oder andere Verantwortungszuschreibungen?</li>
+
+      <section aria-labelledby="practice" className="mt-12">
+        <h2 id="practice" className="font-display text-title">
+          Drei Fragen für die Praxis
+        </h2>
+        <ul className="mt-5 space-y-3 text-[1.0625rem]">
+          {[
+            "Ist bekannt, wer gehandelt hat?",
+            "Würde das Benennen des Akteurs mein Verständnis verändern?",
+            "Verwenden andere Quellen Aktiv, Passiv oder andere Verantwortungszuschreibungen?",
+          ].map((item) => (
+            <li key={item} className="flex items-start gap-3">
+              <span aria-hidden className="mt-2 size-2.5 shrink-0 rounded-full bg-saffron" />
+              {item}
+            </li>
+          ))}
         </ul>
       </section>
-    </article>
+    </Container>
   );
 }

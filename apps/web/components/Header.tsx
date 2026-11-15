@@ -1,77 +1,61 @@
-import { GITHUB_URL } from "@kebab/core";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { FaGithub } from "react-icons/fa6";
+import { FiSearch } from "react-icons/fi";
+import { Logo } from "@/components/brand/Logo";
 import { LogoutButton } from "@/components/LogoutButton";
 import { MobileNav } from "@/components/MobileNav";
+import { NavLinks } from "@/components/nav/NavLinks";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
-import { Wordmark } from "@/components/Wordmark";
-
-// Nav links stay visually quiet beside the filled login action and retain a
-// visible focus ring for keyboard users (WCAG 2.4.7).
-const NAV_LINK =
-  "rounded-md px-1 py-2 font-medium text-ink-soft text-sm transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-3";
+import { MOBILE_NAV, PRIMARY_NAV } from "@/lib/site";
 
 export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   const t = useTranslations("header");
+  const primary = PRIMARY_NAV.map((item) => ({ href: item.href, label: t(item.key) }));
+  const mobile = MOBILE_NAV.map((item) => ({ href: item.href, label: t(item.key) }));
 
   return (
-    <header className="sticky top-0 z-40 border-line-soft border-b bg-bg/86 px-5 py-3 backdrop-blur-xl supports-[backdrop-filter]:bg-bg/76">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-x-8">
-        <div className="flex items-center gap-6 md:gap-10">
-          <Wordmark />
-          {/* Primary nav. Below `md` it is replaced by the drawer in
-              <MobileNav>, which lists every destination including the ones
-              hidden here at narrower breakpoints. */}
-          <nav aria-label={t("nav_label")} className="hidden items-center gap-6 md:flex md:gap-8">
-            <Link href="/themen" className={NAV_LINK}>
-              {t("topics")}
-            </Link>
-            <Link href="/artikel" className={NAV_LINK}>
-              {t("articles")}
-            </Link>
-            <Link href="/lernen" className={NAV_LINK}>
-              {t("learn")}
-            </Link>
-            <Link href="/methodik" className={`${NAV_LINK} hidden lg:inline`}>
-              {t("method")}
-            </Link>
+    <header className="sticky top-0 z-40 border-line-soft border-b bg-bg/90 backdrop-blur-lg supports-[backdrop-filter]:bg-bg/75">
+      <div className="mx-auto flex h-[var(--header-h)] max-w-6xl items-center justify-between gap-6 px-4 sm:px-6">
+        <div className="flex items-center gap-8 lg:gap-12">
+          <Link
+            href="/"
+            aria-label="kebab.news – Startseite"
+            className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
+          >
+            <Logo />
+          </Link>
+          <nav aria-label={t("nav_label")} className="hidden items-center gap-5 md:flex lg:gap-7">
+            <NavLinks items={primary} />
           </nav>
         </div>
-        <div className="flex items-center gap-1.5 md:gap-2">
-          {/* The about link sits beside the account actions on wider screens. */}
-          <Link href="/ueber-uns" className={`${NAV_LINK} hidden md:inline`}>
-            {t("about")}
-          </Link>
-          <ThemeToggle />
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="icon-sm"
             nativeButton={false}
-            aria-label={t("github_label")}
-            className="hidden md:inline-flex"
+            aria-label={t("search_label")}
             render={
-              <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-                <FaGithub />
-              </a>
+              <Link href="/artikel#suche">
+                <FiSearch />
+              </Link>
             }
           />
-          {/* Account actions stay in the bar on desktop; on mobile the drawer
-              carries them so the header keeps to a single row. */}
-          <div className="hidden md:block">
+          <ThemeToggle />
+          <div className="ml-2 hidden md:block">
             {isAuthenticated ? (
               <LogoutButton />
             ) : (
               <Button
                 size="sm"
+                variant="outline"
                 nativeButton={false}
                 render={<Link href="/anmelden">{t("login")}</Link>}
               />
             )}
           </div>
           <div className="md:hidden">
-            <MobileNav isAuthenticated={isAuthenticated} githubUrl={GITHUB_URL} />
+            <MobileNav isAuthenticated={isAuthenticated} items={mobile} />
           </div>
         </div>
       </div>

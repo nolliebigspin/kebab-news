@@ -1,9 +1,17 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("datenschutz");
-  return { title: `${t("page_title")} — kebab.news` };
+  return pageMetadata({
+    title: t("page_title"),
+    description:
+      "Datenschutzerklärung von kebab.news: welche Daten wir verarbeiten, wofür, und welche Rechte du hast.",
+    path: "/datenschutz",
+  });
 }
 
 export default async function DatenschutzPage() {
@@ -21,17 +29,17 @@ export default async function DatenschutzPage() {
   ];
 
   return (
-    <article className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="mb-8 font-display text-3xl leading-tight sm:text-4xl">{t("page_title")}</h1>
+    <Container width="prose" as="article" className="py-12 sm:py-16">
+      <PageHeader title={t("page_title")} className="mb-10" />
 
-      <div className="space-y-8 text-base text-ink leading-relaxed">
+      <div className="space-y-8 text-[1.0625rem] text-ink leading-relaxed">
         {sections.map((s) => (
           <section key={s.heading}>
-            <h2 className="mb-2 font-display text-lg">{s.heading}</h2>
+            <h2 className="mb-2 font-display text-xl">{s.heading}</h2>
             <p className="text-ink-soft">{s.body}</p>
           </section>
         ))}
       </div>
-    </article>
+    </Container>
   );
 }

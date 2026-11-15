@@ -1,58 +1,62 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { LogoMark } from "@/components/brand/Logo";
+import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Button } from "@/components/ui/button";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Über kebab.news",
-  description: "Warum kebab.news Nachrichten aus vielen Quellen transparent zusammenfasst.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Über uns",
+  description:
+    "Warum kebab.news Nachrichten aus vielen Quellen transparent zusammenfasst, statt Neutralität zu versprechen.",
+  path: "/ueber-uns",
+});
 
 export default function AboutPage() {
   return (
-    <article className="mx-auto max-w-4xl px-6 py-14 sm:py-20">
-      <header className="max-w-3xl">
-        <p className="font-mono text-[11px] text-brand-ink uppercase tracking-[0.14em]">
-          Über kebab.news
-        </p>
-        <h1 className="mt-3 text-balance font-display text-4xl sm:text-5xl">
-          We wrapped the news.
-        </h1>
-        <p className="mt-6 text-ink-soft text-xl leading-8">
-          Viele Originalbeiträge beleuchten dasselbe Thema. Wir bündeln sie, ohne Unterschiede
-          glattzubügeln.
-        </p>
-      </header>
-      <section className="mt-14 grid gap-8 sm:grid-cols-2">
+    <Container className="py-12 sm:py-16">
+      <PageHeader
+        title="We wrapped the news."
+        lede="Viele Originalbeiträge beleuchten dasselbe Thema. Wir stecken sie auf einen Spieß, ohne Unterschiede glattzubügeln."
+      />
+      <section className="mt-14 grid max-w-4xl gap-10 md:grid-cols-2">
         <div>
-          <h2 className="font-display text-2xl">Woran wir glauben</h2>
-          <p className="mt-3 text-ink-soft text-sm leading-6">
+          <h2 className="font-display text-title">Woran wir glauben</h2>
+          <p className="mt-3 font-serif text-[1.0625rem] text-ink-soft leading-relaxed">
             Kein Medium und kein KI-System ist vollständig perspektivfrei. Transparenz über Auswahl,
             Quellen, Unsicherheit und Framing ist ehrlicher als das Versprechen absoluter
             Neutralität.
           </p>
         </div>
         <div>
-          <h2 className="font-display text-2xl">Was wir nicht bauen</h2>
-          <p className="mt-3 text-ink-soft text-sm leading-6">
+          <h2 className="font-display text-title">Was wir nicht bauen</h2>
+          <p className="mt-3 font-serif text-[1.0625rem] text-ink-soft leading-relaxed">
             Keinen Empörungs-Feed, kein politisches Zustimmungs-Voting und kein soziales Netzwerk.
             Bewertungen sollen die Qualität eines Artikels verbessern; Kommentare sollen Quellen und
             Kontext ergänzen.
           </p>
         </div>
       </section>
-      <blockquote className="mt-14 rounded-2xl bg-brand-wash p-8 font-display text-2xl leading-9">
-        „Viele Quellen. Eine verständliche Zusammenfassung. Alle Unterschiede transparent.“
-      </blockquote>
-      <div className="mt-10 flex flex-wrap gap-4">
-        <Link
-          href="/methodik"
-          className="rounded-xl bg-brand px-5 py-3 font-semibold text-primary-foreground text-sm"
-        >
-          Methodik lesen
-        </Link>
-        <Link href="/lernen" className="rounded-full border border-line px-5 py-3 text-sm">
-          Bias & Framing lernen
-        </Link>
+      <figure className="mt-16 flex max-w-4xl flex-col gap-6 rounded-3xl bg-ink p-8 text-bg sm:flex-row sm:items-center sm:p-10">
+        <LogoMark className="size-16 text-bg" />
+        <blockquote className="font-display text-title">
+          Viele Quellen. Eine verständliche Zusammenfassung. Alle Unterschiede transparent.
+        </blockquote>
+      </figure>
+      <div className="mt-10 flex flex-wrap gap-3">
+        <Button
+          size="lg"
+          nativeButton={false}
+          render={<Link href="/methodik">Methodik lesen</Link>}
+        />
+        <Button
+          size="lg"
+          variant="outline"
+          nativeButton={false}
+          render={<Link href="/lernen">Bias und Framing lernen</Link>}
+        />
       </div>
-    </article>
+    </Container>
   );
 }

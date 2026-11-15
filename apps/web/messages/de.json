@@ -1,6 +1,5 @@
 {
   "header": {
-    "github": "GitHub",
     "github_label": "Projekt auf GitHub ansehen (öffnet neuen Tab)",
     "nav_label": "Hauptnavigation",
     "menu_label": "Menü öffnen",
@@ -11,13 +10,11 @@
     "learn": "Lernen",
     "method": "Methodik",
     "about": "Über uns",
-    "radar": "Themen",
     "articles": "Artikel",
-    "vision": "Vision",
-    "how_to": "How-to",
     "login": "Anmelden",
     "logout": "Abmelden",
-    "toast_logged_out": "Du wurdest abgemeldet."
+    "toast_logged_out": "Du wurdest abgemeldet.",
+    "search_label": "Artikel durchsuchen"
   },
   "auth": {
     "page_title": "Anmelden",
@@ -35,27 +32,23 @@
     "logout": "Abmelden",
     "toast_logged_in": "Erfolgreich angemeldet."
   },
-  "hero": {
-    "tagline": "Ein Werkzeug gegen Scheuklappen.",
-    "tagline_accent": "Framing sichtbar machen. Quellen vergleichen. Selbst entscheiden.",
-    "stance": "kebab.news bündelt viele Originalbeiträge zu einem verständlichen Artikel und zeigt offen, was belegt, unklar oder unterschiedlich dargestellt ist. Wir behaupten keine vollständige Neutralität; du kannst jeden Beleg selbst prüfen.",
-    "description_before": "Klassische Nachrichtenportale filtern, vereinfachen und polarisieren, oft ohne es selbst zu merken. kebab.news macht etwas anderes: Es ist ein Werkzeug, das auf Framing und Bias aufmerksam macht. Inspiriert von ",
-    "description_after": ", aber mit Fokus auf den deutschsprachigen Raum. Das Werkzeug stellt Originalbeiträge zum selben Thema nebeneinander, markiert mögliche Rahmungen und verlinkt direkt zu den Medien.",
-    "cta_github": "Auf GitHub ansehen"
-  },
   "footer": {
-    "nonprofit": "unabhängig · werbefrei · open source",
+    "claim": "Viele Quellen. Eine verständliche Zusammenfassung. Alle Unterschiede transparent.",
+    "updated": "Zuletzt aktualisiert:",
+    "col_read": "Lesen",
+    "col_understand": "Verstehen",
+    "col_legal": "Rechtliches",
+    "rss": "RSS-Feed",
     "impressum": "Impressum",
     "datenschutz": "Datenschutz",
-    "method": "Methodik",
-    "about": "Über uns"
+    "principles": "Unabhängig, werbefrei und quelloffen.",
+    "source_code": "Quellcode auf GitHub"
   },
   "radar": {
     "page_title": "Themen",
     "page_subtitle": "Ein Thema, viele Originalbeiträge. Vergleiche Schlagzeilen, Perspektiven und mögliche Rahmungen – oder öffne den fertigen Artikel.",
     "empty": "Noch keine Themen. Die Übersicht füllt sich, sobald mehrere Medien über dasselbe Ereignis berichten.",
     "empty_search": "Keine Themen für diese Filter. Passe Suche oder Zeitraum an.",
-    "card_label": "Thema",
     "filters": {
       "search_placeholder": "Themen durchsuchen …",
       "search_label": "Nach Thema oder Originalbeitrag suchen",
@@ -87,12 +80,8 @@
     },
     "article_count": "{count, plural, one {# Originalbeitrag} other {# Originalbeiträge}}",
     "spectrum_label": "Abgedeckte politische Lager: {leans}",
-    "blind_spots_label": "Blindstellen",
-    "no_blind_spots": "Keine Blindstellen — alle politischen Lager berichten.",
-    "read_at_source": "Original öffnen →",
-    "back_to_radar": "Zurück zu den Themen",
-    "published_rewrite_label": "Artikel zu diesem Thema",
-    "published_rewrite_cta": "Artikel lesen →",
+    "read_at_source": "Original öffnen",
+    "published_rewrite_cta": "Artikel lesen",
     "lean": {
       "left": "Links",
       "center-left": "Mitte-Links",
@@ -118,15 +107,18 @@
       "toast_recorded": "Interesse gezählt. Danke!",
       "toast_duplicate": "Dein Interesse an diesem Thema wurde bereits gezählt.",
       "toast_error": "Interesse konnte nicht gezählt werden. Bitte versuche es erneut."
-    }
+    },
+    "not_reported": "nicht berichtet",
+    "empty_widen": "Gesamten Zeitraum anzeigen",
+    "compare_kicker": "{outlets, plural, one {# Medium} other {# Medien}} im Vergleich,",
+    "first_seen": "seit {date}",
+    "spectrum_heading": "Wer berichtet, und wer nicht"
   },
   "articles": {
     "page_title": "Artikel",
     "page_subtitle": "Veröffentlichte Zusammenfassungen mit Belegen, offenen Fragen und Unterschieden zwischen Quellen.",
     "empty": "Noch kein Artikel veröffentlicht.",
     "empty_search": "Keine Artikel für diese Filter. Passe Suche oder Zeitraum an.",
-    "card_label": "Artikel",
-    "read_cta": "Lesen",
     "filters": {
       "search_placeholder": "Artikel durchsuchen …",
       "search_label": "Nach Titel oder Inhalt suchen",
@@ -136,16 +128,10 @@
       }
     },
     "source_count": "{count, plural, one {# Quelle} other {# Quellen}}",
-    "disclaimer_title": "Transparenzhinweis zur Erstellung",
-    "disclaimer_body": "Zusammenfassungen entstehen automatisiert aus den verlinkten Originalbeiträgen. Maßgeblich bleiben die Originalbeiträge.",
-    "sources_heading": "Quellen",
-    "sources_subheading": "Diese Medien haben über das Thema berichtet. Öffne einen Originalbeitrag, um die jeweilige Fassung zu lesen; mögliche Framing-Stellen sind in Schlagzeile und Teaser markiert.",
-    "back_to_index": "Zurück zu allen Artikeln",
-    "see_on_radar": "Quellenvergleich zu diesem Thema"
+    "corrected": "korrigiert"
   },
   "story": {
     "rating": {
-      "eyebrow": "Qualitätsfeedback",
       "heading": "Ist diese Zusammenfassung hilfreich und vertrauenswürdig?",
       "description": "Bewerte die Qualität dieser Zusammenfassung – nicht, ob dir die Nachricht gefällt.",
       "up": "Hilfreich",
@@ -185,7 +171,7 @@
     },
     "framing": {
       "annotation_label": "Framing-Hinweis: {quote}",
-      "eyebrow": "Mögliches Framing · {confidence} Sicherheit",
+      "eyebrow": "Mögliches Framing, {confidence} Sicherheit",
       "confidence": {
         "high": "hohe",
         "medium": "mittlere",
@@ -199,7 +185,6 @@
       "disclaimer": "Diese Markierung ist eine Einordnung, keine objektive Wahrheit. Die Quellen gewichten diesen Aspekt möglicherweise unterschiedlich."
     },
     "comments": {
-      "eyebrow": "Diskussion",
       "heading": "Kommentare",
       "description": "Ergänze Quellen, stelle Fragen oder weise auf fehlenden Kontext hin.",
       "sort_label": "Sortierung",
@@ -207,12 +192,12 @@
       "sort_helpful": "Hilfreichste",
       "comment_label": "Kommentar",
       "placeholder": "Sachlich ergänzen …",
-      "limit": "Plaintext · max. 2.000 Zeichen",
+      "limit": "Nur Text, höchstens 2.000 Zeichen",
       "submit": "Veröffentlichen",
       "login": "Melde dich an",
       "login_suffix": ", um mitzudiskutieren. Lesen ist ohne Konto möglich.",
       "empty": "Noch keine Kommentare. Fehlender Kontext ist ein guter Anfang.",
-      "edited": "(bearbeitet)",
+      "edited": "bearbeitet",
       "helpful": "Hilfreich",
       "reply": "Antworten",
       "edit": "Bearbeiten",
@@ -231,27 +216,6 @@
       "report_reason": "Unangemessener oder irreführender Inhalt",
       "reported": "Kommentar gemeldet."
     }
-  },
-  "how_to": {
-    "page_title": "How-to",
-    "page_subtitle": "Wie kebab.news funktioniert — von der Quelle bis zur transparenten Zusammenfassung.",
-    "intro": "kebab.news bündelt die Berichterstattung deutschsprachiger Medien zu einem Thema, macht Belege, Unsicherheiten und mögliche Rahmungen sichtbar und erstellt daraus einen quellengebundenen Artikel. So läuft das ab:",
-    "step1_title": "1 · Quellen werden eingesammelt",
-    "step1_body": "Mehrmals täglich liest das Werkzeug die RSS-Feeds deutschsprachiger Medien quer durch das politische Spektrum (links bis öffentlich-rechtlich). Schlagzeile und Teaser jedes neuen Artikels werden eingelesen — Artikeltexte werden bewusst nicht gespeichert.",
-    "step2_title": "2 · Beiträge werden zu Themen gebündelt",
-    "step2_body": "Berichten mehrere Medien über dasselbe Ereignis, werden ihre Originalbeiträge automatisch zu einem Thema gruppiert. In der Themenübersicht stehen die Schlagzeilen und möglichen Rahmungen nebeneinander.",
-    "step3_title": "3 · Die stärksten aktuellen Themen werden ausgewählt",
-    "step3_body_before": "Sobald ein aktuelles Thema von genügend unabhängigen Medien aufgegriffen wurde, kann daraus automatisch ein Artikel entstehen. Themen mit breiterer Quellenlage werden zuerst verarbeitet.",
-    "step3_body_after": "",
-    "step4_title": "4 · Der Artikel entsteht",
-    "step4_body": "Erfüllt ein Thema die Quellenkriterien, erstellt eine KI beim nächsten Lauf aus allen Schlagzeilen und Teasern einen transparenten Artikel. Er zeigt seinen tatsächlichen Prüfstatus und verlinkt alle verwendeten Originalbeiträge.",
-    "schedule_title": "Wann werden neue Quellen geladen?",
-    "schedule_body": "Das Werkzeug läuft täglich um 07:00, 13:00 und 19:00 Uhr (Mitteleuropäische Zeit; im Sommer 08:00, 14:00 und 20:00). Bei jedem Lauf werden neue Originalbeiträge eingesammelt und qualifizierte Themen zu Artikeln verarbeitet.",
-    "countdown_label": "Nächster Lauf in",
-    "countdown_days": "T",
-    "countdown_hours": "Std",
-    "countdown_minutes": "Min",
-    "countdown_seconds": "Sek"
   },
   "impressum": {
     "page_title": "Impressum",
@@ -290,5 +254,16 @@
     "voting_body": "Qualitätsbewertungen und Kommentare werden deinem Konto zugeordnet, damit pro Zusammenfassung nur eine aktive Bewertung gilt und du eigene Kommentare bearbeiten oder löschen kannst. Share-Aktionen werden nur inhaltsbezogen nach Kanal gespeichert, ohne Konto-, IP- oder User-Agent-Zuordnung.",
     "rights_heading": "Deine Rechte",
     "rights_body": "Du hast das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung, ein Widerspruchsrecht gegen Verarbeitungen auf Grundlage berechtigten Interesses sowie ein Recht auf Datenübertragbarkeit. Außerdem steht dir ein Beschwerderecht bei einer Datenschutz-Aufsichtsbehörde zu. Wende dich für die Wahrnehmung deiner Rechte an die im Impressum genannte Kontaktadresse."
+  },
+  "sources": {
+    "primary": "Primärquelle",
+    "open_original": "Bei {outlet} lesen"
+  },
+  "carousel": {
+    "position": "{index} von {total}",
+    "previous": "Vorheriger Artikel",
+    "next": "Nächster Artikel",
+    "slide": "{index} von {total}: {label}",
+    "goto": "Zu Artikel {index} von {total}: {label}"
   }
 }

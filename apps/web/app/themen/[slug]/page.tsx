@@ -1,85 +1,21 @@
-import { type Annotation, AnnotationsSchema, LEAN_ORDER, leanI18nKey } from "@kebab/core";
-import { articles, db, type OutletLean, outlets, publishedArticles, stories } from "@kebab/db";
-import { format } from "date-fns";
-import { de } from "date-fns/locale";
-import { eq, sql } from "drizzle-orm";
+import type { OutletLean } from "@kebab/db";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { FiArrowRight } from "react-icons/fi";
-import { AnnotatedText } from "@/components/AnnotatedText";
-import { Badge } from "@/components/ui/badge";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { Container } from "@/components/layout/Container";
+import { LeanDot } from "@/components/lean/Lean";
+import { SourceSkewer } from "@/components/lean/SourceSpectrum";
+import { SourceItem } from "@/components/sources/SourceItem";
+import { Button } from "@/components/ui/button";
 import { VoteButton } from "@/components/VoteButton";
-import { leanColor } from "@/lib/lean";
+import { formatDate } from "@/lib/format";
+import { SPECTRUM } from "@/lib/lean";
+import { pageMetadata } from "@/lib/seo";
 import { getSession } from "@/lib/session";
+import { loadTopic, type TopicContribution } from "@/lib/topics";
 import { countVotes } from "@/lib/vote";
-
-type StoryArticle = {
-  id: string;
-  url: string;
-  headline: string;
-  teaser: string | null;
-  headlineAnnotations: Annotation[];
-  teaserAnnotations: Annotation[];
-  publishedAt: Date;
-  outletName: string;
-  outletSlug: string;
-  outletLean: OutletLean;
-};
-
-async function loadStory(slug: string) {
-  const storyRows = await db.select().from(stories).where(eq(stories.slug, slug)).limit(1);
-  if (storyRows.length === 0) return null;
-  const story = storyRows[0];
-
-  const articleRows = await db
-    .select({
-      id: articles.id,
-      url: articles.url,
-      headline: articles.headline,
-      teaser: articles.teaser,
-      headlineAnnotations: articles.headlineAnnotations,
-      teaserAnnotations: articles.teaserAnnotations,
-      publishedAt: articles.publishedAt,
-      outletName: outlets.name,
-      outletSlug: outlets.slug,
-      outletLean: outlets.politicalLean,
-    })
-    .from(articles)
-    .innerJoin(outlets, sql`${outlets.id} = ${articles.outletId}`)
-    .where(eq(articles.storyId, story.id));
-
-  const parseAnnotations = (raw: unknown): Annotation[] => {
-    const result = AnnotationsSchema.safeParse(raw ?? []);
-    return result.success ? result.data : [];
-  };
-
-  const items: StoryArticle[] = articleRows.map((r) => ({
-    ...r,
-    headlineAnnotations: parseAnnotations(r.headlineAnnotations),
-    teaserAnnotations: parseAnnotations(r.teaserAnnotations),
-  }));
-
-  // Look up the published article (if any) so we can link to its stable URL.
-  let published: { slug: string; neutralHeadline: string } | null = null;
-  if (story.publishedArticleId) {
-    const pubRows = await db
-      .select({
-        slug: publishedArticles.slug,
-        neutralHeadline: publishedArticles.neutralHeadline,
-        publishedAt: publishedArticles.publishedAt,
-      })
-      .from(publishedArticles)
-      .where(eq(publishedArticles.id, story.publishedArticleId))
-      .limit(1);
-    if (pubRows.length > 0 && pubRows[0].publishedAt) {
-      published = { slug: story.slug, neutralHeadline: pubRows[0].neutralHeadline };
-    }
-  }
-
-  return { story, items, published };
-}
 
 export async function generateMetadata({
   params,
@@ -87,150 +23,103 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const data = await loadStory(slug);
-  if (!data) return { title: "kebab.news" };
-  return { title: `${data.story.label} — kebab.news` };
+  const data = await loadTopic(slug);
+  if (!data) return { title: "Thema nicht gefunden", robots: { index: false } };
+  const outletCount = new Set(data.contributions.map((item) => item.outletSlug)).size;
+  return pageMetadata({
+    title: `${data.story.label}: Quellenvergleich`,
+    description: `${outletCount} Medien im Vergleich: Wie berichten Medien von links bis rechts über „${data.story.label}“? Schlagzeilen, Teaser und mögliche Rahmungen nebeneinander.`,
+    path: `/themen/${data.story.slug}`,
+    image: `/themen/${data.story.slug}/opengraph-image`,
+    // When a published article exists it is the canonical page for this event.
+    canonicalPath: data.published ? `/artikel/${data.published.slug}` : undefined,
+  });
 }
 
 export default async function TopicPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const data = await loadStory(slug);
+  const data = await loadTopic(slug);
   if (!data) notFound();
 
   const t = await getTranslations("radar");
-  const { story, items, published } = data;
+  const { story, contributions, published } = data;
   const [voteCount, session] = await Promise.all([countVotes(story.id), getSession()]);
 
-  // Group articles by lean, in LEAN_ORDER. Filter empty leans into the
-  // "blind spots" list.
-  const byLean = new Map<OutletLean, StoryArticle[]>();
-  for (const lean of LEAN_ORDER) byLean.set(lean, []);
-  for (const a of items) byLean.get(a.outletLean)?.push(a);
-  const blindSpots = LEAN_ORDER.filter((l) => (byLean.get(l)?.length ?? 0) === 0);
+  const byLean = new Map<OutletLean, TopicContribution[]>();
+  for (const item of contributions) {
+    byLean.set(item.outletLean, [...(byLean.get(item.outletLean) ?? []), item]);
+  }
+  const outletCount = new Set(contributions.map((item) => item.outletSlug)).size;
 
   return (
-    <article className="mx-auto max-w-4xl px-6 py-12">
-      <div className="mb-8">
-        <Link
-          href="/themen"
-          className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em] hover:text-brand-ink"
-        >
-          ← {t("back_to_radar")}
-        </Link>
-      </div>
+    <Container width="content" as="article" className="py-10 sm:py-14">
+      <Breadcrumbs
+        items={[
+          { name: t("page_title"), path: "/themen" },
+          { name: story.label, path: `/themen/${story.slug}` },
+        ]}
+      />
 
-      <header className="mb-10">
-        <p className="mb-3 font-mono text-[11px] text-brand-ink uppercase tracking-[0.12em]">
-          Thema · Quellenvergleich
+      <header className="mt-8 max-w-4xl">
+        <p className="font-semibold text-ink-soft text-sm">
+          {t("compare_kicker", { outlets: outletCount })}{" "}
+          <time dateTime={story.firstSeenAt.toISOString()} className="font-normal text-ink-mute">
+            {t("first_seen", { date: formatDate(story.firstSeenAt, "long") })}
+          </time>
         </p>
-        <h1 className="font-display text-3xl leading-tight sm:text-4xl">{story.label}</h1>
-        <div className="mt-3 flex flex-wrap items-center gap-4">
-          <p className="font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]">
-            {t("article_count", { count: story.articleCount })}
-          </p>
-          {!published ? (
+        <h1 className="mt-3 font-display text-display">{story.label}</h1>
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          {published ? (
+            <Button
+              size="lg"
+              nativeButton={false}
+              render={<Link href={`/artikel/${published.slug}`}>{t("published_rewrite_cta")}</Link>}
+            />
+          ) : (
             <VoteButton
               storyId={story.id}
               initialCount={voteCount}
               isAuthenticated={session !== null}
             />
-          ) : null}
+          )}
         </div>
-
-        {published ? (
-          <Link
-            href={`/artikel/${published.slug}`}
-            className="group mt-6 flex items-center gap-3 rounded-lg border border-brand/40 bg-brand-wash/60 px-4 py-3 outline-none transition-colors hover:bg-brand-wash focus-visible:ring-2 focus-visible:ring-brand"
-          >
-            <div className="min-w-0 flex-1">
-              <div className="font-mono text-[11px] text-brand-ink uppercase tracking-[0.12em]">
-                {t("published_rewrite_label")}
-              </div>
-              <div className="mt-1 font-display text-base text-ink">
-                {published.neutralHeadline}
-              </div>
-            </div>
-            <FiArrowRight
-              aria-hidden
-              className="size-5 shrink-0 text-brand-ink transition-transform group-hover:translate-x-0.5"
-            />
-          </Link>
-        ) : null}
       </header>
 
-      <div className="space-y-12">
-        {LEAN_ORDER.map((lean) => {
+      <section
+        aria-labelledby="spectrum-heading"
+        className="mt-10 rounded-3xl bg-bg-warm p-5 [--skewer-ring:var(--bg-warm)] sm:p-8"
+      >
+        <h2 id="spectrum-heading" className="mb-6 font-semibold text-ink text-sm">
+          {t("spectrum_heading")}
+        </h2>
+        <SourceSkewer
+          outlets={contributions.map((item) => ({ name: item.outletName, lean: item.outletLean }))}
+        />
+      </section>
+
+      <div className="mt-12 space-y-12">
+        {SPECTRUM.map((lean) => {
           const group = byLean.get(lean) ?? [];
           if (group.length === 0) return null;
           return (
-            <section key={lean}>
-              <h2 className="mb-4 flex items-center gap-2 font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]">
-                <span className="dot" style={{ background: leanColor(lean) }} aria-hidden />
-                {t(`lean.${leanI18nKey(lean)}`)}
+            <section key={lean} aria-labelledby={`lean-${lean}`}>
+              <h2
+                id={`lean-${lean}`}
+                className="flex items-center gap-2.5 border-ink border-b-2 pb-3 font-display text-xl"
+              >
+                <LeanDot lean={lean} className="size-3" />
+                {t(`lean.${lean}`)}
+                <span className="tabular font-normal text-base text-ink-mute">{group.length}</span>
               </h2>
-              <ul className="space-y-6">
-                {group.map((article) => (
-                  <li key={article.id} className="border-line-soft border-l-2 pl-4">
-                    <h3 className="font-display text-lg leading-snug sm:text-xl">
-                      <AnnotatedText
-                        text={article.headline}
-                        annotations={article.headlineAnnotations}
-                      />
-                    </h3>
-                    {article.teaser ? (
-                      <p className="mt-2 text-base text-ink-soft leading-relaxed">
-                        <AnnotatedText
-                          text={article.teaser}
-                          annotations={article.teaserAnnotations}
-                        />
-                      </p>
-                    ) : null}
-                    <div className="mt-2 flex flex-wrap items-center gap-3 text-ink-mute text-xs">
-                      <span className="font-medium">{article.outletName}</span>
-                      <span>·</span>
-                      <time dateTime={article.publishedAt.toISOString()}>
-                        {format(article.publishedAt, "d. MMM yyyy, HH:mm", {
-                          locale: de,
-                        })}
-                      </time>
-                      <span>·</span>
-                      <a
-                        href={article.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-brand-ink underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-brand"
-                      >
-                        {t("read_at_source")}
-                      </a>
-                    </div>
-                  </li>
+              <div>
+                {group.map((item) => (
+                  <SourceItem key={item.id} source={item} showLean={false} />
                 ))}
-              </ul>
+              </div>
             </section>
           );
         })}
       </div>
-
-      {blindSpots.length > 0 ? (
-        <aside className="mt-12 border-line-soft border-t pt-6">
-          <h2 className="mb-3 font-mono text-[11px] text-ink-mute uppercase tracking-[0.12em]">
-            {t("blind_spots_label")}
-          </h2>
-          <ul className="flex flex-wrap gap-2">
-            {blindSpots.map((lean) => (
-              <li key={lean}>
-                <Badge variant="outline" className="text-ink-soft">
-                  {t(`lean.${leanI18nKey(lean)}`)}
-                </Badge>
-              </li>
-            ))}
-          </ul>
-        </aside>
-      ) : (
-        <aside className="mt-12 border-line-soft border-t pt-6">
-          <p className="text-ink-mute text-sm">{t("no_blind_spots")}</p>
-        </aside>
-      )}
-    </article>
+    </Container>
   );
 }

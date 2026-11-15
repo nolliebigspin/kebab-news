@@ -10,13 +10,16 @@ import {
   articles,
   authors,
   db,
+  type OutletLean,
   outlets,
   publishedArticles,
   stories,
   summarySources,
 } from "@kebab/db";
-import { and, desc, eq, inArray, isNotNull, lte, or, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, lte, max, or, type SQL, sql } from "drizzle-orm";
+import { cache } from "react";
 import { z } from "zod";
+import { parseAnnotations } from "@/lib/annotations";
 
 const ParagraphsSchema = z.array(SummaryParagraphSchema);
 const FactsSchema = z.array(ConfirmedFactSchema);
@@ -56,7 +59,11 @@ function parseStoryAnnotations(
   });
 }
 
-export async function loadPublishedStory(slug: string) {
+/**
+ * Full article payload. Wrapped in React `cache()` so `generateMetadata`, the
+ * page and the OG image share one set of queries per request.
+ */
+export const loadPublishedStory = cache(async (slug: string) => {
   const rows = await db
     .select({ summary: publishedArticles, story: stories })
     .from(stories)
@@ -108,13 +115,18 @@ export async function loadPublishedStory(slug: string) {
     .innerJoin(outlets, eq(outlets.id, articles.outletId))
     .where(sourceWhere)
     .orderBy(desc(articles.publishedAt));
-  const sourceRows =
+  const sourceRows = (
     receiptIds.length > 0
       ? sourceCandidates
       : sourceCandidates.filter(
           (source, index, all) =>
             all.findIndex((candidate) => candidate.outletSlug === source.outletSlug) === index
-        );
+        )
+  ).map((source) => ({
+    ...source,
+    headlineAnnotations: parseAnnotations(source.headlineAnnotations),
+    teaserAnnotations: parseAnnotations(source.teaserAnnotations),
+  }));
 
   const legacyParagraphs = summary.neutralBody
     .split(/\n{2,}/)
@@ -154,26 +166,66 @@ export async function loadPublishedStory(slug: string) {
     annotations: parseStoryAnnotations(summary.bodyAnnotations, sourceRows),
     history,
   };
-}
+});
 
+/**
+ * Leans that fed a summary: exact receipts when present, otherwise every
+ * contribution in the topic (legacy summaries predate receipts).
+ */
+const coveredLeans = sql<OutletLean[]>`coalesce(
+  (select array_agg(distinct ${outlets.politicalLean})::text[]
+     from ${summarySources}
+     inner join ${articles} on ${articles.id} = ${summarySources.articleId}
+     inner join ${outlets} on ${outlets.id} = ${articles.outletId}
+    where ${summarySources.summaryId} = ${publishedArticles.id}),
+  (select array_agg(distinct ${outlets.politicalLean})::text[]
+     from ${articles}
+     inner join ${outlets} on ${outlets.id} = ${articles.outletId}
+    where ${articles.storyId} = ${stories.id}),
+  '{}'::text[]
+)`;
+
+export type ArticleCardData = Awaited<ReturnType<typeof loadPublishedStoryCards>>[number];
+
+export type ArticleListFilters = {
+  q?: string;
+  /** Lookback in days by publish date; `null` = all time. */
+  days?: number | null;
+  sort?: "recent" | "sources";
+};
+
+/**
+ * Published articles for cards, lists, the feed, the sitemap and llms.txt.
+ * Only live versions (`published_at NOT NULL`) ever surface.
+ */
 export async function loadPublishedStoryCards(
   limit = 12,
-  sortBy: "published" | "rewritten" = "published"
+  sortBy: "published" | "rewritten" = "published",
+  filters: ArticleListFilters = {}
 ) {
-  const orderBy =
-    sortBy === "rewritten"
-      ? [
-          desc(publishedArticles.rewrittenAt),
-          desc(publishedArticles.publishedAt),
-          desc(publishedArticles.id),
-        ]
-      : [
-          desc(publishedArticles.publishedAt),
-          desc(publishedArticles.rewrittenAt),
-          desc(publishedArticles.id),
-        ];
+  const where: SQL[] = [isNotNull(publishedArticles.publishedAt)];
+  if (filters.days) {
+    where.push(
+      sql`${publishedArticles.publishedAt} >= now() - make_interval(days => ${filters.days})`
+    );
+  }
+  if (filters.q) {
+    const term = `%${filters.q}%`;
+    where.push(
+      sql`(${publishedArticles.neutralHeadline} ILIKE ${term} OR ${publishedArticles.shortSummary} ILIKE ${term} OR ${publishedArticles.neutralBody} ILIKE ${term})`
+    );
+  }
 
-  return db
+  const timeOrder =
+    sortBy === "rewritten"
+      ? [desc(publishedArticles.rewrittenAt), desc(publishedArticles.publishedAt)]
+      : [desc(publishedArticles.publishedAt), desc(publishedArticles.rewrittenAt)];
+  const orderBy =
+    filters.sort === "sources"
+      ? [desc(publishedArticles.sourceCount), ...timeOrder]
+      : [...timeOrder, desc(publishedArticles.id)];
+
+  const rows = await db
     .select({
       id: publishedArticles.id,
       slug: stories.slug,
@@ -184,10 +236,95 @@ export async function loadPublishedStoryCards(
       updatedAt: publishedArticles.rewrittenAt,
       publishedAt: publishedArticles.publishedAt,
       status: publishedArticles.status,
+      leans: coveredLeans,
     })
     .from(publishedArticles)
     .innerJoin(stories, eq(stories.publishedArticleId, publishedArticles.id))
-    .where(isNotNull(publishedArticles.publishedAt))
+    .where(and(...where))
     .orderBy(...orderBy)
+    .limit(limit);
+
+  return rows.map((row) => ({
+    ...row,
+    leans: row.leans ?? [],
+    summary: cardSummary(row.shortSummary, row.body),
+  }));
+}
+
+/** Short summary, falling back to the first ~220 characters of the body. */
+export function cardSummary(shortSummary: string, body: string): string {
+  const short = shortSummary.trim();
+  if (short) return short;
+  return body.length > 220 ? `${body.slice(0, 220).trimEnd()}…` : body;
+}
+
+/** When the newest article went live, for the site-wide freshness signal. */
+export const loadLatestPublishedAt = cache(async (): Promise<Date | null> => {
+  const rows = await db
+    .select({ latest: max(publishedArticles.rewrittenAt) })
+    .from(publishedArticles)
+    .where(isNotNull(publishedArticles.publishedAt));
+  return rows[0]?.latest ?? null;
+});
+
+type SummaryOutlet = { name: string; lean: (typeof outlets.$inferSelect)["politicalLean"] };
+
+/**
+ * Distinct outlets (name + lean) behind each summary, for the homepage
+ * skewers. Two queries for any number of summaries.
+ */
+export async function loadSummaryOutlets(
+  summaryIds: string[]
+): Promise<Map<string, SummaryOutlet[]>> {
+  const result = new Map<string, SummaryOutlet[]>();
+  if (summaryIds.length === 0) return result;
+  const add = (rows: Array<SummaryOutlet & { summaryId: string }>) => {
+    for (const { summaryId, ...outlet } of rows) {
+      const list = result.get(summaryId) ?? [];
+      list.push(outlet);
+      result.set(summaryId, list);
+    }
+  };
+
+  add(
+    await db
+      .selectDistinct({
+        summaryId: summarySources.summaryId,
+        name: outlets.name,
+        lean: outlets.politicalLean,
+      })
+      .from(summarySources)
+      .innerJoin(articles, eq(articles.id, summarySources.articleId))
+      .innerJoin(outlets, eq(outlets.id, articles.outletId))
+      .where(inArray(summarySources.summaryId, summaryIds))
+  );
+
+  // Legacy summaries predate receipts: fall back to the topic's contributions.
+  const legacy = summaryIds.filter((id) => !result.has(id));
+  if (legacy.length > 0) {
+    add(
+      await db
+        .selectDistinct({
+          summaryId: publishedArticles.id,
+          name: outlets.name,
+          lean: outlets.politicalLean,
+        })
+        .from(publishedArticles)
+        .innerJoin(articles, eq(articles.storyId, publishedArticles.storyId))
+        .innerJoin(outlets, eq(outlets.id, articles.outletId))
+        .where(inArray(publishedArticles.id, legacy))
+    );
+  }
+  return result;
+}
+
+/** Slugs and modification dates only: the sitemap needs nothing else. */
+export async function loadPublishedSlugs(limit = 5000) {
+  return db
+    .select({ slug: stories.slug, updatedAt: publishedArticles.rewrittenAt })
+    .from(publishedArticles)
+    .innerJoin(stories, eq(stories.publishedArticleId, publishedArticles.id))
+    .where(isNotNull(publishedArticles.publishedAt))
+    .orderBy(desc(publishedArticles.rewrittenAt))
     .limit(limit);
 }

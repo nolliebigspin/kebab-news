@@ -3,10 +3,15 @@ import { desc, eq, sql } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Container } from "@/components/layout/Container";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Badge } from "@/components/ui/badge";
+import { formatDate, formatRelative } from "@/lib/format";
 import { getSession } from "@/lib/session";
+import { loadLatestPublishedAt } from "@/lib/stories";
 
 export const metadata: Metadata = {
-  title: "Redaktion — kebab.news",
+  title: "Redaktion",
   robots: { index: false, follow: false },
 };
 
@@ -36,7 +41,7 @@ export default async function EditorialPage() {
     .limit(1);
   if (!actor[0] || !["moderator", "editor", "admin"].includes(actor[0].role)) notFound();
 
-  const [summaries, reportCount] = await Promise.all([
+  const [summaries, reportCount, latest] = await Promise.all([
     db
       .select({
         id: publishedArticles.id,
@@ -55,37 +60,35 @@ export default async function EditorialPage() {
       .select({ count: sql<number>`count(*)::int` })
       .from(commentReports)
       .where(eq(commentReports.status, "pending")),
+    loadLatestPublishedAt(),
   ]);
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-14">
-      <header>
-        <p className="font-mono text-[11px] text-brand-ink uppercase tracking-[0.14em]">
-          Interner Bereich · {roleLabels[actor[0].role as keyof typeof roleLabels]}
-        </p>
-        <h1 className="mt-2 font-display text-4xl">Redaktion</h1>
-        <p className="mt-3 text-ink-soft">
-          Veröffentlichte Artikel und Moderation auf einen Blick. Veröffentlichungen bleiben
-          versioniert.
-        </p>
-      </header>
+    <Container width="content" className="py-12 sm:py-16">
+      <PageHeader
+        title="Redaktion"
+        lede={`Interner Bereich (${roleLabels[actor[0].role as keyof typeof roleLabels]}). Veröffentlichte Artikel und Moderation auf einen Blick.`}
+      />
       <div className="mt-10 grid gap-4 sm:grid-cols-3">
         {[
-          ["Artikel gesamt", summaries.length],
-          ["Veröffentlicht", summaries.filter((item) => item.publishedAt !== null).length],
+          ["Letzte Veröffentlichung", latest ? formatRelative(latest) : "noch keine"],
+          [
+            "Veröffentlicht (letzte 50)",
+            summaries.filter((item) => item.publishedAt !== null).length,
+          ],
           ["Offene Meldungen", reportCount[0]?.count ?? 0],
         ].map(([label, value]) => (
-          <div key={label} className="rounded-xl border border-line p-5">
+          <div key={label} className="rounded-2xl bg-bg-warm p-5">
             <p className="text-ink-soft text-sm">{label}</p>
-            <p className="mt-2 font-display text-3xl">{value}</p>
+            <p className="tabular mt-2 font-display text-3xl">{value}</p>
           </div>
         ))}
       </div>
       <section className="mt-12">
-        <h2 className="font-display text-2xl">Artikel</h2>
+        <h2 className="font-display text-title">Artikel</h2>
         <div className="mt-5 overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="border-line border-b font-mono text-[10px] text-ink-mute uppercase">
+            <thead className="border-ink border-b-2 text-ink-mute text-sm">
               <tr>
                 <th className="p-3">Artikel</th>
                 <th className="p-3">Status</th>
@@ -105,18 +108,16 @@ export default async function EditorialPage() {
                       {summary.headline}
                     </Link>
                     <span className="mt-1 block text-ink-mute text-xs">
-                      {summary.rewrittenAt.toLocaleString("de-DE")}
+                      {formatDate(summary.rewrittenAt, "datetime")}
                     </span>
                   </td>
                   <td className="p-3">
-                    <span className="rounded-full bg-bg-warm px-2 py-1 font-mono text-[10px] uppercase">
-                      {statusLabels[summary.status]}
-                    </span>
+                    <Badge variant="muted">{statusLabels[summary.status]}</Badge>
                   </td>
                   <td className="p-3 tabular-nums">{summary.version}</td>
                   <td className="p-3 tabular-nums">{summary.sourceCount}</td>
                   <td className="p-3 text-ink-soft text-xs">
-                    {summary.publishedAt ? summary.publishedAt.toLocaleString("de-DE") : "—"}
+                    {summary.publishedAt ? formatDate(summary.publishedAt, "datetime") : "–"}
                   </td>
                 </tr>
               ))}
@@ -124,11 +125,11 @@ export default async function EditorialPage() {
           </table>
         </div>
       </section>
-      <aside className="mt-10 rounded-xl bg-warn-wash p-4 text-ink-soft text-sm">
+      <aside className="mt-10 rounded-2xl bg-warn-wash p-4 text-ink-soft text-sm">
         Artikel werden automatisch erzeugt und veröffentlicht. Diese Übersicht dient der
         Beobachtung; Moderation läuft über gemeldete Kommentare. Schreibaktionen werden künftig über
         dieselben Rollen abgesichert.
       </aside>
-    </div>
+    </Container>
   );
 }
