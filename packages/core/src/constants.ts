@@ -1,8 +1,8 @@
 // ============================================================================
 // Site / public constants
 // ============================================================================
-export const GITHUB_URL = "https://github.com/nolliebigspin/kebab-news";
-export const BASE_URL = "https://kebab.news";
+// Defined in ./site (dependency-free, safe for Client Components).
+export { BASE_URL, GITHUB_URL } from "./site";
 
 // ============================================================================
 // Radar — ingest pipeline tunables

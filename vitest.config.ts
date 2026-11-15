@@ -12,6 +12,12 @@ export default defineConfig({
     alias: {
       "@kebab/env": r("./packages/env/src/index.ts"),
       "@kebab/db": r("./packages/db/src/index.ts"),
+      // Subpath exports first: the bare "@kebab/core" key would otherwise
+      // prefix-match and resolve "@kebab/core/lean" to "index.ts/lean".
+      "@kebab/core/site": r("./packages/core/src/site.ts"),
+      "@kebab/core/lean": r("./packages/core/src/lean.ts"),
+      "@kebab/core/text-anchor": r("./packages/core/src/text-anchor.ts"),
+      "@kebab/core/schedule": r("./packages/core/src/schedule.ts"),
       "@kebab/core": r("./packages/core/src/index.ts"),
       "@kebab/auth": r("./packages/auth/src/index.ts"),
       "@": r("./apps/web"),
