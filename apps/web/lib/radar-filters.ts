@@ -7,21 +7,7 @@ import {
   parseSort,
   type RawParams,
 } from "./filters";
-
-// Lean slugs used to validate the `lean` searchParam. Kept as a local literal
-// (rather than imported from @kebab/core) so this module stays free of runtime
-// @kebab/* imports — it's pulled into the FilterBar Client Component, and the
-// @kebab/core barrel transitively bundles server-only deps. Typed against
-// OutletLean so it can't drift from the DB enum without a compile error.
-const LEAN_SLUGS: readonly OutletLean[] = [
-  "left",
-  "center-left",
-  "center",
-  "center-right",
-  "right",
-  "right-fringe",
-  "public",
-];
+import { SPECTRUM } from "./lean";
 
 /**
  * Radar filter state. Lives entirely in the URL searchParams so the filtered
@@ -46,7 +32,7 @@ export type RadarFilters = {
 /** Parse (and sanitize) URL searchParams into a typed RadarFilters. */
 export function parseRadarFilters(params: RawParams): RadarFilters {
   const leanRaw = firstParam(params.lean);
-  const lean = LEAN_SLUGS.includes(leanRaw as OutletLean) ? (leanRaw as OutletLean) : null;
+  const lean = SPECTRUM.includes(leanRaw as OutletLean) ? (leanRaw as OutletLean) : null;
 
   return {
     q: parseSearch(params),
@@ -56,7 +42,19 @@ export function parseRadarFilters(params: RawParams): RadarFilters {
   };
 }
 
-/** True when the filters differ from the default view (used to show "reset"). */
+export const DEFAULT_RADAR_FILTERS: RadarFilters = {
+  q: "",
+  days: DEFAULT_DAYS,
+  lean: null,
+  sort: "recent",
+};
+
+/** True for the default view (the reset button stays hidden). */
 export function isDefaultRadarFilters(f: RadarFilters): boolean {
-  return f.q === "" && f.days === DEFAULT_DAYS && f.lean === null && f.sort === "recent";
+  return (
+    f.q === DEFAULT_RADAR_FILTERS.q &&
+    f.days === DEFAULT_RADAR_FILTERS.days &&
+    f.lean === DEFAULT_RADAR_FILTERS.lean &&
+    f.sort === DEFAULT_RADAR_FILTERS.sort
+  );
 }

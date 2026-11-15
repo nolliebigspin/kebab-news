@@ -32,11 +32,14 @@ export function parseSearch(params: RawParams): string {
 /**
  * Lookback window in days from `?days=`. `null` = no limit ("all time", the `0`
  * sentinel or any non-positive value). A missing param falls back to
- * DEFAULT_DAYS so the default view is the last week.
+ * `fallback` (DEFAULT_DAYS unless the surface says otherwise).
  */
-export function parseDays(params: RawParams): number | null {
+export function parseDays(
+  params: RawParams,
+  fallback: number | null = DEFAULT_DAYS
+): number | null {
   const raw = firstParam(params.days);
-  if (raw === undefined) return DEFAULT_DAYS;
+  if (raw === undefined) return fallback;
   const n = Number(raw);
   return Number.isFinite(n) && n > 0 ? n : null;
 }
@@ -52,4 +55,21 @@ export function parseSort<T extends string>(
 ): T {
   const raw = firstParam(params.sort) as T | undefined;
   return raw && allowed.includes(raw) ? raw : fallback;
+}
+
+/**
+ * Filter state → query string. Values equal to their default are dropped so
+ * the default view keeps a clean URL; `days` uses `0` for "all time".
+ */
+export function serializeFilters(
+  filters: Record<string, string | number | null>,
+  defaults: Record<string, string | number | null>
+): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) {
+    if (value === defaults[key] || value === "") continue;
+    if (key === "days") params.set("days", value === null ? "0" : String(value));
+    else if (value !== null) params.set(key, String(value));
+  }
+  return params.toString();
 }

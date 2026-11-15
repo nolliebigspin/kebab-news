@@ -2,7 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { FiCheck, FiCopy, FiShare2 } from "react-icons/fi";
+import { FiCheck, FiChevronDown, FiCopy, FiShare2 } from "react-icons/fi";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type Channel =
   | "native"
@@ -89,26 +91,25 @@ export function ShareMenu({
 
   return (
     <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t("group_label")}>
-      <button
-        type="button"
-        onClick={nativeShare}
-        className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 font-semibold text-primary-foreground text-sm hover:bg-brand-ink focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 dark:hover:bg-brand/85"
-      >
+      <Button type="button" onClick={nativeShare}>
         <FiShare2 aria-hidden /> {t("native")}
-      </button>
-      <button
-        type="button"
-        onClick={copyLink}
-        className="inline-flex items-center gap-2 rounded-full border border-line px-3 py-2 text-sm hover:border-brand focus-visible:outline-2 focus-visible:outline-brand"
-      >
-        {copied ? <FiCheck aria-hidden /> : <FiCopy aria-hidden />}{" "}
+      </Button>
+      <Button type="button" variant="outline" onClick={copyLink} aria-live="polite">
+        {copied ? <FiCheck aria-hidden /> : <FiCopy aria-hidden />}
         {copied ? t("copied") : t("copy")}
-      </button>
-      <details className="relative">
-        <summary className="cursor-pointer list-none rounded-full border border-line px-3 py-2 text-sm hover:border-brand focus-visible:outline-2 focus-visible:outline-brand">
+      </Button>
+      <details className="group/share relative">
+        <summary
+          className={cn(
+            buttonVariants({ variant: "ghost" }),
+            "list-none [&::-webkit-details-marker]:hidden"
+          )}
+        >
           {t("more")}
+          <FiChevronDown aria-hidden className="transition-transform group-open/share:rotate-180" />
         </summary>
-        <div className="absolute right-0 z-20 mt-2 grid min-w-40 rounded-xl border border-line bg-bg p-2 shadow-xl">
+        {/* Anchored left: when the row wraps on phones, "Mehr" sits at the left edge. */}
+        <div className="absolute left-0 z-20 mt-2 grid w-48 max-w-[calc(100vw-2rem)] rounded-2xl border border-line bg-surface-raised p-2 shadow-xl">
           {targets.map((target) => (
             <a
               key={target.channel}
@@ -116,7 +117,7 @@ export function ShareMenu({
               target={target.channel === "email" ? undefined : "_blank"}
               rel="noopener noreferrer"
               onClick={() => track(target.channel)}
-              className="rounded-lg px-3 py-2 text-sm hover:bg-bg-warm focus-visible:outline-2 focus-visible:outline-brand"
+              className="rounded-xl px-3 py-2 text-sm outline-none hover:bg-bg-warm focus-visible:ring-3 focus-visible:ring-ring/40"
             >
               {target.label}
             </a>

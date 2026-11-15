@@ -1,22 +1,18 @@
+// Subpath import: the `@kebab/core` barrel pulls server-only code, this file
+// is safe for Client Components.
+import { LEAN_ORDER } from "@kebab/core/lean";
 import type { OutletLean } from "@kebab/db";
 
-/**
- * Maps a political lean to its spectrum dot colour (CSS var). Shared by the
- * radar list and detail so the colour coding is identical. Left-ish → warm,
- * right-ish → cool, centre → muted, public broadcaster → brand.
- */
+/** Display order of the political spectrum, left → right, public last. */
+export const SPECTRUM: readonly OutletLean[] = LEAN_ORDER;
+
+/** Each lean has its own colour token (see `--lean-*` in globals.css). */
 export function leanColor(lean: OutletLean): string {
-  switch (lean) {
-    case "left":
-    case "center-left":
-      return "var(--left)";
-    case "right":
-    case "center-right":
-    case "right-fringe":
-      return "var(--right)";
-    case "center":
-      return "var(--ink-mute)";
-    case "public":
-      return "var(--brand)";
-  }
+  return `var(--lean-${lean})`;
+}
+
+/** Leans present in `covered`, in spectrum order and without duplicates. */
+export function orderLeans(covered: Iterable<OutletLean>): OutletLean[] {
+  const set = new Set(covered);
+  return SPECTRUM.filter((lean) => set.has(lean));
 }

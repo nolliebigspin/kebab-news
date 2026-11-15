@@ -6,6 +6,8 @@ import { useTranslations } from "next-intl";
 import { type FormEvent, useState, useTransition } from "react";
 import { FiFlag, FiMessageCircle, FiThumbsUp, FiTrash2 } from "react-icons/fi";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { formatDate } from "@/lib/format";
 
 export type PublicComment = {
   id: string;
@@ -71,13 +73,10 @@ export function CommentsSection({
   }
 
   return (
-    <section aria-labelledby="comments-heading" className="border-line-soft border-t pt-10">
+    <section aria-labelledby="comments-heading">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[11px] text-brand-ink uppercase tracking-[0.14em]">
-            {t("eyebrow")}
-          </p>
-          <h2 id="comments-heading" className="mt-2 font-display text-2xl">
+          <h2 id="comments-heading" className="font-display text-title">
             {t("heading")} <span className="text-ink-mute">{comments.length}</span>
           </h2>
           <p className="mt-2 text-ink-soft text-sm">{t("description")}</p>
@@ -87,7 +86,7 @@ export function CommentsSection({
           <select
             value={sort}
             onChange={(event) => setSort(event.target.value as "newest" | "helpful")}
-            className="rounded-lg border border-line bg-bg px-2 py-1.5 focus-visible:outline-2 focus-visible:outline-brand"
+            className="h-9 rounded-full border border-line bg-surface-raised px-3 text-ink outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
           >
             <option value="newest">{t("sort_newest")}</option>
             <option value="helpful">{t("sort_helpful")}</option>
@@ -96,7 +95,7 @@ export function CommentsSection({
       </div>
 
       {currentUserId ? (
-        <form onSubmit={submit} className="mt-6 rounded-xl border border-line bg-bg-warm p-4">
+        <form onSubmit={submit} className="mt-6 rounded-2xl bg-bg-warm p-4">
           <label htmlFor="new-comment" className="sr-only">
             {t("comment_label")}
           </label>
@@ -109,21 +108,17 @@ export function CommentsSection({
             value={content}
             onChange={(event) => setContent(event.target.value)}
             placeholder={t("placeholder")}
-            className="w-full resize-y rounded-lg border border-line bg-bg p-3 text-sm focus-visible:outline-2 focus-visible:outline-brand"
+            className="w-full resize-y rounded-xl border border-line bg-surface-raised p-3 text-base outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
           />
           <div className="mt-3 flex items-center justify-between gap-4">
             <span className="text-ink-mute text-xs">{t("limit")}</span>
-            <button
-              type="submit"
-              disabled={pending || content.trim().length < 3}
-              className="rounded-xl bg-brand px-4 py-2 font-semibold text-primary-foreground text-sm disabled:opacity-50"
-            >
+            <Button type="submit" disabled={pending || content.trim().length < 3}>
               {t("submit")}
-            </button>
+            </Button>
           </div>
         </form>
       ) : (
-        <p className="mt-6 rounded-xl bg-bg-warm p-4 text-ink-soft text-sm">
+        <p className="mt-6 rounded-2xl bg-bg-warm p-4 text-ink-soft text-sm">
           <Link href="/anmelden" className="text-brand-ink underline underline-offset-4">
             {t("login")}
           </Link>
@@ -138,22 +133,20 @@ export function CommentsSection({
           {ordered.map((comment) => (
             <li
               key={comment.id}
-              className={`rounded-xl border border-line-soft p-5 ${comment.parentId ? "ml-6 sm:ml-12" : ""}`}
+              className={`border-line-soft border-t pt-5 ${comment.parentId ? "ml-4 border-l-2 border-l-brand-wash pl-4 sm:ml-10" : ""}`}
             >
-              <header className="flex flex-wrap items-center gap-2 text-ink-mute text-xs">
-                <span className="font-medium text-ink">{comment.authorName}</span>
-                <span aria-hidden>·</span>
+              <header className="flex flex-wrap items-center gap-x-3 gap-y-1 text-ink-mute text-sm">
+                <span className="font-semibold text-ink">{comment.authorName}</span>
                 <time dateTime={comment.createdAt}>
-                  {new Intl.DateTimeFormat("de-DE", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  }).format(new Date(comment.createdAt))}
+                  {formatDate(comment.createdAt, "datetime")}
                 </time>
                 {comment.updatedAt !== comment.createdAt && <span>{t("edited")}</span>}
               </header>
-              <p className="mt-3 whitespace-pre-wrap text-sm leading-6">{comment.content}</p>
+              <p className="mt-2 whitespace-pre-wrap text-[0.9375rem] leading-relaxed">
+                {comment.content}
+              </p>
               {currentUserId && (
-                <div className="mt-4 flex flex-wrap gap-4 text-ink-mute text-xs">
+                <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-ink-mute text-sm">
                   <button
                     type="button"
                     disabled={pending}

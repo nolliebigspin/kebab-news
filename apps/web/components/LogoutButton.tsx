@@ -29,7 +29,7 @@ export function LogoutButton() {
 
   return (
     <Button variant="outline" size="sm" onClick={onClick} disabled={pending}>
-      <span className="font-mono text-xs">{t("logout")}</span>
+      {t("logout")}
     </Button>
   );
 }

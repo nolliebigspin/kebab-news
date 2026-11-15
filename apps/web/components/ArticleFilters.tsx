@@ -5,16 +5,11 @@ import { FilterBar, FilterSelect } from "@/components/FilterBar";
 import {
   ARTICLE_SORTS,
   type ArticleFilters as ArticleFilterState,
-  isDefaultArticleFilters,
+  DEFAULT_ARTICLE_FILTERS,
 } from "@/lib/article-filters";
 import { DAY_PRESETS } from "@/lib/filters";
 
-/**
- * Article filter controls: search + date window + sort. No lean axis (operator
- * decision — a finished neutral rewrite is filtered by text/date/sort only).
- * Reuses the shared FilterBar and the topic filter i18n namespace, with an
- * article-specific sort enum.
- */
+/** Article archive controls: search, date window, sort (no lean axis). */
 export function ArticleFilters({ filters }: { filters: ArticleFilterState }) {
   const t = useTranslations("radar.filters");
   const tArticles = useTranslations("articles.filters");
@@ -22,8 +17,7 @@ export function ArticleFilters({ filters }: { filters: ArticleFilterState }) {
   return (
     <FilterBar
       filters={filters}
-      isDefault={isDefaultArticleFilters(filters)}
-      serialize={serialize}
+      defaults={DEFAULT_ARTICLE_FILTERS}
       labels={{
         searchPlaceholder: tArticles("search_placeholder"),
         searchLabel: tArticles("search_label"),
@@ -50,12 +44,4 @@ export function ArticleFilters({ filters }: { filters: ArticleFilterState }) {
       )}
     />
   );
-}
-
-function serialize(f: ArticleFilterState): string {
-  const params = new URLSearchParams();
-  if (f.q) params.set("q", f.q);
-  params.set("days", f.days === null ? "0" : String(f.days));
-  if (f.sort !== "recent") params.set("sort", f.sort);
-  return params.toString();
 }

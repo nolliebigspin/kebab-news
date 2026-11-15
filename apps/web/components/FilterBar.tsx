@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { FiSearch } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { serializeFilters } from "@/lib/filters";
 
 /**
  * Generic, URL-driven filter bar shared by the topic and article lists. It owns
@@ -12,11 +13,9 @@ import { Input } from "@/components/ui/input";
  * searchParams push, and the reset button — and is otherwise agnostic about the
  * filter shape `F`. Each page supplies:
  *   - `filters`     the current parsed state (must include a `q` string),
- *   - `serialize`   how to turn a state into a query string (page-specific
- *                   param names / defaults),
+ *   - `defaults`    the default state; matching params are left out of the URL,
  *   - `controls`    a render prop given an `update(next)` helper to wire its own
- *                   <FilterSelect>s,
- *   - `isDefault`   whether to hide the reset button.
+ *                   <FilterSelect>s.
  *
  * Holds no list state of its own: every control writes into the URL and lets
  * the Server Component re-render the list from the same params.
@@ -26,17 +25,15 @@ import { Input } from "@/components/ui/input";
  * which transitively bundle server-only deps and break the Turbopack client
  * build.
  */
-export function FilterBar<F extends { q: string }>({
+export function FilterBar<F extends { q: string } & Record<string, string | number | null>>({
   filters,
-  serialize,
+  defaults,
   controls,
-  isDefault,
   labels,
 }: {
   filters: F;
-  serialize: (filters: F) => string;
+  defaults: F;
   controls: (update: (next: Partial<F>) => void) => React.ReactNode;
-  isDefault: boolean;
   labels: { searchPlaceholder: string; searchLabel: string; reset: string };
 }) {
   const router = useRouter();
@@ -50,7 +47,7 @@ export function FilterBar<F extends { q: string }>({
   }, [filters.q]);
 
   function update(next: Partial<F>) {
-    const qs = serialize({ ...filters, ...next });
+    const qs = serializeFilters({ ...filters, ...next }, defaults);
     startTransition(() => {
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     });
@@ -69,21 +66,26 @@ export function FilterBar<F extends { q: string }>({
     startTransition(() => router.replace(pathname, { scroll: false }));
   }
 
+  const isDefault = Object.keys(defaults).every(
+    (key) => (filters as Record<string, unknown>)[key] === defaults[key]
+  );
+
   return (
-    <div className="mb-8 rounded-2xl border border-line-soft bg-bg-warm/55 p-4 sm:p-5">
+    <search className="mb-10 block border-line-soft border-y py-4">
       <div className="grid gap-4 lg:grid-cols-[minmax(16rem,1fr)_auto] lg:items-end">
         <div className="relative max-w-xl">
           <FiSearch
-            className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-mute"
+            className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-ink-mute"
             aria-hidden
           />
           <Input
+            id="suche"
             type="search"
             value={query}
             onChange={(e) => onSearch(e.target.value)}
             placeholder={labels.searchPlaceholder}
             aria-label={labels.searchLabel}
-            className="h-11 pl-10"
+            className="h-12 rounded-full bg-bg-warm pl-11 text-base"
           />
         </div>
 
@@ -97,7 +99,7 @@ export function FilterBar<F extends { q: string }>({
           )}
         </div>
       </div>
-    </div>
+    </search>
   );
 }
 
@@ -114,11 +116,11 @@ export function FilterSelect({
 }) {
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="font-medium text-[11px] text-ink-mute">{label}</span>
+      <span className="font-medium text-ink-mute text-xs">{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-9 cursor-pointer rounded-xl border border-input bg-surface-raised px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35"
+        className="h-10 cursor-pointer rounded-full border border-line bg-surface-raised px-4 text-sm outline-none transition-colors hover:border-brand focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>

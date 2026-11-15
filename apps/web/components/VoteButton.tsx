@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { FiArrowUp, FiCheckCircle, FiLogIn } from "react-icons/fi";
 import { toast } from "sonner";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type Props = {
   storyId: string;
@@ -15,8 +17,9 @@ type Props = {
 
 type Status = "idle" | "voted" | "duplicate" | "error" | "login";
 
-const PILL_CLASS =
-  "inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-xl border border-line bg-surface-raised px-3.5 py-2 font-semibold text-ink text-xs outline-none transition-all hover:border-brand/60 hover:bg-brand-wash hover:text-brand-ink focus-visible:ring-3 focus-visible:ring-brand/35 disabled:cursor-not-allowed disabled:opacity-60";
+const PILL_CLASS = cn(buttonVariants({ variant: "outline", size: "sm" }));
+const COUNT_CLASS =
+  "-mr-1 rounded-full bg-bg-warm px-2 py-0.5 text-[0.75rem] text-ink-soft tabular-nums";
 
 export function VoteButton({ storyId, initialCount, isAuthenticated }: Props) {
   const t = useTranslations("radar");
@@ -73,9 +76,7 @@ export function VoteButton({ storyId, initialCount, isAuthenticated }: Props) {
         <Link href="/anmelden" className={PILL_CLASS}>
           <FiLogIn aria-hidden />
           <span>{t("vote.login_cta")}</span>
-          <span className="rounded-md bg-brand-wash px-1.5 py-0.5 font-mono text-[10px] text-brand-ink tabular-nums">
-            {count}
-          </span>
+          <span className={COUNT_CLASS}>{count}</span>
         </Link>
       </div>
     );
@@ -97,13 +98,12 @@ export function VoteButton({ storyId, initialCount, isAuthenticated }: Props) {
         onClick={onClick}
         disabled={pending || locked}
         aria-busy={pending}
-        className={PILL_CLASS}
+        aria-pressed={locked}
+        className={cn(PILL_CLASS, locked && "border-brand bg-brand-wash text-brand-ink")}
       >
         {locked ? <FiCheckCircle aria-hidden /> : <FiArrowUp aria-hidden />}
         <span>{label}</span>
-        <span className="rounded-md bg-brand-wash px-1.5 py-0.5 font-mono text-[10px] text-brand-ink tabular-nums">
-          {count}
-        </span>
+        <span className={COUNT_CLASS}>{count}</span>
       </button>
     </div>
   );
