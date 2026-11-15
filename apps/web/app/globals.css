@@ -3,32 +3,49 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-@theme {
-  --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-mono: var(--font-mono), ui-monospace, monospace;
-}
+/*
+ * kebab.news design system — "Der Spieß".
+ *
+ * Many sources threaded on one line, ordered left → right by political lean.
+ * The skewer (petrol line + lean-coloured stops) is the one bold device; the
+ * rest stays quiet: cool white paper, navy ink, a news grotesk for structure
+ * and a reading serif for prose. Saffron is a highlighter, never an alarm.
+ */
 
 :root {
   color-scheme: light;
-  --bg: oklch(0.975 0.005 220);
-  --bg-warm: oklch(0.948 0.011 205);
-  --surface: oklch(0.995 0.002 220);
-  --surface-raised: oklch(1 0 0);
-  --ink: oklch(0.205 0.032 248);
-  --ink-soft: oklch(0.42 0.03 245);
-  --ink-mute: oklch(0.52 0.025 245);
-  --line: oklch(0.84 0.016 235);
-  --line-soft: oklch(0.91 0.012 230);
-  --brand: oklch(0.52 0.105 190);
-  --brand-ink: oklch(0.37 0.09 190);
-  --brand-wash: oklch(0.925 0.035 190);
-  --brand-glow: oklch(0.78 0.08 190 / 0.14);
-  --warn: oklch(0.5 0.13 45);
-  --warn-wash: oklch(0.94 0.035 45);
-  --oerr: oklch(0.55 0.06 280);
-  --left: oklch(0.58 0.08 25);
-  --right: oklch(0.55 0.08 240);
-  --shadow-color: oklch(0.18 0.025 245 / 0.09);
+  --bg: #ffffff;
+  --bg-warm: #eef2f6; /* "fog" — cool secondary surface, not cream */
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --ink: #0f1b2d;
+  --ink-soft: #3a4a60;
+  --ink-mute: #5c6b80;
+  --line: #d3dbe5;
+  --line-soft: #e6ebf1;
+  --brand: #00687a; /* petrol */
+  --brand-ink: #004d5a;
+  --brand-wash: #dcf0f2;
+  --saffron: #f4b400;
+  --saffron-wash: #ffe9a8;
+  --saffron-ink: #5c3f00;
+  --warn: #8f5200;
+  --warn-wash: #fdf1dc;
+
+  /* Political lean ramp: raspberry (left) → indigo (right), emerald for public
+     broadcasters. Deliberately clear of petrol and saffron. */
+  --lean-left: #c0365f;
+  --lean-center-left: #d77798;
+  --lean-center: #8792a3;
+  --lean-center-right: #6f8bd3;
+  --lean-right: #3352bd;
+  --lean-right-fringe: #2a237f;
+  --lean-public: #23875c;
+
+  --shadow-color: rgb(15 27 45 / 0.08);
+  --header-h: 4rem;
+  /* Halo around skewer stops; containers on another surface override it. */
+  --skewer-ring: var(--bg);
 
   --background: var(--bg);
   --foreground: var(--ink);
@@ -37,14 +54,14 @@
   --popover: var(--surface-raised);
   --popover-foreground: var(--ink);
   --primary: var(--brand);
-  --primary-foreground: oklch(0.99 0 0);
+  --primary-foreground: #ffffff;
   --secondary: var(--bg-warm);
   --secondary-foreground: var(--ink);
   --muted: var(--bg-warm);
   --muted-foreground: var(--ink-soft);
   --accent: var(--brand-wash);
   --accent-foreground: var(--brand-ink);
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: #b42318;
   --border: var(--line);
   --input: var(--line);
   --ring: var(--brand);
@@ -53,31 +70,42 @@
 
 .dark {
   color-scheme: dark;
-  --bg: oklch(0.16 0.022 248);
-  --bg-warm: oklch(0.195 0.025 245);
-  --surface: oklch(0.205 0.025 245);
-  --surface-raised: oklch(0.235 0.028 243);
-  --ink: oklch(0.94 0.012 225);
-  --ink-soft: oklch(0.76 0.022 225);
-  --ink-mute: oklch(0.65 0.024 225);
-  --line: oklch(0.34 0.025 238);
-  --line-soft: oklch(0.275 0.022 240);
-  --brand: oklch(0.7 0.105 185);
-  --brand-ink: oklch(0.79 0.09 185);
-  --brand-wash: oklch(0.29 0.055 190);
-  --brand-glow: oklch(0.65 0.11 185 / 0.11);
-  --warn: oklch(0.73 0.12 55);
-  --warn-wash: oklch(0.27 0.05 45);
-  --oerr: oklch(0.72 0.07 285);
-  --left: oklch(0.7 0.09 25);
-  --right: oklch(0.7 0.09 240);
-  --shadow-color: oklch(0.04 0.018 245 / 0.34);
-  --primary-foreground: oklch(0.15 0.025 245);
-  --destructive: oklch(0.7 0.18 25);
+  --bg: #0a1322;
+  --bg-warm: #101c2f;
+  --surface: #122036;
+  --surface-raised: #172840;
+  --ink: #e9eef5;
+  --ink-soft: #b5c1d1;
+  --ink-mute: #8d9bb0;
+  --line: #2a3a53;
+  --line-soft: #1c2a40;
+  --brand: #3ec1d3;
+  --brand-ink: #86dbe6;
+  --brand-wash: #0e3340;
+  --saffron: #f6c445;
+  --saffron-wash: #4a3a0c;
+  --saffron-ink: #ffe08a;
+  --warn: #f2b45c;
+  --warn-wash: #2e2410;
+
+  --lean-left: #f06a92;
+  --lean-center-left: #f0a3be;
+  --lean-center: #9aa6b8;
+  --lean-center-right: #a0b5ee;
+  --lean-right: #6f8df0;
+  --lean-right-fringe: #a596f7;
+  --lean-public: #4fc28e;
+
+  --shadow-color: rgb(0 0 0 / 0.4);
+  --primary-foreground: #06202a;
+  --destructive: #f97066;
 }
 
 @theme inline {
+  --font-sans: var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-source-serif), ui-serif, Georgia, serif;
   --font-heading: var(--font-sans);
+
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
   --color-ink-mute: var(--ink-mute);
@@ -90,11 +118,11 @@
   --color-brand: var(--brand);
   --color-brand-ink: var(--brand-ink);
   --color-brand-wash: var(--brand-wash);
+  --color-saffron: var(--saffron);
+  --color-saffron-wash: var(--saffron-wash);
+  --color-saffron-ink: var(--saffron-ink);
   --color-warn: var(--warn);
   --color-warn-wash: var(--warn-wash);
-  --color-oerr: var(--oerr);
-  --color-left: var(--left);
-  --color-right: var(--right);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -113,126 +141,213 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 0.75);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-xl: calc(var(--radius) * 1.5);
+  --radius-2xl: calc(var(--radius) * 2);
 }
 
-html,
-body {
-  background: var(--bg);
-  color: var(--ink);
-  scrollbar-gutter: stable;
+/* Fluid type scale. Headlines carry the personality: heavy grotesk, tight
+   leading, negative tracking that loosens as the size drops. */
+@theme {
+  --text-hero: clamp(2.375rem, 1.35rem + 4.4vw, 5.5rem);
+  --text-hero--line-height: 0.96;
+  --text-hero--letter-spacing: -0.045em;
+  --text-display: clamp(2rem, 1.45rem + 2.4vw, 3.75rem);
+  --text-display--line-height: 1.02;
+  --text-display--letter-spacing: -0.04em;
+  --text-title: clamp(1.5rem, 1.25rem + 1.1vw, 2.25rem);
+  --text-title--line-height: 1.1;
+  --text-title--letter-spacing: -0.03em;
+  --text-lede: clamp(1.125rem, 1.05rem + 0.35vw, 1.3125rem);
+  --text-lede--line-height: 1.6;
 }
 
-html {
-  scroll-behavior: smooth;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--header-h) + 1.5rem);
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "kern", "liga";
+    text-rendering: optimizeLegibility;
+  }
+
+  /* German compounds ("Bundesverfassungsgericht") must never push the layout
+     sideways on a phone. Wider screens keep words whole. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    overflow-wrap: break-word;
+    text-wrap: balance;
+  }
+
+  @media (width < 40rem) {
+    h1,
+    h2,
+    h3,
+    h4 {
+      hyphens: auto;
+    }
+  }
+
+  p,
+  li,
+  dd,
+  blockquote {
+    overflow-wrap: break-word;
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: var(--saffron-wash);
+    color: var(--ink);
+  }
+
+  :focus-visible {
+    outline-color: var(--brand);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
 }
 
-body {
-  font-family: "Inter", system-ui, sans-serif;
-  font-feature-settings: "ss01", "cv11";
-  background-image: radial-gradient(circle at 50% -12rem, var(--brand-glow), transparent 36rem);
-  background-attachment: fixed;
-  transition:
-    background-color 180ms ease,
-    color 180ms ease;
+/* Headline face: Schibsted Grotesk at heavy weight. */
+@utility font-display {
+  font-family: var(--font-sans);
+  font-weight: 760;
+  letter-spacing: -0.03em;
 }
 
-::selection {
-  background: var(--brand-wash);
-  color: var(--ink);
+/* Reading face for article prose and summaries. */
+@utility prose-serif {
+  font-family: var(--font-serif);
+  font-optical-sizing: auto;
+  font-size: 1.125rem;
+  line-height: 1.75;
 }
 
-.font-display {
-  font-family: "Inter", system-ui, sans-serif;
-  letter-spacing: -0.035em;
-  font-weight: 650;
+/* Highlighter-pen treatment for framing marks: a saffron stroke across the
+   lower part of the line box, like a reader marking a printout. */
+@utility mark-highlight {
+  background-image: linear-gradient(
+    to bottom,
+    transparent 0.55em,
+    var(--saffron-wash) 0.55em,
+    var(--saffron-wash) 1.15em,
+    transparent 1.15em
+  );
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--saffron-ink);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.28em;
 }
 
-.font-mono {
-  font-feature-settings: "zero";
+@utility scrollbar-none {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
-/* Hairline borders */
-.hairline {
-  border-color: var(--line);
-}
-.hairline-soft {
-  border-color: var(--line-soft);
+@utility tabular {
+  font-variant-numeric: tabular-nums;
 }
 
 .surface-shadow {
   box-shadow:
     0 1px 2px var(--shadow-color),
-    0 16px 40px -28px var(--shadow-color);
+    0 18px 40px -24px var(--shadow-color);
 }
 
-/* Brand utility classes (hand-rolled components consume these) */
-.ink {
-  color: var(--ink);
-}
-.ink-soft {
-  color: var(--ink-soft);
-}
-.ink-mute {
-  color: var(--ink-mute);
-}
-.bg-warm {
-  background: var(--bg-warm);
-}
-.text-brand {
-  color: var(--brand);
-}
-.bg-brand {
-  background: var(--brand);
-}
-.text-brand-ink {
-  color: var(--brand-ink);
-}
-.bg-brand-wash {
-  background: var(--brand-wash);
+/* The one orchestrated motion moment: source stops slide onto the skewer. */
+@keyframes skewer-thread {
+  from {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 99px;
-  display: inline-block;
+@keyframes skewer-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes skewer-draw-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* Only for readers who have not asked for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-skewer-draw {
+    transform-origin: left center;
+    animation: skewer-draw 700ms cubic-bezier(0.2, 0.7, 0.1, 1) both;
+  }
+
+  .animate-skewer-thread {
+    animation: skewer-thread 520ms cubic-bezier(0.2, 0.7, 0.1, 1) both;
+    animation-delay: calc(180ms + var(--i, 0) * 70ms);
+  }
+
+  /* In a narrow container the skewer stands upright, so it grows downwards
+     (mirrors the @2xl container query in SourceSkewer). */
+  @container (width < 42rem) {
+    .animate-skewer-draw {
+      transform-origin: center top;
+      animation-name: skewer-draw-y;
+    }
+
+    .animate-skewer-thread {
+      animation-name: fade-in;
+    }
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes pulse-ring {
   0% {
-    box-shadow: 0 0 0 0 oklch(0.56 0.085 190 / 0.45);
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--brand) 45%, transparent);
   }
   100% {
-    box-shadow: 0 0 0 14px oklch(0.56 0.085 190 / 0);
+    box-shadow: 0 0 0 14px color-mix(in oklab, var(--brand) 0%, transparent);
   }
 }
+
 .pulse {
   animation: pulse-ring 0.6s ease-out;
-}
-
-@keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.fade-up {
-  animation: fade-up 0.3s ease-out;
-}
-
-@keyframes shimmer {
-  from {
-    background-position: -200% center;
-  }
-  to {
-    background-position: 200% center;
-  }
 }

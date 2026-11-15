@@ -12,9 +12,10 @@ describe("dark mode regressions", () => {
     expect(source).not.toContain('className="block text-white/85"');
   });
 
-  it("preserves the wordmark artwork's internal colors in dark mode", () => {
-    const source = readWebSource("components/Wordmark.tsx");
+  it("themes the logo mark through tokens instead of colour-inverting filters", () => {
+    const source = readWebSource("components/brand/Logo.tsx");
 
-    expect(source).not.toContain("dark:brightness-0 dark:invert");
+    expect(source).toContain("currentColor");
+    expect(source).not.toContain("invert");
   });
 });

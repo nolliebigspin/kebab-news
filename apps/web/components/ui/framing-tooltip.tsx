@@ -28,14 +28,14 @@ export function FramingTooltip({ label, note, children }: FramingTooltipProps) {
           event.stopPropagation();
           setOpen(true);
         }}
-        className="inline cursor-help rounded-sm bg-brand-wash px-0.5 text-left text-brand-ink underline decoration-brand-ink decoration-dotted underline-offset-2 outline-none hover:bg-brand/15 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1"
+        className="mark-highlight inline cursor-help rounded-[2px] text-left text-inherit outline-none transition-colors hover:bg-saffron-wash focus-visible:ring-2 focus-visible:ring-ring"
       >
         {children}
       </Tooltip.Trigger>
       <Tooltip.Portal>
         <Tooltip.Positioner sideOffset={8} collisionPadding={12} className="z-50">
-          <Tooltip.Popup className="max-w-[min(20rem,calc(100vw-1.5rem))] origin-[var(--transform-origin)] rounded-lg border border-line bg-ink px-3 py-2 text-bg text-xs leading-5 shadow-xl transition-[transform,opacity] data-[ending-style]:scale-95 data-[starting-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 motion-reduce:transition-none">
-            <span className="block font-semibold">{label}</span>
+          <Tooltip.Popup className="max-w-[min(20rem,calc(100vw-1.5rem))] origin-[var(--transform-origin)] rounded-xl border border-line bg-ink px-3.5 py-2.5 text-bg text-sm leading-5 shadow-xl transition-[transform,opacity] data-[ending-style]:scale-95 data-[starting-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 motion-reduce:transition-none">
+            <span className="block font-semibold text-saffron dark:text-bg">{label}</span>
             <span className="block text-bg/85">{note}</span>
           </Tooltip.Popup>
         </Tooltip.Positioner>
