@@ -114,9 +114,14 @@ export function renderOgImage({
         </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column" }}>
-        <div style={{ color: C.saffron, fontSize: 28, fontWeight: 600 }}>{kicker}</div>
+        {/* Satori throws on any multi-child <div> without an explicit display,
+            so every text block declares flex even when it holds one string. */}
+        <div style={{ display: "flex", color: C.saffron, fontSize: 28, fontWeight: 600 }}>
+          {kicker}
+        </div>
         <div
           style={{
+            display: "flex",
             marginTop: 18,
             fontSize,
             fontWeight: 700,
