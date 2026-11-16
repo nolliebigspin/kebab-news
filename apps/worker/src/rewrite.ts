@@ -117,18 +117,27 @@ export async function annotateStory(
  * Annotate every source in a story as soon as that story is visible in the
  * source comparison. A persisted prompt version distinguishes "neutral, no
  * annotations" from "not analyzed yet" and makes prompt upgrades backfillable.
+ *
+ * `currentOnly` limits the pass to topics seen within STORY_WINDOW_HOURS, so a
+ * backlog of old topics (after a prompt bump or a provider outage) cannot use
+ * up the daily AI budget. Without it, every reader-visible topic is eligible.
  */
 export async function annotateReadyStories(
-  options: { storyIds?: readonly string[] } = {}
+  options: { storyIds?: readonly string[]; currentOnly?: boolean; now?: Date } = {}
 ): Promise<{ stories: number; articles: number }> {
+  const now = options.now ?? new Date();
+  const currentWindowStart = new Date(now.getTime() - STORY_WINDOW_HOURS * 60 * 60 * 1_000);
   const readyStories = await db
     .select({ id: stories.id })
     .from(stories)
     .innerJoin(articles, eq(articles.storyId, stories.id))
     .where(
-      options.storyIds && options.storyIds.length > 0
-        ? inArray(stories.id, [...options.storyIds])
-        : undefined
+      and(
+        options.storyIds && options.storyIds.length > 0
+          ? inArray(stories.id, [...options.storyIds])
+          : undefined,
+        options.currentOnly ? gte(stories.lastSeenAt, currentWindowStart) : undefined
+      )
     )
     .groupBy(stories.id)
     .having(
@@ -136,7 +145,8 @@ export async function annotateReadyStories(
         and bool_or(
           ${articles.annotationVersion} is distinct from ${ANNOTATION_PROMPT_VERSION}
         )`
-    );
+    )
+    .orderBy(desc(sql`count(distinct ${articles.outletId})`), desc(stories.lastSeenAt));
 
   let annotatedArticles = 0;
   for (const story of readyStories) {

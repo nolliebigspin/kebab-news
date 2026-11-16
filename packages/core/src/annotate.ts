@@ -272,7 +272,8 @@ export async function annotateTexts(
 
     const parsed = AnnotationBatchSchema.safeParse(JSON.parse(text) as unknown);
     if (!parsed.success) {
-      console.error("annotate: schema parse failed", parsed.error.format());
+      // Serialize the issues: console.error truncates nested objects to [Object ...].
+      console.error("annotate: schema parse failed", JSON.stringify(parsed.error.issues));
       return null;
     }
 

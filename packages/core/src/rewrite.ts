@@ -375,7 +375,7 @@ export async function generateRewrite(
 
     const generated = GeneratedRewriteSchema.safeParse(raw);
     if (!generated.success) {
-      console.error("[rewrite] model schema parse failed:", generated.error.format());
+      console.error("[rewrite] model schema parse failed:", JSON.stringify(generated.error.issues));
       return null;
     }
     const sourceIds = new Map(
@@ -393,7 +393,7 @@ export async function generateRewrite(
     };
     const parsed = RewriteSchema.safeParse(normalized);
     if (!parsed.success) {
-      console.error("[rewrite] schema parse failed:", parsed.error.format());
+      console.error("[rewrite] schema parse failed:", JSON.stringify(parsed.error.issues));
       return null;
     }
     if (!validateRewriteSources(parsed.data, requestSources)) {

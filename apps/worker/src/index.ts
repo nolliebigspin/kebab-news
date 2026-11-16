@@ -33,16 +33,20 @@ async function safeRun(reason: string): Promise<void> {
       durationMs: result.durationMs,
     });
 
-    const annotations = await annotateReadyStories();
+    // Articles are the product, so they get the daily AI budget first:
+    // current, source-diverse topics without an article (strongest coverage
+    // first), plus published topics with enough newly attached sources.
+    // rewriteStory() annotates the sources of every topic it writes, so those
+    // stay covered. The AI rewrite runs only here (CLAUDE.md rule #5).
+    const auto = await runAutoRewrites(log);
+    if (auto.triggered > 0) log("worker.auto_rewrites_done", auto);
+
+    // Remaining budget goes to source annotations for current topics only.
+    // Older topics are backfilled by the operator (`bun annotations:refresh --ready`).
+    const annotations = await annotateReadyStories({ currentOnly: true });
     if (annotations.stories > 0) {
       log("worker.source_annotations_done", annotations);
     }
-
-    // After ingest, pick up current, source-diverse topics without an article,
-    // strongest coverage first, plus published topics with enough newly
-    // attached sources. The AI rewrite runs only here (CLAUDE.md rule #5).
-    const auto = await runAutoRewrites(log);
-    if (auto.triggered > 0) log("worker.auto_rewrites_done", auto);
   } catch (err) {
     // Never let one failed pass kill the scheduler loop.
     log("worker.run_error", { error: err instanceof Error ? err.message : String(err) });
